@@ -17,13 +17,17 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       {
+        loader: "ts-loader",
         test: /\.tsx?$/,
-        use: "ts-loader",
         exclude: /node_modules/,
+        options: {
+          transpileOnly: true,
+          experimentalWatchApi: true
+        }
       },
       {
         test: /\.s[ac]ss$/i,
-        use: [
+        loader: [
           // Creates `style` nodes from JS strings
           'style-loader',
           // Translates CSS into CommonJS
