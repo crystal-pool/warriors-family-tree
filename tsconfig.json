@@ -1,0 +1,17 @@
+{
+    /* For webpack.config.js */
+    "compilerOptions": {
+        "module": "commonjs",
+        "strict": true,
+        "target": "es5",
+        "lib": [
+            "es5",
+            "es2015.promise",
+            "es2015.collection",
+            "es2015.iterable",
+            "es2015.core",
+            "es2017.object"
+        ],
+        "esModuleInterop": true
+    }
+}

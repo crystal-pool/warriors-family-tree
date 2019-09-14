@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "strict": true,
+        "sourceMap": true,
+        "target": "es5",
+        "jsx": "react",
+        "lib": [
+            "es5",
+            "es2015.promise",
+            "es2015.collection",
+            "es2015.iterable",
+            "es2015.core",
+            "es2017.object",
+            "dom"
+        ],
+        "esModuleInterop": true
+    }
+}

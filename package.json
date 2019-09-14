@@ -1,0 +1,38 @@
+{
+  "name": "warriors-family-tree",
+  "version": "0.1.0",
+  "description": "An complete and up-to-date warriors family tree.",
+  "main": "index.js",
+  "repository": "https://github.com/crystal-pool/warriors-family-tree",
+  "author": "CXuesong",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "webpack-dev-server",
+    "build": "webpack --production"
+  },
+  "devDependencies": {
+    "@types/copy-webpack-plugin": "^5.0.0",
+    "@types/node": "^12.7.5",
+    "@types/react-dom": "^16.9.0",
+    "@types/terser-webpack-plugin": "^1.2.1",
+    "@types/webpack": "^4.39.1",
+    "@types/webpack-dev-server": "^3.1.7",
+    "copy-webpack-plugin": "^5.0.4",
+    "css-loader": "^3.2.0",
+    "style-loader": "^1.0.0",
+    "terser-webpack-plugin": "^2.0.1",
+    "ts-loader": "^6.1.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3",
+    "webpack-cli": "^3.3.8",
+    "webpack-dev-server": "^3.8.0"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.4.2",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "webpack": "^4.40.2"
+  }
+}
