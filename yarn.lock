@@ -4436,6 +4436,11 @@ tar@^4:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
+tasklike-promise-library@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/tasklike-promise-library/-/tasklike-promise-library-0.0.4.tgz#f6c8249b89242c469942309092ee305de815bfc6"
+  integrity sha512-fUqYL/2SHFW+nAn9DIYtR1Fs+9hO1yzUTY/EQW30kK+WAtOgxQHeqdM3CSJq2S0PVLhRBVzmrGwEC1+aG4791Q==
+
 terser-webpack-plugin@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/terser-webpack-plugin/-/terser-webpack-plugin-1.4.1.tgz#61b18e40eaee5be97e771cdbb10ed1280888c2b4"

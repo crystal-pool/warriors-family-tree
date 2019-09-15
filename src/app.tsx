@@ -1,13 +1,13 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SnackbarContent, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
-import { AppModel } from "./appModel";
+import { PromiseLikeResolutionSource, PromiseResolutionSource } from "tasklike-promise-library";
 import * as Pages from "./pages";
+import { dataService } from "./services";
 
 export interface IAppProps {
-    model: AppModel;
 }
 
 const drawerWidth = 240;
@@ -48,6 +48,30 @@ export const App: React.FC<IAppProps> = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
+    const [dataInitialized, setDataInitialized] = React.useState(dataService.isInitialized);
+    const [error, setError] = React.useState<Error>();
+    const errorMessage = error && (error.stack || error.message || error.toString());
+
+    React.useEffect(() => {
+        function onGlobalError(e: ErrorEvent | PromiseRejectionEvent) {
+            const merged = e as (ErrorEvent & PromiseRejectionEvent);
+            setError(merged.error || merged.reason || "<Error>");
+        }
+        window.addEventListener("error", onGlobalError);
+        window.addEventListener("unhandledrejection", onGlobalError);
+        return () => {
+            window.removeEventListener("error", onGlobalError);
+            window.removeEventListener("unhandledrejection", onGlobalError);
+        };
+    });
+
+    React.useEffect(() => {
+        if (dataInitialized) { return; }
+        const cleanupPrs = new PromiseLikeResolutionSource();
+        Promise.race([cleanupPrs.promiseLike, dataService.initialization])
+            .then(p => cleanupPrs && cleanupPrs.tryResolve() && setDataInitialized(true));
+        return () => { cleanupPrs.tryResolve(); };
+    });
 
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
@@ -123,10 +147,18 @@ export const App: React.FC<IAppProps> = (props) => {
                 </nav>
                 <main className={classes.content}>
                     <div className={classes.toolbar} />
-                    <Route exact path="/" component={Pages.Welcome} />
-                    <Route path="/familyTree/:character" component={Pages.FamilyTree} />
+                    {
+                        dataInitialized
+                            ? <React.Fragment>
+                                <Route exact path="/" component={Pages.Welcome} />
+                                <Route path="/familyTree/:character" component={Pages.FamilyTree} />
+                            </React.Fragment>
+                            : <Pages.InitializationScreen />
+                    }
+
                 </main>
             </HashRouter>
+            <Snackbar open={!!error} message={<div style={{whiteSpace: "pre-wrap"}}>{errorMessage}</div>} />
         </div>
     );
 };
