@@ -1,0 +1,40 @@
+SELECT ?character ?type ?ordinal ?since ?until ?target ?cause ?ref ?reliability
+WHERE {
+  ?character    wdt:P3/wdt:P4*  wd:Q624.    # should be fictional character
+  {
+    VALUES ?type { "parent" }
+    ?character  (p:P88|p:P89)       ?claim.
+    ?claim      (ps:P88|ps:P89)     ?target.
+  }
+  UNION {
+    VALUES ?type { "child" }
+    ?target     (p:P88|p:P89)       ?claim.
+    ?claim      (ps:P88|ps:P89)     ?character.
+  }
+  UNION {
+    VALUES ?type { "foster-parent" }
+    ?character  p:P99       ?claim.
+    ?claim      ps:P99      ?target.
+  }
+  UNION {
+    VALUES ?type { "foster-child" }
+    ?target     p:P99       ?claim.
+    ?claim      ps:P99      ?character.
+  }
+  UNION {
+    VALUES ?type { "mentor" }
+    ?character  p:P86       ?claim.
+    ?claim      ps:P86      ?target.
+  }
+  UNION {
+    VALUES ?type { "apprentice" }
+    ?target     p:P86       ?claim.
+    ?claim      ps:P86      ?character.
+  }
+  OPTIONAL { ?claim  pq:P53               ?ordinal. }
+  OPTIONAL { ?claim  pq:P92               ?since. }
+  OPTIONAL { ?claim  pq:P93               ?until. }
+  OPTIONAL { ?claim  pq:P103              ?cause. }
+  OPTIONAL { ?claim  pq:P102              ?reliability. }
+  OPTIONAL { ?claim  prov:wasDerivedFrom  ?ref. }
+}

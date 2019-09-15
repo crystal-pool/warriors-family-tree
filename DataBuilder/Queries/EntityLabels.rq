@@ -1,0 +1,5 @@
+SELECT ?entity ?label
+WHERE {
+  ?entity   wdt:P3/wdt:P4*  wd:Q624.    # should be fictional character
+  ?entity   schema:name     ?label.
+}

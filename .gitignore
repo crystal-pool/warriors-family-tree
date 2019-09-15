@@ -9,3 +9,9 @@ dist
 *.tgz
 
 _private
+
+/assets/data
+
+bin
+obj
+/DataBuilder/Properties/launchSettings.json
