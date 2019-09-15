@@ -1,17 +1,17 @@
-import { CancellationTokenSource, ICancellationToken, sendRequest } from "tasklike-promise-library";
+import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
 
-export type RdfReducedUri = string;
+export type RdfQName = string;
 
 export type CharacterRelationType = "parent" | "child" | "foster-parent" | "foster-child" | "mate" | "mentor" | "apprentice";
 
 export interface ICharacterRelationEntry {
-    subject: RdfReducedUri;
+    subject: RdfQName;
     relation: CharacterRelationType;
-    target: RdfReducedUri;
-    since?: RdfReducedUri;
-    until?: RdfReducedUri;
-    cause?: RdfReducedUri;
-    reliability?: RdfReducedUri;
+    target: RdfQName;
+    since?: RdfQName;
+    until?: RdfQName;
+    cause?: RdfQName;
+    reliability?: RdfQName;
 }
 
 export interface IEntityLabel {
@@ -34,6 +34,7 @@ export class DataService {
     private labels: ILabelsRoot | undefined;
     private _language: string;
     private _switchLanguageCts: CancellationTokenSource | undefined;
+    private _languageChanged = new EventEmitter();
     constructor(private _dataPathPrefix: string, language?: string) {
         this._language = language && language.toLowerCase() || "en-us";
         this.initialization = this._initialize();
@@ -52,13 +53,16 @@ export class DataService {
             this._switchLanguage(value, this._switchLanguageCts.token);
         }
     }
-    public getRelationsFor(characterEntityId: RdfReducedUri, relationType?: CharacterRelationType): ICharacterRelationEntry[] | undefined {
+    public onLanguageChanged(listener: () => void): IDisposable {
+        return this._languageChanged.addListener(listener);
+    }
+    public getRelationsFor(characterEntityId: RdfQName, relationType?: CharacterRelationType): Readonly<ICharacterRelationEntry[]> | undefined {
         if (!this.relations) { return undefined; }
         const relations = this.relations.relations[characterEntityId];
         if (!relations) { return undefined; }
         return relationType ? relations.filter(r => r.relation === relationType) : relations;
     }
-    public getLabelFor(entityId: RdfReducedUri): IEntityLabel | undefined {
+    public getLabelFor(entityId: RdfQName): Readonly<IEntityLabel> | undefined {
         if (!this.labels) { return undefined; }
         const rawLabel = this.labels.labels[entityId];
         if (!rawLabel) { return undefined; }
@@ -86,5 +90,6 @@ export class DataService {
         }, cancellationToken);
         labels.ensureSuccessfulStatusCode();
         this.labels = labels.xhr.response;
+        this._languageChanged.raise();
     }
 }
