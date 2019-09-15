@@ -6,6 +6,13 @@ using Newtonsoft.Json;
 namespace WarriorsFamilyTree.DataBuilder.Contracts
 {
 
+    public class LabelsRoot
+    {
+
+        public IDictionary<string, EntityLabel> Labels { get; set; }
+
+    }
+
     [JsonConverter(typeof(EntityLabelJsonConverter))]
     public class EntityLabel
     {

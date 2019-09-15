@@ -93,12 +93,12 @@ namespace WarriorsFamilyTree.DataBuilder
             "zh-tw",
         };
 
-        public IDictionary<string, IDictionary<string, EntityLabel>> BuildEntityLabels()
+        public IDictionary<string, LabelsRoot> BuildEntityLabels()
         {
             var resultSet = ExecuteQueryFromResource("EntityLabels.rq");
-            var rootsByLanguage = new Dictionary<string, IDictionary<string, EntityLabel>>();
+            var rootsByLanguage = new Dictionary<string, LabelsRoot>();
             foreach (var language in localizationLanguages)
-                rootsByLanguage.Add(language, new Dictionary<string, EntityLabel>());
+                rootsByLanguage.Add(language, new LabelsRoot { Labels = new Dictionary<string, EntityLabel>() });
             foreach (var group in resultSet.Select(row =>
                     (Entity: SerializeUriNode(row["entity"]),
                         Text: ((ILiteralNode)row["label"]).Value,
@@ -111,7 +111,7 @@ namespace WarriorsFamilyTree.DataBuilder
                 {
                     var label = LanguageUtility.GetTextWithFallback(language, labels);
                     if (!string.IsNullOrEmpty(label))
-                        root.Add(entity, new EntityLabel { Label = label });
+                        root.Labels.Add(entity, new EntityLabel { Label = label });
                 }
             }
             resultSet = ExecuteQueryFromResource("EntityDescriptions.rq");
@@ -128,10 +128,10 @@ namespace WarriorsFamilyTree.DataBuilder
                     var desc = LanguageUtility.GetTextWithFallback(language, labels);
                     if (!string.IsNullOrEmpty(desc))
                     {
-                        if (!root.TryGetValue(entity, out var label))
+                        if (!root.Labels.TryGetValue(entity, out var label))
                         {
                             label = new EntityLabel();
-                            root.Add(entity, label);
+                            root.Labels.Add(entity, label);
                         }
                         label.Description = desc;
                     }
