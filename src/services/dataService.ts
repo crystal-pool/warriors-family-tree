@@ -56,11 +56,17 @@ export class DataService {
     public onLanguageChanged(listener: () => void): IDisposable {
         return this._languageChanged.addListener(listener);
     }
-    public getRelationsFor(characterEntityId: RdfQName, relationType?: CharacterRelationType): Readonly<ICharacterRelationEntry[]> | undefined {
-        if (!this.relations) { return undefined; }
+    public getRelationsFor(
+        characterEntityId: RdfQName,
+        relationType?: CharacterRelationType | Iterable<CharacterRelationType>
+    ): Readonly<ICharacterRelationEntry[]> | undefined {
+        if (!this.relations) return undefined; 
         const relations = this.relations.relations[characterEntityId];
-        if (!relations) { return undefined; }
-        return relationType ? relations.filter(r => r.relation === relationType) : relations;
+        if (!relations)  return undefined; 
+        if (!relationType) return relations;
+        if (typeof relationType === "string") return relations.filter(r => r.relation === relationType);
+        const localRelationTypes = relationType instanceof Set ? relationType as Set<CharacterRelationType> : new Set(relationType);
+        return relations.filter(r => localRelationTypes.has(r.relation));
     }
     public getLabelFor(entityId: RdfQName): Readonly<IEntityLabel> | undefined {
         if (!this.labels) { return undefined; }
