@@ -1,5 +1,14 @@
-import * as React from 'react'
+import * as React from "react";
+import { match } from "react-router";
 
-export const FamilyTree: React.FC = (props) => {
-    return <div>Family Tree</div>
+export interface IFamilyTreeRoutingParams {
+    character?: string;
 }
+
+export interface IFamilyTreeProps {
+    match: match<IFamilyTreeRoutingParams>;
+}
+
+export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
+    return <div>Family Tree: {props.match.params.character}</div>;
+};

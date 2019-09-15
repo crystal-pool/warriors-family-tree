@@ -1,10 +1,10 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, SwipeableDrawer, Toolbar, Typography, useTheme } from '@material-ui/core';
-import * as Icons from '@material-ui/icons';
-import * as React from 'react';
-import { Route } from 'react-router';
-import { HashRouter } from 'react-router-dom';
-import { AppModel } from './appModel';
-import * as Pages from './pages';
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import * as Icons from "@material-ui/icons";
+import * as React from "react";
+import { Route } from "react-router";
+import { HashRouter } from "react-router-dom";
+import { AppModel } from "./appModel";
+import * as Pages from "./pages";
 
 export interface IAppProps {
     model: AppModel;
@@ -14,24 +14,24 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
     root: {
-        display: 'flex',
+        display: "flex",
     },
     drawer: {
-        [theme.breakpoints.up('sm')]: {
+        [theme.breakpoints.up("sm")]: {
             width: drawerWidth,
             flexShrink: 0,
         },
     },
     appBar: {
         marginLeft: drawerWidth,
-        [theme.breakpoints.up('sm')]: {
+        [theme.breakpoints.up("sm")]: {
             width: `calc(100% - ${drawerWidth}px)`,
         },
     },
     menuButton: {
         marginRight: theme.spacing(2),
-        [theme.breakpoints.up('sm')]: {
-            display: 'none',
+        [theme.breakpoints.up("sm")]: {
+            display: "none",
         },
     },
     toolbar: theme.mixins.toolbar,
@@ -95,7 +95,7 @@ export const App: React.FC<IAppProps> = (props) => {
                         <SwipeableDrawer
                             container={undefined}
                             variant="temporary"
-                            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+                            anchor={theme.direction === "rtl" ? "right" : "left"}
                             open={mobileOpen}
                             onOpen={handleDrawerToggle}
                             onClose={handleDrawerToggle}
@@ -124,7 +124,7 @@ export const App: React.FC<IAppProps> = (props) => {
                 <main className={classes.content}>
                     <div className={classes.toolbar} />
                     <Route exact path="/" component={Pages.Welcome} />
-                    <Route path="/familyTree" component={Pages.FamilyTree} />
+                    <Route path="/familyTree/:character" component={Pages.FamilyTree} />
                 </main>
             </HashRouter>
         </div>
