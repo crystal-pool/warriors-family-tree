@@ -1,10 +1,14 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
+import List from "linked-list";
 import * as React from "react";
 import { match } from "react-router";
-import { FamilyTree as FamilyTreeComponent, IFamilyTreeNode } from "../components/FamilyTree";
+import wu from "wu";
+import { FamilyTree as FamilyTreeComponent, IFamilyTree } from "../components/FamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { dataService } from "../services";
 import { CharacterRelationType, RdfQName } from "../services/dataService";
+import { buildUnorderedIdPair, parseUnorderedIdPair } from "../utility/general";
+import { ListItem } from "../utility/linkedList";
 
 export interface IFamilyTreeRoutingParams {
     character?: string;
@@ -14,51 +18,61 @@ export interface IFamilyTreeProps {
     match: match<IFamilyTreeRoutingParams>;
 }
 
-function renderNode(this: IFamilyTreeNode): React.ReactNode {
-    return <RdfEntityLabel qName={this.id} />;
+function renderNode(charId: RdfQName): React.ReactNode {
+    return <RdfEntityLabel qName={charId} />;
 }
 
-function walk(characterId: RdfQName, maxDistance?: number): IFamilyTreeNode[] {
+function walk(characterId: RdfQName, maxDistance?: number): IFamilyTree {
     if (maxDistance && maxDistance < 0)
         throw new RangeError("maxDistanceUp should be non-negative number.");
-    const q: [number, RdfQName, RdfQName?][] = [[0, characterId]];
-    const edgeTypes = new Set<CharacterRelationType>(["parent", "child"]);
-    const nodeMap = new Map<RdfQName, IFamilyTreeNode>();
-    while (q.length > 0) {
-        const [distance, charId, reachedFrom] = q.shift()!;
-        if (nodeMap.has(charId)) continue;
-        const node: IFamilyTreeNode & { distance?: number, reachedFrom?: string } = {
-            id: charId,
-            render: renderNode,
-            // distance,
-            // reachedFrom
-        };
-        nodeMap.set(charId, node);
+    const edgeTypes = new Set<CharacterRelationType>(["parent", "child", "mate"]);
+    const q = List.of<ListItem<[number, RdfQName, RdfQName?]>>(new ListItem([0, characterId]));
+    const visited = new Set<RdfQName>();
+    const mates = new Set<string>();
+    const children: [RdfQName, RdfQName | undefined, RdfQName][] = [];
+    const roots: RdfQName[] = [];
+    while (q.head) {
+        const [distance, charId, reachedFrom] = q.head.data;
+        q.head.detach();
+        if (visited.has(charId)) continue;
         const relations = dataService.getRelationsFor(charId, edgeTypes);
+        let parentId1: RdfQName | undefined;
+        let parentId2: RdfQName | undefined;
         if (!relations) continue;
         for (const relation of relations) {
             if (maxDistance != null && distance + 1 > maxDistance) continue;
             if (relation.relation === "parent") {
-                if (node.parentId1 == null) node.parentId1 = relation.target;
-                else if (node.parentId2 == null) node.parentId2 = relation.target;
+                if (parentId1 == null) parentId1 = relation.target;
+                else if (parentId2 == null) parentId2 = relation.target;
                 else console.warn(`${charId} has more than 2 parents.`);
+            } else if (relation.relation === "mate") {
+                mates.add(buildUnorderedIdPair(charId, relation.target));
             }
-            if (!nodeMap.has(relation.target)) {
-                q.push([distance + 1, relation.target, charId]);
+            if (!visited.has(relation.target)) {
+                q.append(new ListItem([distance + 1, relation.target, charId]));
             }
         }
+        if (parentId1 == null && parentId2 == null) {
+            roots.push(charId);
+        } else {
+            children.push([parentId1!, parentId2, charId]);
+        }
     }
-    return Array.from(nodeMap.values());
+    return {
+        roots,
+        children,
+        mates: wu.map(m => parseUnorderedIdPair(m) as [string, string], mates).toArray()
+    };
 }
 
 export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
     let characterId = props.match.params.character;
     const [maxDistance, setMaxDistance] = React.useState(3);
-    const [familyTreeNodes, setFamilyTreeNodes] = React.useState<IFamilyTreeNode[]>([]);
+    const [familyTreeData, setFamilyTreeData] = React.useState<IFamilyTree | undefined>();
     React.useEffect(() => {
         if (!characterId) return;
-        const nodes = walk(characterId, maxDistance);
-        setFamilyTreeNodes(nodes);
+        const familyTree = walk(characterId, maxDistance);
+        setFamilyTreeData(familyTree);
     }, [characterId, maxDistance]);
     if (!characterId) {
         return <span>No character ID specified.</span>;
@@ -74,7 +88,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
             </Grid>
         </Grid>
         <Paper>
-            <FamilyTreeComponent nodes={familyTreeNodes} />
+            {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} />}
         </Paper>
     </React.Fragment>);
 };

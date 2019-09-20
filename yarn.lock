@@ -553,6 +553,11 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
+"@types/wu@^2.1.39":
+  version "2.1.39"
+  resolved "https://registry.yarnpkg.com/@types/wu/-/wu-2.1.39.tgz#84ec33c25115514ed95b899aee52e707f70b2c45"
+  integrity sha512-GcWc+khCfE3yBonhADArZxvWqgxp3HzzjG720JSB+5s5jFlN0OMcTIOUCBmnPx8tSzj6HNKty7S5zOtZ6VKKSA==
+
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.8.5.tgz#51b1c5fe6576a34953bf4b253df9f0d490d9e359"
@@ -3189,6 +3194,11 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
+linked-list@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/linked-list/-/linked-list-2.1.0.tgz#fa7b63a6caf4b17862a1eb90d14ead4ee57649f2"
+  integrity sha512-0GK/ylO6e5cv1PCOIdTRHxOaCgQ+0jKwHt+cHzkiCAZlx0KM5Id1bBAPad6g2mkvBNp1pNdmG0cohFGfqjkv9A==
+
 loader-runner@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-2.4.0.tgz#ed47066bfe534d7e84c4c7b9998c2a75607d9357"
@@ -5447,6 +5457,11 @@ ws@^6.2.1:
   integrity sha512-GIyAXC2cB7LjvpgMt9EKS2ldqr0MTrORaleiOno6TweZ6r3TKtoFQWay/2PceJ3RuBasOHzXNn5Lrw1X0bEjqA==
   dependencies:
     async-limiter "~1.0.0"
+
+wu@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/wu/-/wu-2.1.0.tgz#7e72e3fba23e0ff669ddd537e1c857d3d4b1614f"
+  integrity sha1-fnLj+6I+D/Zp3dU34chX09SxYU8=
 
 xtend@^4.0.0, xtend@~4.0.1:
   version "4.0.2"
