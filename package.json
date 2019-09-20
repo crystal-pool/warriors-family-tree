@@ -10,7 +10,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack --production",
-    "test": "mocha --require ts-node/register tests/**/*.ts"
+    "test": "mocha --require ts-node/register --timeout 10000 tests/**/*.test.ts"
   },
   "devDependencies": {
     "@types/copy-webpack-plugin": "^5.0.0",

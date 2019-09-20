@@ -19,7 +19,10 @@ const config: webpack.Configuration = {
       {
         loader: "ts-loader",
         test: /\.tsx?$/,
-        exclude: /node_modules/,
+        exclude: [
+          /[/\\]node_modules[/\\]/,
+          /[/\\]test[/\\]/
+        ],
         options: {
           transpileOnly: true,
           experimentalWatchApi: true
