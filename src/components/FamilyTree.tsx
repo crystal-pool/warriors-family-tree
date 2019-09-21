@@ -187,6 +187,16 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
     for (const [, , id3] of props.children) {
         rootCandidates.delete(id3);
     }
+    const freeNodes = new Set<string>();
+    for (const id of rootCandidates) {
+        const mates = matesLookup.get(id);
+        if (mates && wu(mates).every(m => !rootCandidates.has(m))) {
+            // If any root candidate only have mates in the rows below, we push it down.
+            freeNodes.add(id);
+        }
+    }
+    for (const id of freeNodes)
+        rootCandidates.delete(id);
     if (rootCandidates.size === 0) return null;
     const laidoutNodes = new Map<string, ILayoutNode>();
     const rootLayer = arrangeLayer(wu(rootCandidates)
@@ -207,43 +217,40 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
         const nextLayer: ILayoutNode[] = [];
         const groupBoundaries: [number, number][] = [];
         for (const n of lastLayer) {
-            const selfChildren = childrenLookup.get(buildUnorderedIdPair(n.id));
-            if (selfChildren) {
-                for (const child of selfChildren) {
-                    if (!seenChildren.has(child)) {
-                        nextLayer.push({
-                            id: child,
-                            groupId: groupBoundaries.length,
-                            offsetX: NaN,
-                            row: layers.length,
-                            column: NaN
-                        });
-                        seenChildren.add(child);
-                    }
-                }
-                groupBoundaries.push([n.offsetX!, n.offsetX!]);
-            }
-            const mates = matesLookup.get(n.id);
-            if (mates) {
-                for (const mate of mates) {
-                    const mateNode = laidoutNodes.get(mate);
-                    if (!mateNode) continue;
-                    const children = childrenLookup.get(buildUnorderedIdPair(n.id, mate));
-                    if (children) {
-                        for (const child of children) {
-                            if (!seenChildren.has(child)) {
-                                nextLayer.push({
-                                    id: child,
-                                    groupId: groupBoundaries.length,
-                                    offsetX: NaN,
-                                    row: layers.length,
-                                    column: NaN
-                                });
-                                seenChildren.add(child);
+            for (const mate of wu.chain([undefined], matesLookup.get(n.id) || [])) {
+                const mateNode = mate && laidoutNodes.get(mate);
+                if (mate && !mateNode) continue;
+                const children = childrenLookup.get(buildUnorderedIdPair(n.id, mate));
+                if (children) {
+                    for (const child of children) {
+                        if (seenChildren.has(child)) continue;
+                        const childMates = matesLookup.get(child);
+                        let newNodeIds: string[] | undefined;
+                        if (childMates) {
+                            newNodeIds = wu(childMates).filter(m => freeNodes.has(m)).toArray();
+                            for (const m of newNodeIds) {
+                                freeNodes.delete(m);
                             }
                         }
-                        groupBoundaries.push([Math.min(n.offsetX!, mateNode.offsetX!), Math.max(n.offsetX!, mateNode.offsetX!)]);
+                        if (!newNodeIds || newNodeIds.length === 0)
+                            newNodeIds = [child];
+                        else
+                            newNodeIds.splice(1, 0, child);
+                        for (const id of newNodeIds) {
+                            nextLayer.push({
+                                id,
+                                groupId: groupBoundaries.length,
+                                offsetX: NaN,
+                                row: layers.length,
+                                column: NaN
+                            });
+                        }
+                        seenChildren.add(child);
                     }
+                    if (mateNode)
+                        groupBoundaries.push([Math.min(n.offsetX!, mateNode.offsetX!), Math.max(n.offsetX!, mateNode.offsetX!)]);
+                    else
+                        groupBoundaries.push([n.offsetX!, n.offsetX!]);
                 }
             }
         }
