@@ -1,14 +1,13 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
-import List from "linked-list";
 import * as React from "react";
 import { match } from "react-router";
 import wu from "wu";
-import { FamilyTree as FamilyTreeComponent, IFamilyTree } from "../components/FamilyTree";
+import { FamilyTree as FamilyTreeComponent, IFamilyTree, NodeRenderCallback } from "../components/FamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { dataService } from "../services";
 import { CharacterRelationType, RdfQName } from "../services/dataService";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../utility/general";
-import { ListItem } from "../utility/linkedList";
+import "./familyTree.scss";
 
 export interface IFamilyTreeRoutingParams {
     character?: string;
@@ -18,9 +17,13 @@ export interface IFamilyTreeProps {
     match: match<IFamilyTreeRoutingParams>;
 }
 
-function renderNode(charId: RdfQName): React.ReactNode {
-    return <RdfEntityLabel qName={charId} />;
+export interface IFamilyTreeNodeProps {
+    qName: string;
 }
+
+const renderNode: NodeRenderCallback = (id, brct) => {
+    return (<FamilyTreeNode qName={id} />);
+};
 
 function walk(characterId: RdfQName, maxDistance?: number): IFamilyTree {
     if (maxDistance && maxDistance < 0)
@@ -87,8 +90,14 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
                 <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={30} onChange={(e, v) => setMaxDistance(v as number)} />
             </Grid>
         </Grid>
-        <Paper style={{ minWidth: "0", overflowX: "auto" }}>
-            {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} />}
+        <Paper className="familytree-container">
+            {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} onRenderNode={renderNode} />}
         </Paper>
     </React.Fragment>);
+};
+
+export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
+    return (<div className="familytree-node">
+        <RdfEntityLabel qName={props.qName} />
+    </div>);
 };

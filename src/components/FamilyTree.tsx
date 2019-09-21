@@ -1,6 +1,8 @@
 import List from "linked-list";
+import _ from "lodash";
 import * as React from "react";
-import Svg from "svgjs";
+import ReactDOM from "react-dom";
+import Svg, { Rect } from "svgjs";
 import wu from "wu";
 import { buildUnorderedIdPair } from "../utility/general";
 import { ListItem } from "../utility/linkedList";
@@ -13,8 +15,18 @@ export interface IFamilyTree {
     children: [string, string | null | undefined, string][];
 }
 
+export interface IRect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+export type NodeRenderCallback = (id: string, boundingRect: Readonly<IRect>) => React.ReactNode;
+
 export interface IFamilyTreeProps {
     familyTree: Readonly<IFamilyTree>;
+    onRenderNode?: NodeRenderCallback;
 }
 
 const FAMILY_TREE_BOX_WIDTH = 100;
@@ -23,11 +35,27 @@ const FAMILY_TREE_BOX_SPACING_X = 50;
 const FAMILY_TREE_BOX_SPACING_Y = 50;
 
 export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
+    private static defaultProps: Partial<IFamilyTreeProps> = {
+        onRenderNode(id, brct): React.ReactNode {
+            return id;
+        }
+    };
     private _drawingRoot: HTMLDivElement | null | undefined;
-    private _refreshDrawing(): void {
+    private _drawingReactRoot: HTMLElement | undefined;
+    public constructor(props: IFamilyTreeProps) {
+        super(props);
+        this._updateDrawing = _.debounce(this._updateDrawing, 100);
+    }
+    private _updateDrawing = (): void => {
+        // Cleanup
+        if (this._drawingReactRoot) {
+            ReactDOM.unmountComponentAtNode(this._drawingReactRoot);
+            this._drawingReactRoot = undefined;
+        }
         if (!this._drawingRoot) return;
         while (this._drawingRoot.hasChildNodes())
             this._drawingRoot.firstChild!.remove();
+        // Render
         const layout = layoutFamilyTree(this.props.familyTree);
         if (!layout) return;
         const rootScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
@@ -38,29 +66,52 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         const drawing = Svg(this._drawingRoot)
             .size(drawingWidth, drawingHeight)
             .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
+        const nodeContentRenderQueue: [HTMLElement, React.ReactNode][] = [];
         for (let rowi = 0; rowi < layout.layers.length; rowi++) {
             const row = layout.layers[rowi];
             const rowTop = rowi * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
             for (let coli = 0; coli < row.length; coli++) {
                 const node = row[coli];
-                drawing.rect(FAMILY_TREE_BOX_WIDTH, FAMILY_TREE_BOX_HEIGHT)
-                    .move(node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2, rowTop)
-                    .fill("#CCCCCCCC")
-                    .stroke("#CCCCCC");
+                const bRect: IRect = {
+                    left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
+                    top: rowTop,
+                    width: FAMILY_TREE_BOX_WIDTH,
+                    height: FAMILY_TREE_BOX_HEIGHT
+                };
+                drawing.rect(bRect.width, bRect.height)
+                    .move(bRect.left, bRect.top)
+                    .fill("none")
+                    .stroke("none");
+                if (this.props.onRenderNode) {
+                    const renderedNode = this.props.onRenderNode(node.id, bRect);
+                    if (renderedNode) {
+                        const container = drawing
+                            .element("foreignObject")
+                            .move(bRect.left, bRect.top)
+                            .size(bRect.width, bRect.height);
+                        nodeContentRenderQueue.push([container.native(), renderedNode]);
+                    }
+                }
             }
         }
+        const reactPortalDomRoot = document.createElement("div");
+        this._drawingRoot.appendChild(reactPortalDomRoot);
+        const mergedComponent = nodeContentRenderQueue.map(([container, reactRoot], i) =>
+            ReactDOM.createPortal(reactRoot, container));
+        ReactDOM.render(<React.Fragment>{mergedComponent}</React.Fragment>, reactPortalDomRoot);
+        this._drawingReactRoot = reactPortalDomRoot;
     }
     private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
         this._drawingRoot = root;
         if (!root) return;
-        this._refreshDrawing();
+        this._updateDrawing();
     }
     public render(): React.ReactNode {
-        return (<div ref={this._onDrawingRootChanged}></div>);
+        return (<React.Fragment><div ref={this._onDrawingRootChanged} className="family-tree-drawing"></div></React.Fragment>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
         if (prevProps.familyTree !== this.props.familyTree) {
-            this._refreshDrawing();
+            this._updateDrawing();
         }
     }
 }

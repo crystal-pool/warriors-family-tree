@@ -2,7 +2,13 @@
     "rules": {
         "no-duplicate-imports": true,
         "no-duplicate-variable": true,
-        "no-import-side-effect": true,
+        "no-unused-imports": true,
+        "no-import-side-effect": [
+            true,
+            {
+                "ignore-module": "\\.(css|sass|scss)$"
+            }
+        ],
         "ordered-imports": true,
         "eofline": true,
         "await-promise": true,
