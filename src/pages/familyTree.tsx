@@ -3,7 +3,7 @@ import * as React from "react";
 import { match } from "react-router";
 import wu from "wu";
 import { FamilyTree as FamilyTreeComponent, IFamilyTree, NodeRenderCallback } from "../components/FamilyTree";
-import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
+import { RdfEntityDescription, RdfEntityLabel, RdfEntityLink } from "../components/RdfEntity";
 import { dataService } from "../services";
 import { CharacterRelationType, RdfQName } from "../services/dataService";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../utility/general";
@@ -99,5 +99,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     return (<div className="familytree-node">
         <RdfEntityLabel qName={props.qName} />
+        <br />
+        <RdfEntityLink qName={props.qName} />
     </div>);
 };

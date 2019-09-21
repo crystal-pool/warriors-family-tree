@@ -3,8 +3,8 @@ import _ from "lodash";
 import * as React from "react";
 import ReactDOM from "react-dom";
 import Svg, { Rect } from "svgjs";
-import wu from "wu";
-import { buildUnorderedIdPair } from "../utility/general";
+import wu, { WuIterable } from "wu";
+import { buildUnorderedIdPair, parseUnorderedIdPair } from "../utility/general";
 import { ListItem } from "../utility/linkedList";
 
 export interface IFamilyTree {
@@ -33,6 +33,7 @@ const FAMILY_TREE_BOX_WIDTH = 100;
 const FAMILY_TREE_BOX_HEIGHT = 50;
 const FAMILY_TREE_BOX_SPACING_X = 50;
 const FAMILY_TREE_BOX_SPACING_Y = 50;
+const FAMILY_TREE_MATE_SLOT_OFFSET = 10;
 
 export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     private static defaultProps: Partial<IFamilyTreeProps> = {
@@ -67,17 +68,20 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             .size(drawingWidth, drawingHeight)
             .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
         const nodeContentRenderQueue: [HTMLElement, React.ReactNode][] = [];
+        function getNodeRect(node: ILayoutNode): IRect {
+            return {
+                left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
+                top: node.row * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y),
+                width: FAMILY_TREE_BOX_WIDTH,
+                height: FAMILY_TREE_BOX_HEIGHT
+            };
+        }
+        // Draw nodes.
         for (let rowi = 0; rowi < layout.layers.length; rowi++) {
             const row = layout.layers[rowi];
-            const rowTop = rowi * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
             for (let coli = 0; coli < row.length; coli++) {
                 const node = row[coli];
-                const bRect: IRect = {
-                    left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
-                    top: rowTop,
-                    width: FAMILY_TREE_BOX_WIDTH,
-                    height: FAMILY_TREE_BOX_HEIGHT
-                };
+                const bRect: IRect = getNodeRect(node);
                 drawing.rect(bRect.width, bRect.height)
                     .move(bRect.left, bRect.top)
                     .fill("none")
@@ -94,6 +98,32 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
             }
         }
+        // Draw connections.
+        for (const [mate1, mate2] of layout.mates) {
+            const mateNode1 = layout.nodeFromId(mate1);
+            const mateNode2 = layout.nodeFromId(mate2);
+            console.assert(mateNode1 && mateNode2);
+            if (!mateNode1 || !mateNode2) continue;
+            const mateNodeL = mateNode1.offsetX < mateNode2.offsetX ? mateNode1 : mateNode2;
+            const mateNodeR = mateNode1.offsetX < mateNode2.offsetX ? mateNode2 : mateNode1;
+            const rectL = getNodeRect(mateNodeL);
+            const rectR = getNodeRect(mateNodeR);
+            if (mateNodeL.row === mateNodeR.row && mateNodeL.column + 1 === mateNodeR.column) {
+                drawing
+                    .line(rectL.left + rectL.width, rectL.top + rectL.height / 2,
+                        rectR.left, rectR.top + rectR.height / 2)
+                    .fill("none")
+                    .stroke({ width: 1 });
+            } else {
+                plotElbow(drawing,
+                    rectL.left + rectL.width / 2, rectL.top + rectL.height,
+                    Math.max(rectL.top + rectL.height, rectR.top + rectR.height) + FAMILY_TREE_MATE_SLOT_OFFSET,
+                    rectR.left + rectR.width / 2, rectR.top + rectR.height)
+                    .fill("none")
+                    .stroke({ width: 1 });
+            }
+        }
+        // Mount React.
         const reactPortalDomRoot = document.createElement("div");
         this._drawingRoot.appendChild(reactPortalDomRoot);
         const mergedComponent = nodeContentRenderQueue.map(([container, reactRoot], i) =>
@@ -119,7 +149,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
 interface ILayoutNode {
     id: string;
     groupId: number;
-    offsetX?: number;
+    offsetX: number;
+    row: number;
+    column: number;
 }
 
 interface IFamilyTreeLayoutInfo {
@@ -127,6 +159,9 @@ interface IFamilyTreeLayoutInfo {
     rootNodeCount: number;
     rawWidth: number;
     minNodeSpacingX: number;
+    nodeFromId(id: string): ILayoutNode | undefined;
+    mates: Iterable<[string, string]>;
+    children: Iterable<[string, string | undefined, Iterable<string>]>;
 }
 
 function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo | null {
@@ -154,7 +189,13 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
     }
     if (rootCandidates.size === 0) return null;
     const laidoutNodes = new Map<string, ILayoutNode>();
-    const rootLayer = arrangeLayer(Array.from(rootCandidates).map<ILayoutNode>(id => ({ id, groupId: 0 })), [[0, 1]]);
+    const rootLayer = arrangeLayer(wu(rootCandidates)
+        .map<ILayoutNode>(id => ({
+            id, groupId: 0,
+            offsetX: NaN,
+            row: 0,
+            column: NaN
+        })).toArray(), [[0, 1]]);
     const layers: ILayoutNode[][] = [rootLayer];
     let rawWidth: number = 1;
     let minNodeSpacingX: number = rawWidth / rootLayer.length;
@@ -170,7 +211,13 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
             if (selfChildren) {
                 for (const child of selfChildren) {
                     if (!seenChildren.has(child)) {
-                        nextLayer.push({ id: child, groupId: groupBoundaries.length });
+                        nextLayer.push({
+                            id: child,
+                            groupId: groupBoundaries.length,
+                            offsetX: NaN,
+                            row: layers.length,
+                            column: NaN
+                        });
                         seenChildren.add(child);
                     }
                 }
@@ -185,7 +232,13 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
                     if (children) {
                         for (const child of children) {
                             if (!seenChildren.has(child)) {
-                                nextLayer.push({ id: child, groupId: groupBoundaries.length });
+                                nextLayer.push({
+                                    id: child,
+                                    groupId: groupBoundaries.length,
+                                    offsetX: NaN,
+                                    row: layers.length,
+                                    column: NaN
+                                });
                                 seenChildren.add(child);
                             }
                         }
@@ -205,7 +258,17 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
         }
         layers.push(laidoutLayer);
     }
-    return { layers, rootNodeCount: rootLayer.length, rawWidth, minNodeSpacingX };
+    return {
+        layers,
+        rootNodeCount: rootLayer.length,
+        rawWidth, minNodeSpacingX,
+        nodeFromId: id => laidoutNodes.get(id),
+        mates: wu(matesLookup).map(([m1, m2s]) => wu(m2s).filter(m2 => m2 >= m1).map(m2 => [m1, m2])).flatten(true) as WuIterable<[string, string]>,
+        children: wu(childrenLookup).map(([p, c]) => {
+            const [p1, p2] = parseUnorderedIdPair(p);
+            return [p1, p2, c];
+        })
+    };
 
     function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][]): ILayoutNode[] {
         if (nodes.length === 0) {
@@ -316,6 +379,13 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
                 groupItems = 0;
             }
         } while (node = node.next);
-        return wu.map(n => n.data, nodeList).toArray();
+        const arrangedArray = wu.map(n => n.data, nodeList).toArray();
+        arrangedArray.forEach((n, i) => n.column = i);
+        return arrangedArray;
     }
+}
+
+function plotElbow(container: Svg.Container, x1: number, y1: number, y2: number, x3: number, y3: number): Svg.PolyLine {
+    return container
+        .polyline([x1, y1, x1, y2, x3, y2, x3, y3]);
 }
