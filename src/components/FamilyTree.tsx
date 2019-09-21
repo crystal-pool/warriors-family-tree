@@ -5,6 +5,66 @@ import wu from "wu";
 import { buildUnorderedIdPair } from "../utility/general";
 import { ListItem } from "../utility/linkedList";
 
+export interface IFamilyTree {
+    roots: string[];
+    // s - s
+    mates: [string, string][];
+    // p + p -> c
+    children: [string, string | null | undefined, string][];
+}
+
+export interface IFamilyTreeProps {
+    familyTree: Readonly<IFamilyTree>;
+}
+
+const FAMILY_TREE_BOX_WIDTH = 100;
+const FAMILY_TREE_BOX_HEIGHT = 50;
+const FAMILY_TREE_BOX_SPACING_X = 50;
+const FAMILY_TREE_BOX_SPACING_Y = 50;
+
+export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
+    private _drawingRoot: HTMLDivElement | null | undefined;
+    private _refreshDrawing(): void {
+        if (!this._drawingRoot) return;
+        while (this._drawingRoot.hasChildNodes())
+            this._drawingRoot.firstChild!.remove();
+        const layout = layoutFamilyTree(this.props.familyTree);
+        if (!layout) return;
+        const rootScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
+        const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
+        const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
+        const drawingWidth = layout.rawWidth * scaleX;
+        const drawingHeight = layout.layers.length * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) - FAMILY_TREE_BOX_SPACING_Y;
+        const drawing = Svg(this._drawingRoot)
+            .size(drawingWidth, drawingHeight)
+            .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
+        for (let rowi = 0; rowi < layout.layers.length; rowi++) {
+            const row = layout.layers[rowi];
+            const rowTop = rowi * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
+            for (let coli = 0; coli < row.length; coli++) {
+                const node = row[coli];
+                drawing.rect(FAMILY_TREE_BOX_WIDTH, FAMILY_TREE_BOX_HEIGHT)
+                    .move(node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2, rowTop)
+                    .fill("#CCCCCCCC")
+                    .stroke("#CCCCCC");
+            }
+        }
+    }
+    private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
+        this._drawingRoot = root;
+        if (!root) return;
+        this._refreshDrawing();
+    }
+    public render(): React.ReactNode {
+        return (<div ref={this._onDrawingRootChanged}></div>);
+    }
+    public componentDidUpdate(prevProps: IFamilyTreeProps) {
+        if (prevProps.familyTree !== this.props.familyTree) {
+            this._refreshDrawing();
+        }
+    }
+}
+
 interface ILayoutNode {
     id: string;
     groupId: number;
@@ -206,70 +266,5 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
             }
         } while (node = node.next);
         return wu.map(n => n.data, nodeList).toArray();
-    }
-}
-
-// d3.stratify<ICharacterRelationEntry>()
-// .id(c => c.subject)
-// .parentId(c => c.);
-// const tree = d3.tree();
-
-export interface IFamilyTree {
-    roots: string[];
-    // s - s
-    mates: [string, string][];
-    // p + p -> c
-    children: [string, string | null | undefined, string][];
-}
-
-export interface IFamilyTreeProps {
-    familyTree: Readonly<IFamilyTree>;
-}
-
-const FAMILY_TREE_BOX_WIDTH = 100;
-const FAMILY_TREE_BOX_HEIGHT = 50;
-const FAMILY_TREE_BOX_SPACING_X = 50;
-const FAMILY_TREE_BOX_SPACING_Y = 50;
-
-export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
-    private _drawingRoot: HTMLDivElement | null | undefined;
-    private _refreshDrawing(): void {
-        if (!this._drawingRoot) return;
-        while (this._drawingRoot.hasChildNodes())
-            this._drawingRoot.firstChild!.remove();
-        const layout = layoutFamilyTree(this.props.familyTree);
-        if (!layout) return;
-        const rootScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
-        const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
-        const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
-        const drawingWidth = layout.rawWidth * scaleX;
-        const drawingHeight = layout.layers.length * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) - FAMILY_TREE_BOX_SPACING_Y;
-        const drawing = Svg(this._drawingRoot)
-            .size(drawingWidth, drawingHeight)
-            .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
-        for (let rowi = 0; rowi < layout.layers.length; rowi++) {
-            const row = layout.layers[rowi];
-            const rowTop = rowi * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
-            for (let coli = 0; coli < row.length; coli++) {
-                const node = row[coli];
-                drawing.rect(FAMILY_TREE_BOX_WIDTH, FAMILY_TREE_BOX_HEIGHT)
-                    .move(node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2, rowTop)
-                    .fill("#CCCCCCCC")
-                    .stroke("#CCCCCC");
-            }
-        }
-    }
-    private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
-        this._drawingRoot = root;
-        if (!root) return;
-        this._refreshDrawing();
-    }
-    public render(): React.ReactNode {
-        return (<div ref={this._onDrawingRootChanged}></div>);
-    }
-    public componentDidUpdate(prevProps: IFamilyTreeProps) {
-        if (prevProps.familyTree !== this.props.familyTree) {
-            this._refreshDrawing();
-        }
     }
 }
