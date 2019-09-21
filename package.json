@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --production",
+    "build": "webpack --mode production",
     "test": "mocha --require ts-node/register --timeout 10000 tests/**/*.test.ts"
   },
   "devDependencies": {

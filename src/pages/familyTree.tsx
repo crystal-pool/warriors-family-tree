@@ -26,15 +26,15 @@ function walk(characterId: RdfQName, maxDistance?: number): IFamilyTree {
     if (maxDistance && maxDistance < 0)
         throw new RangeError("maxDistanceUp should be non-negative number.");
     const edgeTypes = new Set<CharacterRelationType>(["parent", "child", "mate"]);
-    const q = List.of<ListItem<[number, RdfQName, RdfQName?]>>(new ListItem([0, characterId]));
+    const q: [number, RdfQName, RdfQName?][] = [[0, characterId]];
     const visited = new Set<RdfQName>();
     const mates = new Set<string>();
     const children: [RdfQName, RdfQName | undefined, RdfQName][] = [];
     const roots: RdfQName[] = [];
-    while (q.head) {
-        const [distance, charId, reachedFrom] = q.head.data;
-        q.head.detach();
+    while (q.length) {
+        const [distance, charId, reachedFrom] = q.shift()!;
         if (visited.has(charId)) continue;
+        visited.add(charId);
         const relations = dataService.getRelationsFor(charId, edgeTypes);
         let parentId1: RdfQName | undefined;
         let parentId2: RdfQName | undefined;
@@ -49,7 +49,7 @@ function walk(characterId: RdfQName, maxDistance?: number): IFamilyTree {
                 mates.add(buildUnorderedIdPair(charId, relation.target));
             }
             if (!visited.has(relation.target)) {
-                q.append(new ListItem([distance + 1, relation.target, charId]));
+                q.push([distance + 1, relation.target, charId]);
             }
         }
         if (parentId1 == null && parentId2 == null) {

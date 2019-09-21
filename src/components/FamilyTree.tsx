@@ -73,10 +73,12 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
             }
         }
         if (nextLayer.length === 0) break;
-        const laidoutLater = arrangeLayer(nextLayer, groupBoundaries);
-        layers.push(laidoutLater);
+        // console.log("Layer", layers.length);
+        const laidoutLayer = arrangeLayer(nextLayer, groupBoundaries);
+        layers.push(laidoutLayer);
     }
     return layers;
+
     function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][]): ILayoutNode[] {
         if (nodes.length === 0) {
             return nodes;
@@ -86,39 +88,58 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
         }
         const nodeList = List.from(wu.map(n => new ListItem(n), nodes));
         const layerNodesMap = new Map<string, ListItem<ILayoutNode>>(wu.map(n => [n.data.id, n], nodeList));
+        // const arrangedNodes_DEBUG = new Set<string>();
+        const arrangedNodes = new Set<string>();
         let node = nodeList.head!;
         let nextNode: typeof node | null | undefined;
         do {
+            // console.log(node.data);
             nextNode = node.next;
+            if (arrangedNodes.has(node.data.id)) continue;
+            // if (arrangedNodes_DEBUG.has(node.data.id) && node.next && node.next.data.groupId === node.data.groupId)
+            //     throw new Error("Detected loop in iteration.");
+            // arrangedNodes_DEBUG.add(node.data.id);
             const mates = matesLookup.get(node.data.id);
             if (!mates) continue;
             const mateNodes = wu.map(m => layerNodesMap.get(m), mates).filter(m => !!m).toArray() as ListItem<ILayoutNode>[];
             const firstExtMate = mateNodes.find(m => m.data.groupId > node.data.groupId);
             if (firstExtMate) {
                 // Move external mates closer.
-                let n = node;
-                while (n.next && n.next.data.groupId === node.data.groupId)
-                    n = n.next;
-                n.append(node.detach());
-                n = firstExtMate;
-                while (n.prev && n.prev.data.groupId === firstExtMate.data.groupId)
-                    n = n.prev;
-                n.prepend(firstExtMate.detach());
+                // Move `node` right.
+                if (node.next && node.next.data.groupId === node.data.groupId) {
+                    let n = node.next;
+                    while (n.next && n.next.data.groupId === node.data.groupId)
+                        n = n.next;
+                    n.append(node.detach());
+                    // Mark this node as visited becuase we moved it to the right.
+                    arrangedNodes.add(node.data.id);
+                }
+                // Move `firstExtMate` left.
+                if (firstExtMate.prev && firstExtMate.prev.data.groupId === firstExtMate.data.groupId) {
+                    let n = firstExtMate;
+                    while (n.prev && n.prev.data.groupId === firstExtMate.data.groupId)
+                        n = n.prev;
+                    if (n !== firstExtMate) n.prepend(firstExtMate.detach());
+                }
+                // console.log("Ext");
                 continue;
             }
             const firstIntMate = mateNodes.find(m => m.data.groupId === node.data.groupId);
+            console.assert(firstIntMate !== node);
             if (firstIntMate) {
                 // Move interal mates closer.
-                let n = node;
-                if (n.next !== firstIntMate || n.prev !== firstIntMate) {
+                if (node.next !== firstIntMate && node.prev !== firstIntMate) {
+                    let n = node;
                     while (n.next && n.next.data.groupId === node.data.groupId) {
+                        // Assume `node` is on the lhs of `firstIntMate`
                         if (n === firstIntMate) {
-                            firstIntMate.prepend(n.detach());
+                            n.append(firstIntMate.detach());
                             break;
                         }
                         n = n.next;
                     }
                 }
+                // console.log("Int");
                 continue;
             }
         } while (node = nextNode);
@@ -133,6 +154,8 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
         do {
             groupItems++;
             if (!node.next || node.next.data.groupId !== node.data.groupId) {
+                if (node.data.groupId >= groupBoundaries.length)
+                    throw new RangeError("groupId out of range.");
                 const [left, right] = groupBoundaries[node.data.groupId];
                 if (groupItems === 1) {
                     if (left >= currentX) {
@@ -144,23 +167,24 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
                         groupStart.data.offsetX = currentX;
                         currentX += minItemSpacing;
                     }
+                } else {
+                    let spacing = (right - currentX) / (groupItems - 1);
+                    if (spacing < minItemSpacing) {
+                        spacing = minItemSpacing;
+                    } else if (spacing > maxItemSpacing) {
+                        spacing = maxItemSpacing;
+                        currentX = (left + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
+                    }
+                    let n = groupStart;
+                    let i = 0;
+                    do {
+                        n.data.offsetX = currentX + spacing * i;
+                        i++;
+                    } while (n = n.next);
+                    groupStart = node.next;
+                    groupItems = 0;
+                    currentX += spacing * groupItems;
                 }
-                let spacing = (right - currentX) / (groupItems - 1);
-                if (spacing < minItemSpacing) {
-                    spacing = minItemSpacing;
-                } else if (spacing > maxItemSpacing) {
-                    spacing = maxItemSpacing;
-                    currentX = (left + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
-                }
-                let n = groupStart;
-                let i = 0;
-                do {
-                    n.data.offsetX = currentX + spacing * i;
-                    i++;
-                } while (n = n.next);
-                groupStart = node.next;
-                groupItems = 0;
-                currentX += spacing * groupItems;
             }
         } while (node = node.next);
         return wu.map(n => n.data, nodeList).toArray();
