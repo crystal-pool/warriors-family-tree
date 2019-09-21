@@ -87,7 +87,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
                 <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={30} onChange={(e, v) => setMaxDistance(v as number)} />
             </Grid>
         </Grid>
-        <Paper>
+        <Paper style={{ minWidth: "0", overflowX: "auto" }}>
             {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} />}
         </Paper>
     </React.Fragment>);

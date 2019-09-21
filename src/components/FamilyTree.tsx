@@ -1,5 +1,6 @@
 import List from "linked-list";
 import * as React from "react";
+import Svg from "svgjs";
 import wu from "wu";
 import { buildUnorderedIdPair } from "../utility/general";
 import { ListItem } from "../utility/linkedList";
@@ -10,7 +11,13 @@ interface ILayoutNode {
     offsetX?: number;
 }
 
-function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
+interface IFamilyTreeLayoutInfo {
+    layers: ILayoutNode[][];
+    rootNodeCount: number;
+    rawWidth: number;
+}
+
+function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
     const rootCandidates = new Set<string>();
@@ -36,6 +43,7 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
     const laidoutNodes = new Map<string, ILayoutNode>();
     const rootLayer = arrangeLayer(Array.from(rootCandidates).map<ILayoutNode>(id => ({ id, groupId: 0 })), [[0, 1]]);
     const layers: ILayoutNode[][] = [rootLayer];
+    let rawWidth: number = 1;
     while (true) {
         const lastLayer = layers[layers.length - 1];
         for (const n of lastLayer)
@@ -75,9 +83,10 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): ILayoutNode[][] {
         if (nextLayer.length === 0) break;
         // console.log("Layer", layers.length);
         const laidoutLayer = arrangeLayer(nextLayer, groupBoundaries);
+        rawWidth = Math.max(rawWidth, laidoutLayer[laidoutLayer.length - 1].offsetX!);
         layers.push(laidoutLayer);
     }
-    return layers;
+    return { layers, rootNodeCount: rootLayer.length, rawWidth };
 
     function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][]): ILayoutNode[] {
         if (nodes.length === 0) {
@@ -208,11 +217,33 @@ export interface IFamilyTreeProps {
     familyTree: Readonly<IFamilyTree>;
 }
 
-export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
-    const layers = layoutFamilyTree(props.familyTree);
-    return (
-        <div>
-            <pre>{JSON.stringify(layers, undefined, 4)}</pre>
-        </div>
-    );
-};
+const FAMILY_TREE_BOX_WIDTH = 100;
+const FAMILY_TREE_BOX_HEIGHT = 50;
+const FAMILY_TREE_BOX_SPACING_X = 50;
+const FAMILY_TREE_BOX_SPACING_Y = 50;
+
+export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
+    private _drawingRoot: HTMLDivElement | null | undefined;
+    private _refreshDrawing(): void {
+        if (!this._drawingRoot) return;
+        const layout = layoutFamilyTree(this.props.familyTree);
+        const scaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
+        while (this._drawingRoot.hasChildNodes())
+            this._drawingRoot.firstChild!.remove();
+        const drawing = Svg(this._drawingRoot).size(layout.rawWidth * scaleX, (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) * layout.layers.length);
+
+    }
+    private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
+        this._drawingRoot = root;
+        if (!root) return;
+        this._refreshDrawing();
+    }
+    public render(): React.ReactNode {
+        return (<div ref={this._onDrawingRootChanged}></div>);
+    }
+    public componentDidUpdate(prevProps: IFamilyTreeProps) {
+        if (prevProps.familyTree !== this.props.familyTree) {
+            this._refreshDrawing();
+        }
+    }
+}
