@@ -31,6 +31,11 @@ WHERE {
     ?target     p:P86       ?claim.
     ?claim      ps:P86      ?character.
   }
+  UNION {
+    VALUES ?type { "mate" }
+    ?character  p:P100      ?claim.
+    ?claim      ps:P100     ?target.
+  }
   OPTIONAL { ?claim  pq:P53               ?ordinal. }
   OPTIONAL { ?claim  pq:P92               ?since. }
   OPTIONAL { ?claim  pq:P93               ?until. }

@@ -151,7 +151,7 @@ namespace WarriorsFamilyTree.DataBuilder
                 Subject = SerializeUriNode(row["character"])!,
                 Relation = row["type"].AsValuedNode().AsString(),
                 Target = SerializeUriNode(row["target"]),
-                Ordinal = row.TryGetBoundValue("ordinal", out tempNode) ? (int?)tempNode.AsValuedNode().AsInteger() : null,
+                Ordinal = row.TryGetBoundValue("ordinal", out tempNode) ? (int?)Convert.ToInt32(tempNode.AsValuedNode().AsString()) : null,
                 Since = row.TryGetBoundValue("since", out tempNode) ? SerializeUriNode(tempNode) : null,
                 Until = row.TryGetBoundValue("until", out tempNode) ? SerializeUriNode(tempNode) : null,
                 Cause = row.TryGetBoundValue("cause", out tempNode) ? SerializeUriNode(tempNode) : null,
