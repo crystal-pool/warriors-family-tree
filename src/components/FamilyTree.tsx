@@ -15,9 +15,10 @@ interface IFamilyTreeLayoutInfo {
     layers: ILayoutNode[][];
     rootNodeCount: number;
     rawWidth: number;
+    minNodeSpacingX: number;
 }
 
-function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
+function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo | null {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
     const rootCandidates = new Set<string>();
@@ -40,10 +41,12 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
     for (const [, , id3] of props.children) {
         rootCandidates.delete(id3);
     }
+    if (rootCandidates.size === 0) return null;
     const laidoutNodes = new Map<string, ILayoutNode>();
     const rootLayer = arrangeLayer(Array.from(rootCandidates).map<ILayoutNode>(id => ({ id, groupId: 0 })), [[0, 1]]);
     const layers: ILayoutNode[][] = [rootLayer];
     let rawWidth: number = 1;
+    let minNodeSpacingX: number = rawWidth / rootLayer.length;
     while (true) {
         const lastLayer = layers[layers.length - 1];
         for (const n of lastLayer)
@@ -84,9 +87,14 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
         // console.log("Layer", layers.length);
         const laidoutLayer = arrangeLayer(nextLayer, groupBoundaries);
         rawWidth = Math.max(rawWidth, laidoutLayer[laidoutLayer.length - 1].offsetX!);
+        if (laidoutLayer.length > 1) {
+            minNodeSpacingX = wu.zip(laidoutLayer, wu(laidoutLayer).slice(1))
+                .reduce((spacing, [prev, cur]) => Math.min(spacing, cur.offsetX! - prev.offsetX!), minNodeSpacingX);
+            console.assert(minNodeSpacingX >= 0);
+        }
         layers.push(laidoutLayer);
     }
-    return { layers, rootNodeCount: rootLayer.length, rawWidth };
+    return { layers, rootNodeCount: rootLayer.length, rawWidth, minNodeSpacingX };
 
     function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][]): ILayoutNode[] {
         if (nodes.length === 0) {
@@ -168,21 +176,22 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
                 const [left, right] = groupBoundaries[node.data.groupId];
                 if (groupItems === 1) {
                     if (left >= currentX) {
-                        groupStart.data.offsetX = (left + right) / 2;
-                        currentX = Math.min(right, currentX + maxItemSpacing);
+                        currentX = (left + right) / 2;
+                        groupStart.data.offsetX = currentX;
                     } else if (right >= currentX + minItemSpacing) {
-                        groupStart.data.offsetX = (currentX + right) / 2;
+                        currentX += (currentX + right) / 2;
+                        groupStart.data.offsetX = currentX;
                     } else {
                         groupStart.data.offsetX = currentX;
-                        currentX += minItemSpacing;
                     }
+                    currentX += minItemSpacing;
                 } else {
                     let spacing = (right - currentX) / (groupItems - 1);
                     if (spacing < minItemSpacing) {
                         spacing = minItemSpacing;
                     } else if (spacing > maxItemSpacing) {
                         spacing = maxItemSpacing;
-                        currentX = (left + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
+                        currentX = (currentX + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
                     }
                     let n = groupStart;
                     let i = 0;
@@ -190,10 +199,10 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo {
                         n.data.offsetX = currentX + spacing * i;
                         i++;
                     } while (n = n.next);
-                    groupStart = node.next;
-                    groupItems = 0;
                     currentX += spacing * groupItems;
                 }
+                groupStart = node.next;
+                groupItems = 0;
             }
         } while (node = node.next);
         return wu.map(n => n.data, nodeList).toArray();
@@ -226,12 +235,29 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     private _drawingRoot: HTMLDivElement | null | undefined;
     private _refreshDrawing(): void {
         if (!this._drawingRoot) return;
-        const layout = layoutFamilyTree(this.props.familyTree);
-        const scaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
         while (this._drawingRoot.hasChildNodes())
             this._drawingRoot.firstChild!.remove();
-        const drawing = Svg(this._drawingRoot).size(layout.rawWidth * scaleX, (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) * layout.layers.length);
-
+        const layout = layoutFamilyTree(this.props.familyTree);
+        if (!layout) return;
+        const rootScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
+        const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
+        const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
+        const drawingWidth = layout.rawWidth * scaleX;
+        const drawingHeight = layout.layers.length * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) - FAMILY_TREE_BOX_SPACING_Y;
+        const drawing = Svg(this._drawingRoot)
+            .size(drawingWidth, drawingHeight)
+            .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
+        for (let rowi = 0; rowi < layout.layers.length; rowi++) {
+            const row = layout.layers[rowi];
+            const rowTop = rowi * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
+            for (let coli = 0; coli < row.length; coli++) {
+                const node = row[coli];
+                drawing.rect(FAMILY_TREE_BOX_WIDTH, FAMILY_TREE_BOX_HEIGHT)
+                    .move(node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2, rowTop)
+                    .fill("#CCCCCCCC")
+                    .stroke("#CCCCCC");
+            }
+        }
     }
     private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
         this._drawingRoot = root;
