@@ -2,7 +2,7 @@ import { Grid, Paper, Slider, Typography } from "@material-ui/core";
 import * as React from "react";
 import { match } from "react-router";
 import wu from "wu";
-import { FamilyTree as FamilyTreeComponent, IFamilyTree, NodeRenderCallback } from "../components/FamilyTree";
+import { FamilyTree as FamilyTreeComponent, IFamilyTree, NodeRenderCallback } from "../components/familyTree/FamilyTree";
 import { RdfEntityDescription, RdfEntityLabel, RdfEntityLink } from "../components/RdfEntity";
 import { dataService } from "../services";
 import { CharacterRelationType, RdfQName } from "../services/dataService";
@@ -91,7 +91,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = (props) => {
             </Grid>
         </Grid>
         <Paper className="familytree-container">
-            {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} onRenderNode={renderNode} />}
+            {familyTreeData && <FamilyTreeComponent familyTree={familyTreeData} onRenderNode={renderNode} debugInfo />}
         </Paper>
     </React.Fragment>);
 };
