@@ -102,7 +102,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         for (const [mate1, mate2] of layout.mates) {
             const mateNode1 = layout.nodeFromId(mate1);
             const mateNode2 = layout.nodeFromId(mate2);
-            console.assert(mateNode1 && mateNode2);
+            console.assert(mateNode1, "Mate node [0] missing", mate1, mate2);
+            console.assert(mateNode2, "Mate node [1] missing", mate1, mate2);
             if (!mateNode1 || !mateNode2) continue;
             const mateNodeL = mateNode1.offsetX < mateNode2.offsetX ? mateNode1 : mateNode2;
             const mateNodeR = mateNode1.offsetX < mateNode2.offsetX ? mateNode2 : mateNode1;
@@ -329,9 +330,9 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
                 if (node.next !== firstIntMate && node.prev !== firstIntMate) {
                     let n = node;
                     while (n.next && n.next.data.groupId === node.data.groupId) {
-                        // Assume `node` is on the lhs of `firstIntMate`
                         if (n === firstIntMate) {
-                            n.append(firstIntMate.detach());
+                            // `node` is on the lhs of `firstIntMate`
+                            node.append(firstIntMate.detach());
                             break;
                         }
                         n = n.next;
@@ -341,6 +342,7 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
                 continue;
             }
         } while (node = nextNode);
+        console.assert(nodeList.size === nodes.length);
         // Layout
         node = nodeList.head!;
         let groupStart = node;
@@ -387,6 +389,7 @@ function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo |
             }
         } while (node = node.next);
         const arrangedArray = wu.map(n => n.data, nodeList).toArray();
+        console.assert(arrangedArray.length === nodes.length);
         arrangedArray.forEach((n, i) => n.column = i);
         return arrangedArray;
     }
