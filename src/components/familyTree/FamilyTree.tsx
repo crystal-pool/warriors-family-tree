@@ -57,7 +57,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         // Render
         const layout = layoutFamilyTree(this.props.familyTree);
         if (!layout) return;
-        const rootScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) * layout.rootNodeCount - FAMILY_TREE_BOX_SPACING_X;
+        const rootScaleX = FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X;
         const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
         const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
         const drawingWidth = layout.rawWidth * scaleX;
@@ -100,9 +100,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
                 if (this.props.debugInfo) {
                     const lines = [`${node.row},${node.column}|${node.groupId}`];
-                    for (const { id1, id2, slot1: slot2 } of layout.mateConnections) {
+                    for (const { id1, id2, slot1 } of layout.mateConnections) {
                         if (id1 !== node.id && id2 !== node.id) continue;
-                        lines.push(`${id1} -- ${id2} | ${slot2}`);
+                        lines.push(`${id1} -- ${id2} | ${slot1}`);
                     }
                     drawing.text(lines.join("\n"))
                         .font({ size: 9 })
@@ -111,7 +111,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             }
         }
         // Draw connections.
-        for (const { id1, id2, slot1 } of layout.mateConnections) {
+        for (const { id1, id2, slot1, childrenId, childrenSlot } of layout.mateConnections) {
             const node1 = layout.nodeFromId(id1);
             const node2 = layout.nodeFromId(id2);
             console.assert(node1, "Mate node [0] missing", id1, id2);
@@ -121,12 +121,26 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
             const rectL = getNodeRect(nodeL);
             const rectR = getNodeRect(nodeR);
+            console.assert((childrenId == null) == (childrenSlot == null));
             if (slot1 === 0) {
+                const mateLineY = rectL.top + rectL.height / 2;
                 drawing
-                    .line(rectL.left + rectL.width, rectL.top + rectL.height / 2,
-                        rectR.left, rectR.top + rectR.height / 2)
+                    .line(rectL.left + rectL.width, mateLineY, rectR.left, mateLineY)
                     .fill("none")
                     .stroke({ width: 1 });
+                if (childrenId && childrenSlot) {
+                    const centerX = ((rectL.left + rectL.width) + rectR.left) / 2;
+                    for (const childId of childrenId) {
+                        const nodeC = layout.nodeFromId(childId)!;
+                        const rectC = getNodeRect(nodeC);
+                        plotElbowHorizontal(drawing,
+                            centerX, mateLineY,
+                            rectL.top + rectL.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
+                            rectC.left + rectC.width / 2, rectC.top
+                        ).fill("none")
+                            .stroke({ width: 1, color: "#00CCFF99" });
+                    }
+                }
             } else {
                 if (nodeL.row === nodeR.row) {
                     const slotYL = rectL.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
@@ -134,8 +148,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     plotElbowHorizontal(drawing,
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
                         slotYL,
-                        rectR.left + rectR.width / 2, rectR.top + rectR.height)
-                        .fill("none")
+                        rectR.left + rectR.width / 2, rectR.top + rectR.height
+                    ).fill("none")
                         .stroke({ width: 1 });
                 } else {
                     console.assert(node1.row < node2.row);
