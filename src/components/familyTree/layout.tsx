@@ -26,7 +26,6 @@ export interface IFamilyTreeLayoutInfo {
     rawWidth: number;
     minNodeSpacingX: number;
     nodeFromId(id: string): ILayoutNode | undefined;
-    mates: Iterable<[string, string]>;
     children: Iterable<[string, string | undefined, Iterable<string>]>;
 }
 
@@ -194,7 +193,6 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         rawWidth, minNodeSpacingX,
         mateConnections,
         nodeFromId: id => laidoutNodes.get(id),
-        mates: wu(matesLookup).map(([m1, m2s]) => wu(m2s).filter(m2 => m2 >= m1).map(m2 => [m1, m2])).flatten(true) as WuIterable<[string, string]>,
         children: wu(childrenLookup).map(([p, c]) => {
             const [p1, p2] = parseUnorderedIdPair(p);
             return [p1, p2, c];
@@ -285,7 +283,7 @@ function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][],
                     currentX = (left + right) / 2;
                     groupStart.data.offsetX = currentX;
                 } else if (right >= currentX + minItemSpacing) {
-                    currentX += (currentX + right) / 2;
+                    currentX = (currentX + right) / 2;
                     groupStart.data.offsetX = currentX;
                 } else {
                     groupStart.data.offsetX = currentX;
