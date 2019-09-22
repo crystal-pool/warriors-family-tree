@@ -65,14 +65,17 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         rootCandidates.delete(id);
     if (rootCandidates.size === 0) return null;
     const laidoutNodes = new Map<string, ILayoutNode>();
-    const row0 = arrangeRow(wu(rootCandidates)
+    const rows: ILayoutNode[][] = [];
+    {
+        const row0 = arrangeRow(wu(rootCandidates)
         .map<ILayoutNode>(id => ({
             id, groupId: 0,
             offsetX: NaN,
             row: 0,
             column: NaN
         })).toArray(), matesLookup);
-    const rows: ILayoutNode[][] = [row0];
+        rows.push(row0);
+    }
     // Start node index, End node index
     const rowGroupBoundaries: [undefined, ...[ILayoutNode, ILayoutNode][][]] = [undefined];
     const mateConnections: ILayoutConnection[] = [];
@@ -176,23 +179,26 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                 const rNode = node.offsetX <= mateNode.offsetX ? mateNode : node;
                 if (node.row === mateNode.row) {
                     console.assert(lNode.column <= rNode.column);
-                    // Same row
+                    // Same row.
                     const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id));
                     mateConnections.push({ id1: node.id, id2: mate, slot1: slot, slot2: slot });
                     wu(row)
                         .slice(lNode.column, rNode.column)
                         .forEach(n => declareSlotOccupied(n.id, slot));
                 } else {
-                    console.assert(mateNode.row < node.row);
-                    const row1 = rows[lNode.row];
-                    const row2 = rows[rNode.row];
-                    const slot1 = findVacantSlot(wu(row1).filter(n => n.column >= lNode.column && n.offsetX < rNode.offsetX).map(r => r.id));
-                    const slot2 = findVacantSlot([rNode.id]);
-                    mateConnections.push({ id1: lNode.id, id2: rNode.id, slot1, slot2 });
-                    wu(row1)
-                        .filter(n => n.column >= lNode.column && n.offsetX < rNode.offsetX)
+                    // Different row. Prefer to use slot of the upper node.
+                    const uNode = node.row < mateNode.row ? node : mateNode;
+                    const dNode = node.row < mateNode.row ? mateNode : node;
+                    const uRow = rows[lNode.row];
+                    const slot1 = findVacantSlot(wu(uRow)
+                        .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
+                        .map(r => r.id));
+                    const slot2 = findVacantSlot([dNode.id]);
+                    mateConnections.push({ id1: uNode.id, id2: dNode.id, slot1, slot2 });
+                    wu(uRow)
+                        .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
                         .forEach(n => declareSlotOccupied(n.id, slot1));
-                    declareSlotOccupied(rNode.id, slot2);
+                    declareSlotOccupied(dNode.id, slot2);
                 }
             }
             arrangedNodes.add(node.id);
@@ -200,7 +206,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
     }
     return {
         rows: rows,
-        rootNodeCount: row0.length,
+        rootNodeCount: rows[0].length,
         rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
         rawWidth, minNodeSpacingX: nodeSpacing,
         mateConnections,
@@ -285,14 +291,15 @@ function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], sp
     }
     if (nodes.length === 1) {
         nodes[0].offsetX = (groupBoundaries[0][0] + groupBoundaries[0][1]) / 2;
+        nodes[0].column = 0;
         return;
     }
     // Layout offsetX
     let groupStartIndex = 0;
     let currentX = 0;
     let normalizedItemSpacing = spacing;
-    let minItemSpacing = normalizedItemSpacing * 0.8;
-    let maxItemSpacing = normalizedItemSpacing * 1.5;
+    let minItemSpacing = normalizedItemSpacing * 1;
+    let maxItemSpacing = normalizedItemSpacing * 2;
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         const next = nodes[i + 1];

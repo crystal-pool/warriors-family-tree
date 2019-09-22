@@ -130,14 +130,35 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     .fill("none")
                     .stroke({ width: 1 });
             } else {
-                const connectionYL = rectL.top + rectL.height + slotL * FAMILY_TREE_MATE_SLOT_OFFSET;
-                const connectionYR = rectR.top + rectL.height + slotR * FAMILY_TREE_MATE_SLOT_OFFSET;
-                plotElbow(drawing,
-                    rectL.left + rectL.width / 2, rectL.top + rectL.height,
-                    connectionYL,
-                    rectR.left + rectR.width / 2, rectR.top + rectR.height)
-                    .fill("none")
-                    .stroke({ width: 1 });
+                if (nodeL.row === nodeR.row) {
+                    const slotYL = rectL.top + rectL.height + slotL * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const slotYR = rectR.top + rectL.height + slotR * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    plotElbowHorizontal(drawing,
+                        rectL.left + rectL.width / 2, rectL.top + rectL.height,
+                        slotYL,
+                        rectR.left + rectR.width / 2, rectR.top + rectR.height)
+                        .fill("none")
+                        .stroke({ width: 1 });
+                } else {
+                    const nodeU = node1.row < node2.row ? node1 : node2;
+                    const nodeD = node1.row < node2.row ? node2 : node1;
+                    const rectU = nodeU === nodeL ? rectL : rectR;
+                    const slotU = nodeU === nodeL ? slotL : slotR;
+                    const slotYU = rectU.top + rectU.height + slotU * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const edgeXL = rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const edgeYL = rectL.top + rectL.height / 2;
+                    const edgeXR = rectR.left - FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const edgeYR = rectR.top + rectR.height / 2;
+                    drawing.polyline([
+                        rectL.left + rectL.width, edgeYL,
+                        edgeXL, edgeYL,
+                        edgeXL, slotYU,
+                        edgeXR, slotYU,
+                        edgeXR, edgeYR,
+                        rectR.left, edgeYR
+                    ]).fill("none")
+                        .stroke({ width: 1 });
+                }
             }
         }
         // Mount React.
@@ -163,7 +184,12 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     }
 }
 
-function plotElbow(container: Svg.Container, x1: number, y1: number, y2: number, x3: number, y3: number): Svg.PolyLine {
+function plotElbowHorizontal(container: Svg.Container, x1: number, y1: number, y2: number, x3: number, y3: number): Svg.PolyLine {
     return container
         .polyline([x1, y1, x1, y2, x3, y2, x3, y3]);
+}
+
+function plotElbowVertical(container: Svg.Container, x1: number, y1: number, x2: number, x3: number, y3: number): Svg.PolyLine {
+    return container
+        .polyline([x1, y1, x2, y1, x2, y3, x3, y3]);
 }
