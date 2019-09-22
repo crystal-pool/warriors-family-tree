@@ -62,7 +62,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
         const drawingWidth = layout.rawWidth * scaleX;
         const rowTop: number[] = [0];
-        for (let row = 0; row < layout.layers.length; row++) {
+        for (let row = 0; row < layout.rows.length; row++) {
             rowTop.push(rowTop[row] + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET + FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
         }
         const drawingHeight = rowTop[rowTop.length - 1];
@@ -79,8 +79,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             };
         }
         // Draw nodes.
-        for (let rowi = 0; rowi < layout.layers.length; rowi++) {
-            const row = layout.layers[rowi];
+        for (let rowi = 0; rowi < layout.rows.length; rowi++) {
+            const row = layout.rows[rowi];
             for (let coli = 0; coli < row.length; coli++) {
                 const node = row[coli];
                 const bRect: IRect = getNodeRect(node);
