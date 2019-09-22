@@ -61,7 +61,11 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
         const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
         const drawingWidth = layout.rawWidth * scaleX;
-        const drawingHeight = layout.layers.length * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y) - FAMILY_TREE_BOX_SPACING_Y;
+        const rowTop: number[] = [0];
+        for (let row = 0; row < layout.layers.length; row++) {
+            rowTop.push(rowTop[row] + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET + FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
+        }
+        const drawingHeight = rowTop[rowTop.length - 1];
         const drawing = Svg(this._drawingRoot)
             .size(drawingWidth, drawingHeight)
             .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
@@ -69,7 +73,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         function getNodeRect(node: ILayoutNode): IRect {
             return {
                 left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
-                top: node.row * (FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y),
+                top: rowTop[node.row],
                 width: FAMILY_TREE_BOX_WIDTH,
                 height: FAMILY_TREE_BOX_HEIGHT
             };

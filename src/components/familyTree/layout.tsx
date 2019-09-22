@@ -21,6 +21,7 @@ export interface ILayoutConnection {
 
 export interface IFamilyTreeLayoutInfo {
     layers: ILayoutNode[][];
+    rowSlotCount: number[];
     mateConnections: ILayoutConnection[];
     rootNodeCount: number;
     rawWidth: number;
@@ -75,12 +76,6 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
     // Start node index, End node index
     const rowGroupBoundaries: [undefined, ...[ILayoutNode, ILayoutNode][][]] = [undefined];
     const mateConnections: ILayoutConnection[] = [];
-    const occupiedSlotsMap = new Map<string, boolean[]>();
-    function declareSlotOccupied(id: string, slotIndex: number): void {
-        const slots = occupiedSlotsMap.get(id) || occupiedSlotsMap.set(id, []).get(id)!;
-        console.assert(!slots[slotIndex]);
-        slots[slotIndex] = true;
-    }
     while (true) {
         const lastLayer = layers[layers.length - 1];
         for (const n of lastLayer)
@@ -143,6 +138,16 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         rawWidth = Math.max(rawWidth, layers[i][layers[i].length - 1].offsetX);
     }
     const arrangedNodes = new Set<string>();
+    const occupiedSlotsMap = new Map<string, boolean[]>();
+    function findVacantSlot(ids: Iterable<string>): number {
+        const slots = wu(ids).map(id => occupiedSlotsMap.get(id)).filter(s => !!s).toArray() as boolean[][];
+        return wu.count(1).find(i => slots.every(s => !s[i]))!;
+    }
+    function declareSlotOccupied(id: string, slotIndex: number): void {
+        const slots = occupiedSlotsMap.get(id) || occupiedSlotsMap.set(id, []).get(id)!;
+        console.assert(!slots[slotIndex]);
+        slots[slotIndex] = true;
+    }
     for (const row of layers) {
         // Layout connections
         // internal representation: slot index increases as slot goes above.
@@ -172,22 +177,21 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                 if (node.row === mateNode.row) {
                     console.assert(lNode.column <= rNode.column);
                     // Same row
-                    const prevSlot = wu(row)
-                        .slice(lNode.column, rNode.column + 1)
-                        .reduce((p, c) => Math.max(p, (occupiedSlotsMap.get(c.id) || []).length - 1), 0);
-                    const slot = prevSlot + 1;
+                    const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id));
                     mateConnections.push({ id1: node.id, id2: mate, slot1: slot, slot2: slot });
                     wu(row)
                         .slice(lNode.column, rNode.column)
                         .forEach(n => declareSlotOccupied(n.id, slot));
                 } else {
                     console.assert(mateNode.row < node.row);
-                    const prevSlot1 = Math.max(0, (occupiedSlotsMap.get(lNode.id) || []).length - 1);
-                    const prevSlot2 = Math.max(0, (occupiedSlotsMap.get(rNode.id) || []).length - 1);
-                    const slot1 = prevSlot1 + 1;
-                    const slot2 = prevSlot2 + 1;
+                    const row1 = layers[lNode.row];
+                    const row2 = layers[rNode.row];
+                    const slot1 = findVacantSlot(wu(row1).filter(n => n.column >= lNode.column && n.offsetX < rNode.offsetX).map(r => r.id));
+                    const slot2 = findVacantSlot([rNode.id]);
                     mateConnections.push({ id1: lNode.id, id2: rNode.id, slot1, slot2 });
-                    declareSlotOccupied(lNode.id, slot1);
+                    wu(row1)
+                        .filter(n => n.column >= lNode.column && n.offsetX < rNode.offsetX)
+                        .forEach(n => declareSlotOccupied(n.id, slot1));
                     declareSlotOccupied(rNode.id, slot2);
                 }
             }
@@ -197,6 +201,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
     return {
         layers,
         rootNodeCount: rootLayer.length,
+        rowSlotCount: layers.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
         rawWidth, minNodeSpacingX: nodeSpacing,
         mateConnections,
         nodeFromId: id => laidoutNodes.get(id),
@@ -304,7 +309,7 @@ function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], sp
                 } else {
                     node.offsetX = currentX;
                 }
-                currentX += minItemSpacing;
+                currentX += normalizedItemSpacing;
             } else {
                 let spacing = (right - currentX) / (groupItems - 1);
                 if (spacing < minItemSpacing) {
@@ -320,7 +325,7 @@ function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], sp
                 }
                 for (let j = groupStartIndex; j <= i; j++)
                     nodes[j].offsetX = currentX + spacing * (j - groupStartIndex);
-                currentX += spacing * (groupItems - 1) + minItemSpacing;
+                currentX += spacing * (groupItems - 1) + normalizedItemSpacing;
             }
             groupStartIndex = i + 1;
         }
