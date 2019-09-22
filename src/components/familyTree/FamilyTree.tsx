@@ -100,9 +100,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
                 if (this.props.debugInfo) {
                     const lines = [`${node.row},${node.column}|${node.groupId}`];
-                    for (const { id1, id2, slot1, slot2 } of layout.mateConnections) {
+                    for (const { id1, id2, slot1: slot2 } of layout.mateConnections) {
                         if (id1 !== node.id && id2 !== node.id) continue;
-                        lines.push(`${id1} -- ${id2} | ${slot1} -- ${slot2}`);
+                        lines.push(`${id1} -- ${id2} | ${slot2}`);
                     }
                     drawing.text(lines.join("\n"))
                         .font({ size: 9 })
@@ -111,7 +111,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             }
         }
         // Draw connections.
-        for (const { id1, id2, slot1, slot2 } of layout.mateConnections) {
+        for (const { id1, id2, slot1 } of layout.mateConnections) {
             const node1 = layout.nodeFromId(id1);
             const node2 = layout.nodeFromId(id2);
             console.assert(node1, "Mate node [0] missing", id1, id2);
@@ -121,9 +121,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
             const rectL = getNodeRect(nodeL);
             const rectR = getNodeRect(nodeR);
-            const slotL = nodeL === node1 ? slot1 : slot2;
-            const slotR = nodeR === node1 ? slot1 : slot2;
-            if (slotL === 0 && slotR === 0) {
+            if (slot1 === 0) {
                 drawing
                     .line(rectL.left + rectL.width, rectL.top + rectL.height / 2,
                         rectR.left, rectR.top + rectR.height / 2)
@@ -131,8 +129,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     .stroke({ width: 1 });
             } else {
                 if (nodeL.row === nodeR.row) {
-                    const slotYL = rectL.top + rectL.height + slotL * FAMILY_TREE_MATE_SLOT_OFFSET;
-                    const slotYR = rectR.top + rectL.height + slotR * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const slotYL = rectL.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const slotYR = rectR.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
                     plotElbowHorizontal(drawing,
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
                         slotYL,
@@ -140,11 +138,11 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         .fill("none")
                         .stroke({ width: 1 });
                 } else {
-                    const nodeU = node1.row < node2.row ? node1 : node2;
-                    const nodeD = node1.row < node2.row ? node2 : node1;
+                    console.assert(node1.row < node2.row);
+                    const nodeU = node1;
+                    const nodeD = node2;
                     const rectU = nodeU === nodeL ? rectL : rectR;
-                    const slotU = nodeU === nodeL ? slotL : slotR;
-                    const slotYU = rectU.top + rectU.height + slotU * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const slotYU = rectU.top + rectU.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
                     const edgeXL = rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET;
                     const edgeYL = rectL.top + rectL.height / 2;
                     const edgeXR = rectR.left - FAMILY_TREE_MATE_SLOT_OFFSET;
