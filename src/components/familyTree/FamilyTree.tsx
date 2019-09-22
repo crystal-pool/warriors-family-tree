@@ -95,32 +95,42 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     }
                 }
                 if (this.props.debugInfo) {
-                    drawing.text(`${node.row},${node.column}|${node.groupId}`)
+                    const lines = [`${node.row},${node.column}|${node.groupId}`];
+                    for (const { id1, id2, slot1, slot2 } of layout.mateConnections) {
+                        if (id1 !== node.id && id2 !== node.id) continue;
+                        lines.push(`${id1} -- ${id2} | ${slot1} -- ${slot2}`);
+                    }
+                    drawing.text(lines.join("\n"))
+                        .font({ size: 9 })
                         .move(bRect.left, bRect.top + bRect.height);
                 }
             }
         }
         // Draw connections.
-        for (const [mate1, mate2] of layout.mates) {
-            const mateNode1 = layout.nodeFromId(mate1);
-            const mateNode2 = layout.nodeFromId(mate2);
-            console.assert(mateNode1, "Mate node [0] missing", mate1, mate2);
-            console.assert(mateNode2, "Mate node [1] missing", mate1, mate2);
-            if (!mateNode1 || !mateNode2) continue;
-            const mateNodeL = mateNode1.offsetX < mateNode2.offsetX ? mateNode1 : mateNode2;
-            const mateNodeR = mateNode1.offsetX < mateNode2.offsetX ? mateNode2 : mateNode1;
-            const rectL = getNodeRect(mateNodeL);
-            const rectR = getNodeRect(mateNodeR);
-            if (mateNodeL.row === mateNodeR.row && mateNodeL.column + 1 === mateNodeR.column) {
+        for (const { id1, id2, slot1, slot2 } of layout.mateConnections) {
+            const node1 = layout.nodeFromId(id1);
+            const node2 = layout.nodeFromId(id2);
+            console.assert(node1, "Mate node [0] missing", id1, id2);
+            console.assert(node2, "Mate node [1] missing", id1, id2);
+            if (!node1 || !node2) continue;
+            const nodeL = node1.offsetX < node2.offsetX ? node1 : node2;
+            const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
+            const rectL = getNodeRect(nodeL);
+            const rectR = getNodeRect(nodeR);
+            const slotL = nodeL === node1 ? slot1 : slot2;
+            const slotR = nodeR === node1 ? slot1 : slot2;
+            if (slotL === 0 && slotR === 0) {
                 drawing
                     .line(rectL.left + rectL.width, rectL.top + rectL.height / 2,
                         rectR.left, rectR.top + rectR.height / 2)
                     .fill("none")
                     .stroke({ width: 1 });
             } else {
+                const connectionYL = rectL.top + rectL.height + slotL * FAMILY_TREE_MATE_SLOT_OFFSET;
+                const connectionYR = rectR.top + rectL.height + slotR * FAMILY_TREE_MATE_SLOT_OFFSET;
                 plotElbow(drawing,
                     rectL.left + rectL.width / 2, rectL.top + rectL.height,
-                    Math.max(rectL.top + rectL.height, rectR.top + rectR.height) + FAMILY_TREE_MATE_SLOT_OFFSET,
+                    connectionYL,
                     rectR.left + rectR.width / 2, rectR.top + rectR.height)
                     .fill("none")
                     .stroke({ width: 1 });

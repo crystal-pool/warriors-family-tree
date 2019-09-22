@@ -6,14 +6,22 @@ import { IFamilyTree } from "./FamilyTree";
 
 export interface ILayoutNode {
     id: string;
-    groupId: number;
-    offsetX: number;
     row: number;
     column: number;
+    groupId: number;
+    offsetX: number;
+}
+
+export interface ILayoutConnection {
+    id1: string;
+    id2: string;
+    slot1: number;
+    slot2: number;
 }
 
 export interface IFamilyTreeLayoutInfo {
     layers: ILayoutNode[][];
+    mateConnections: ILayoutConnection[];
     rootNodeCount: number;
     rawWidth: number;
     minNodeSpacingX: number;
@@ -65,12 +73,69 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
             column: NaN
         })).toArray(), [[0, 1]], matesLookup);
     const layers: ILayoutNode[][] = [rootLayer];
+    const mateConnections: ILayoutConnection[] = [];
+    const occupiedSlotsMap = new Map<string, boolean[]>();
+    function declareSlotOccupied(id: string, slotIndex: number): void {
+        const slots = occupiedSlotsMap.get(id) || occupiedSlotsMap.set(id, []).get(id)!;
+        console.assert(!slots[slotIndex]);
+        slots[slotIndex] = true;
+    }
     let rawWidth: number = 1;
     let minNodeSpacingX: number = rawWidth / rootLayer.length;
     while (true) {
         const lastLayer = layers[layers.length - 1];
         for (const n of lastLayer)
             laidoutNodes.set(n.id, n);
+        // Layout connections
+        // internal representation: slot index increases as slot goes above.
+        // Bottom-most has the smallest index (1).
+        // 0 means the connection can be drawn directly from sibling node to sibling node.
+        const arrangedNodes = new Set<string>();
+        for (let i = 0; i < lastLayer.length; i++) {
+            const node = lastLayer[i];
+            const mates = matesLookup.get(node.id);
+            if (!mates) continue;
+            const prev = i > 0 ? lastLayer[i - 1] : undefined;
+            const next = i < lastLayer.length - 1 ? lastLayer[i + 1] : undefined;
+            const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
+            for (const mate of mates) {
+                if (arrangedNodes.has(mate)) continue;
+                if (!occupiedSlots[0]) {
+                    if (next && next.id === mate) {
+                        mateConnections.push({ id1: node.id, id2: mate, slot1: 0, slot2: 0 });
+                        occupiedSlots[0] = true;
+                        continue;
+                    }
+                }
+                const mateNode = laidoutNodes.get(mate);
+                // The row has not been laid out yet.
+                if (!mateNode) continue;
+                const lNode = node.offsetX <= mateNode.offsetX ? node : mateNode;
+                const rNode = node.offsetX <= mateNode.offsetX ? mateNode : node;
+                if (node.row === mateNode.row) {
+                    console.assert(lNode.column <= rNode.column);
+                    // Same row
+                    const prevSlot = wu(lastLayer)
+                        .slice(lNode.column, rNode.column + 1)
+                        .reduce((p, c) => Math.max(p, (occupiedSlotsMap.get(c.id) || []).length - 1), 0);
+                    const slot = prevSlot + 1;
+                    mateConnections.push({ id1: node.id, id2: mate, slot1: slot, slot2: slot });
+                    wu(lastLayer)
+                        .slice(lNode.column, rNode.column)
+                        .forEach(n => declareSlotOccupied(n.id, slot));
+                } else {
+                    console.assert(mateNode.row < node.row);
+                    const prevSlot1 = Math.max(0, (occupiedSlotsMap.get(lNode.id) || []).length - 1);
+                    const prevSlot2 = Math.max(0, (occupiedSlotsMap.get(rNode.id) || []).length - 1);
+                    const slot1 = prevSlot1 + 1;
+                    const slot2 = prevSlot2 + 1;
+                    mateConnections.push({ id1: lNode.id, id2: rNode.id, slot1, slot2 });
+                    declareSlotOccupied(lNode.id, slot1);
+                    declareSlotOccupied(rNode.id, slot2);
+                }
+            }
+            arrangedNodes.add(node.id);
+        }
         const seenChildren = new Set<string>();
         const nextLayer: ILayoutNode[] = [];
         const groupBoundaries: [number, number][] = [];
@@ -127,6 +192,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         layers,
         rootNodeCount: rootLayer.length,
         rawWidth, minNodeSpacingX,
+        mateConnections,
         nodeFromId: id => laidoutNodes.get(id),
         mates: wu(matesLookup).map(([m1, m2s]) => wu(m2s).filter(m2 => m2 >= m1).map(m2 => [m1, m2])).flatten(true) as WuIterable<[string, string]>,
         children: wu(childrenLookup).map(([p, c]) => {
@@ -201,15 +267,14 @@ function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][],
         }
     } while (node = nextNode);
     console.assert(nodeList.size === nodes.length);
-    // Layout
-    node = nodeList.head!;
-    let groupStart = node;
+    // Layout offsetX
+    let groupStart = nodeList.head!;
     let groupItems = 0;
     let currentX = 0;
     let normalizedItemSpacing = 1 / nodes.length;
     let minItemSpacing = normalizedItemSpacing / 2;
     let maxItemSpacing = normalizedItemSpacing * 1.5;
-    do {
+    for (const node of nodeList) {
         groupItems++;
         if (!node.next || node.next.data.groupId !== node.data.groupId) {
             if (node.data.groupId >= groupBoundaries.length)
@@ -245,7 +310,7 @@ function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][],
             groupStart = node.next;
             groupItems = 0;
         }
-    } while (node = node.next);
+    }
     const arrangedArray = wu.map(n => n.data, nodeList).toArray();
     console.assert(arrangedArray.length === nodes.length);
     arrangedArray.forEach((n, i) => n.column = i);
