@@ -70,8 +70,10 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
             offsetX: NaN,
             row: 0,
             column: NaN
-        })).toArray(), [[0, 1]], matesLookup);
+        })).toArray(), matesLookup);
     const layers: ILayoutNode[][] = [rootLayer];
+    // Start node index, End node index
+    const rowGroupBoundaries: [undefined, ...[ILayoutNode, ILayoutNode][][]] = [undefined];
     const mateConnections: ILayoutConnection[] = [];
     const occupiedSlotsMap = new Map<string, boolean[]>();
     function declareSlotOccupied(id: string, slotIndex: number): void {
@@ -79,65 +81,13 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         console.assert(!slots[slotIndex]);
         slots[slotIndex] = true;
     }
-    let rawWidth: number = 1;
-    let minNodeSpacingX: number = rawWidth / rootLayer.length;
     while (true) {
         const lastLayer = layers[layers.length - 1];
         for (const n of lastLayer)
             laidoutNodes.set(n.id, n);
-        // Layout connections
-        // internal representation: slot index increases as slot goes above.
-        // Bottom-most has the smallest index (1).
-        // 0 means the connection can be drawn directly from sibling node to sibling node.
-        const arrangedNodes = new Set<string>();
-        for (let i = 0; i < lastLayer.length; i++) {
-            const node = lastLayer[i];
-            const mates = matesLookup.get(node.id);
-            if (!mates) continue;
-            const prev = i > 0 ? lastLayer[i - 1] : undefined;
-            const next = i < lastLayer.length - 1 ? lastLayer[i + 1] : undefined;
-            const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
-            for (const mate of mates) {
-                if (arrangedNodes.has(mate)) continue;
-                if (!occupiedSlots[0]) {
-                    if (next && next.id === mate) {
-                        mateConnections.push({ id1: node.id, id2: mate, slot1: 0, slot2: 0 });
-                        occupiedSlots[0] = true;
-                        continue;
-                    }
-                }
-                const mateNode = laidoutNodes.get(mate);
-                // The row has not been laid out yet.
-                if (!mateNode) continue;
-                const lNode = node.offsetX <= mateNode.offsetX ? node : mateNode;
-                const rNode = node.offsetX <= mateNode.offsetX ? mateNode : node;
-                if (node.row === mateNode.row) {
-                    console.assert(lNode.column <= rNode.column);
-                    // Same row
-                    const prevSlot = wu(lastLayer)
-                        .slice(lNode.column, rNode.column + 1)
-                        .reduce((p, c) => Math.max(p, (occupiedSlotsMap.get(c.id) || []).length - 1), 0);
-                    const slot = prevSlot + 1;
-                    mateConnections.push({ id1: node.id, id2: mate, slot1: slot, slot2: slot });
-                    wu(lastLayer)
-                        .slice(lNode.column, rNode.column)
-                        .forEach(n => declareSlotOccupied(n.id, slot));
-                } else {
-                    console.assert(mateNode.row < node.row);
-                    const prevSlot1 = Math.max(0, (occupiedSlotsMap.get(lNode.id) || []).length - 1);
-                    const prevSlot2 = Math.max(0, (occupiedSlotsMap.get(rNode.id) || []).length - 1);
-                    const slot1 = prevSlot1 + 1;
-                    const slot2 = prevSlot2 + 1;
-                    mateConnections.push({ id1: lNode.id, id2: rNode.id, slot1, slot2 });
-                    declareSlotOccupied(lNode.id, slot1);
-                    declareSlotOccupied(rNode.id, slot2);
-                }
-            }
-            arrangedNodes.add(node.id);
-        }
         const seenChildren = new Set<string>();
         const nextLayer: ILayoutNode[] = [];
-        const groupBoundaries: [number, number][] = [];
+        const groupBoundaries: [ILayoutNode, ILayoutNode][] = [];
         for (const n of lastLayer) {
             for (const mate of wu.chain([undefined], matesLookup.get(n.id) || [])) {
                 const mateNode = mate && laidoutNodes.get(mate);
@@ -170,27 +120,84 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                         seenChildren.add(child);
                     }
                     if (mateNode)
-                        groupBoundaries.push([Math.min(n.offsetX!, mateNode.offsetX!), Math.max(n.offsetX!, mateNode.offsetX!)]);
+                        groupBoundaries.push([n, mateNode]);
                     else
-                        groupBoundaries.push([n.offsetX!, n.offsetX!]);
+                        groupBoundaries.push([n, n]);
                 }
             }
         }
         if (nextLayer.length === 0) break;
         // console.log("Layer", layers.length);
-        const laidoutLayer = arrangeLayer(nextLayer, groupBoundaries, matesLookup);
-        rawWidth = Math.max(rawWidth, laidoutLayer[laidoutLayer.length - 1].offsetX!);
-        if (laidoutLayer.length > 1) {
-            minNodeSpacingX = wu.zip(laidoutLayer, wu(laidoutLayer).slice(1))
-                .reduce((spacing, [prev, cur]) => Math.min(spacing, cur.offsetX! - prev.offsetX!), minNodeSpacingX);
-            console.assert(minNodeSpacingX >= 0);
-        }
+        const laidoutLayer = arrangeLayer(nextLayer, matesLookup);
         layers.push(laidoutLayer);
+        rowGroupBoundaries.push(groupBoundaries);
+    }
+    // const baselineRowIndex = layers.reduce((p, c, i) => layers[p].length >= c.length ? p : i, 0);
+    const baselineRowIndex = 0;
+    const nodeSpacing = layers[baselineRowIndex].length < 3 ? 0.5 : 1 / (layers[baselineRowIndex].length + 1);
+    layers[baselineRowIndex].forEach((n, i) => { n.offsetX = nodeSpacing / 2 + nodeSpacing * i; });
+    let rawWidth: number = layers[baselineRowIndex][layers[baselineRowIndex].length - 1].offsetX;
+    for (let i = baselineRowIndex + 1; i < layers.length; i++) {
+        const groupBoundaries: [number, number][] = rowGroupBoundaries[i]!.map(([n1, n2]) => [n1.offsetX, n2.offsetX]);
+        layoutRow(layers[i], groupBoundaries, nodeSpacing);
+        rawWidth = Math.max(rawWidth, layers[i][layers[i].length - 1].offsetX);
+    }
+    const arrangedNodes = new Set<string>();
+    for (const row of layers) {
+        // Layout connections
+        // internal representation: slot index increases as slot goes above.
+        // Bottom-most has the smallest index (1).
+        // 0 means the connection can be drawn directly from sibling node to sibling node.
+        for (let i = 0; i < row.length; i++) {
+            const node = row[i];
+            const mates = matesLookup.get(node.id);
+            if (!mates) continue;
+            const prev = i > 0 ? row[i - 1] : undefined;
+            const next = i < row.length - 1 ? row[i + 1] : undefined;
+            const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
+            for (const mate of mates) {
+                if (arrangedNodes.has(mate)) continue;
+                if (!occupiedSlots[0]) {
+                    if (next && next.id === mate) {
+                        mateConnections.push({ id1: node.id, id2: mate, slot1: 0, slot2: 0 });
+                        occupiedSlots[0] = true;
+                        continue;
+                    }
+                }
+                const mateNode = laidoutNodes.get(mate);
+                // The row has not been laid out yet.
+                if (!mateNode) continue;
+                const lNode = node.offsetX <= mateNode.offsetX ? node : mateNode;
+                const rNode = node.offsetX <= mateNode.offsetX ? mateNode : node;
+                if (node.row === mateNode.row) {
+                    console.assert(lNode.column <= rNode.column);
+                    // Same row
+                    const prevSlot = wu(row)
+                        .slice(lNode.column, rNode.column + 1)
+                        .reduce((p, c) => Math.max(p, (occupiedSlotsMap.get(c.id) || []).length - 1), 0);
+                    const slot = prevSlot + 1;
+                    mateConnections.push({ id1: node.id, id2: mate, slot1: slot, slot2: slot });
+                    wu(row)
+                        .slice(lNode.column, rNode.column)
+                        .forEach(n => declareSlotOccupied(n.id, slot));
+                } else {
+                    console.assert(mateNode.row < node.row);
+                    const prevSlot1 = Math.max(0, (occupiedSlotsMap.get(lNode.id) || []).length - 1);
+                    const prevSlot2 = Math.max(0, (occupiedSlotsMap.get(rNode.id) || []).length - 1);
+                    const slot1 = prevSlot1 + 1;
+                    const slot2 = prevSlot2 + 1;
+                    mateConnections.push({ id1: lNode.id, id2: rNode.id, slot1, slot2 });
+                    declareSlotOccupied(lNode.id, slot1);
+                    declareSlotOccupied(rNode.id, slot2);
+                }
+            }
+            arrangedNodes.add(node.id);
+        }
     }
     return {
         layers,
         rootNodeCount: rootLayer.length,
-        rawWidth, minNodeSpacingX,
+        rawWidth, minNodeSpacingX: nodeSpacing,
         mateConnections,
         nodeFromId: id => laidoutNodes.get(id),
         children: wu(childrenLookup).map(([p, c]) => {
@@ -200,11 +207,8 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
     };
 }
 
-function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][], matesLookup: Map<string, Set<string>>): ILayoutNode[] {
-    if (nodes.length === 0) {
-        return nodes;
-    } else if (nodes.length === 1) {
-        nodes[0].offsetX = (groupBoundaries[0][0] + groupBoundaries[0][1]) / 2;
+function arrangeLayer(nodes: ILayoutNode[], matesLookup: Map<string, Set<string>>): ILayoutNode[] {
+    if (nodes.length < 2) {
         return nodes;
     }
     const nodeList = List.from(wu.map(n => new ListItem(n), nodes));
@@ -265,28 +269,40 @@ function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][],
         }
     } while (node = nextNode);
     console.assert(nodeList.size === nodes.length);
+    const laidoutNodes = wu(nodeList).map(n => n.data).toArray();
+    laidoutNodes.forEach((n, i) => n.column = i);
+    return laidoutNodes;
+}
+
+function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], spacing: number): void {
+    if (nodes.length === 0) {
+        return;
+    }
+    if (nodes.length === 1) {
+        nodes[0].offsetX = (groupBoundaries[0][0] + groupBoundaries[0][1]) / 2;
+        return;
+    }
     // Layout offsetX
-    let groupStart = nodeList.head!;
-    let groupItems = 0;
+    let groupStartIndex = 0;
     let currentX = 0;
-    let normalizedItemSpacing = 1 / nodes.length;
-    let minItemSpacing = normalizedItemSpacing / 2;
+    let normalizedItemSpacing = spacing;
+    let minItemSpacing = normalizedItemSpacing * 0.8;
     let maxItemSpacing = normalizedItemSpacing * 1.5;
-    for (const node of nodeList) {
-        groupItems++;
-        if (!node.next || node.next.data.groupId !== node.data.groupId) {
-            if (node.data.groupId >= groupBoundaries.length)
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const next = nodes[i + 1];
+        if (!next || next.groupId !== node.groupId) {
+            if (node.groupId >= groupBoundaries.length)
                 throw new RangeError("groupId out of range.");
-            const [left, right] = groupBoundaries[node.data.groupId];
+            const groupItems = i - groupStartIndex + 1;
+            const [left, right] = groupBoundaries[node.groupId];
             if (groupItems === 1) {
                 if (left >= currentX) {
-                    currentX = (left + right) / 2;
-                    groupStart.data.offsetX = currentX;
+                    currentX = node.offsetX = (left + right) / 2;
                 } else if (right >= currentX + minItemSpacing) {
-                    currentX = (currentX + right) / 2;
-                    groupStart.data.offsetX = currentX;
+                    currentX = node.offsetX = (currentX + right) / 2;
                 } else {
-                    groupStart.data.offsetX = currentX;
+                    node.offsetX = currentX;
                 }
                 currentX += minItemSpacing;
             } else {
@@ -295,22 +311,18 @@ function arrangeLayer(nodes: ILayoutNode[], groupBoundaries: [number, number][],
                     spacing = minItemSpacing;
                 } else if (spacing > maxItemSpacing) {
                     spacing = maxItemSpacing;
-                    currentX = (currentX + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
+                    let centeredX = (left + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
+                    if (centeredX >= currentX) {
+                        currentX = centeredX;
+                    } else {
+                        currentX = (currentX + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
+                    }
                 }
-                let n = groupStart;
-                let i = 0;
-                do {
-                    n.data.offsetX = currentX + spacing * i;
-                    i++;
-                } while (n = n.next);
-                currentX += spacing * groupItems;
+                for (let j = groupStartIndex; j <= i; j++)
+                    nodes[j].offsetX = currentX + spacing * (j - groupStartIndex);
+                currentX += spacing * (groupItems - 1) + minItemSpacing;
             }
-            groupStart = node.next;
-            groupItems = 0;
+            groupStartIndex = i + 1;
         }
     }
-    const arrangedArray = wu.map(n => n.data, nodeList).toArray();
-    console.assert(arrangedArray.length === nodes.length);
-    arrangedArray.forEach((n, i) => n.column = i);
-    return arrangedArray;
 }
