@@ -100,9 +100,16 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
                 if (this.props.debugInfo) {
                     const lines = [`${node.row},${node.column}|${node.groupId}`];
-                    for (const { id1, id2, slot1, childrenSlot } of layout.mateConnections) {
-                        if (id1 !== node.id && id2 !== node.id) continue;
-                        lines.push(`${id1} -- ${id2} | S${slot1}${childrenSlot && (" | CS" + childrenSlot) || ""}`);
+                    for (const connection of layout.mateConnections) {
+                        if ("id2" in connection) {
+                            const { id1, id2, slot1, childrenSlot } = connection;
+                            if (id1 !== node.id && id2 !== node.id) continue;
+                            lines.push(`${id1} -- ${id2} | S${slot1}${childrenSlot && (" | CS" + childrenSlot) || ""}`);
+                        } else {
+                            const { id1, childrenSlot } = connection;
+                            if (id1 !== node.id) continue;
+                            lines.push(`${id1} | ${childrenSlot && (" | CS" + childrenSlot) || ""}`);
+                        }
                     }
                     drawing.text(lines.join("\n"))
                         .font({ size: 9 })
@@ -111,38 +118,40 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             }
         }
         // Draw connections.
-        for (const { id1, id2, slot1, childrenId, childrenSlot } of layout.mateConnections) {
-            const node1 = layout.nodeFromId(id1);
-            const node2 = layout.nodeFromId(id2);
-            console.assert(node1, "Mate node [0] missing", id1, id2);
-            console.assert(node2, "Mate node [1] missing", id1, id2);
-            if (!node1 || !node2) continue;
-            const nodeL = node1.offsetX < node2.offsetX ? node1 : node2;
-            const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
-            const rectL = getNodeRect(nodeL);
-            const rectR = getNodeRect(nodeR);
-            console.assert((childrenId == null) == (childrenSlot == null));
-            if (slot1 === 0) {
-                const mateLineY = rectL.top + rectL.height / 2;
-                drawing
-                    .line(rectL.left + rectL.width, mateLineY, rectR.left, mateLineY)
-                    .fill("none")
-                    .stroke({ width: 1 });
-                if (childrenId && childrenSlot) {
-                    const centerX = ((rectL.left + rectL.width) + rectR.left) / 2;
-                    for (const childId of childrenId) {
-                        const nodeC = layout.nodeFromId(childId)!;
-                        const rectC = getNodeRect(nodeC);
-                        plotElbowHorizontal(drawing,
-                            centerX, mateLineY,
-                            rectL.top + rectL.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
-                            rectC.left + rectC.width / 2, rectC.top
-                        ).fill("none")
-                            .stroke({ width: 1, color: "#00CCFF99" });
+        for (const connection of layout.mateConnections) {
+            if ("id2" in connection) {
+                // ICoupleLayoutConnection
+                const { id1, id2, slot1, childrenId, childrenSlot } = connection;
+                const node1 = layout.nodeFromId(id1);
+                const node2 = layout.nodeFromId(id2);
+                console.assert(node1, "Mate node [0] missing", id1, id2);
+                console.assert(node2, "Mate node [1] missing", id1, id2);
+                if (!node1 || !node2) continue;
+                const nodeL = node1.offsetX < node2.offsetX ? node1 : node2;
+                const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
+                const rectL = getNodeRect(nodeL);
+                const rectR = getNodeRect(nodeR);
+                console.assert((childrenId == null) == (childrenSlot == null));
+                if (slot1 === 0) {
+                    const mateLineY = rectL.top + rectL.height / 2;
+                    drawing
+                        .line(rectL.left + rectL.width, mateLineY, rectR.left, mateLineY)
+                        .fill("none")
+                        .stroke({ width: 1 });
+                    if (childrenId && childrenSlot) {
+                        const centerX = ((rectL.left + rectL.width) + rectR.left) / 2;
+                        for (const childId of childrenId) {
+                            const nodeC = layout.nodeFromId(childId)!;
+                            const rectC = getNodeRect(nodeC);
+                            plotElbowHorizontal(drawing,
+                                centerX, mateLineY,
+                                rectL.top + rectL.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
+                                rectC.left + rectC.width / 2, rectC.top
+                            ).fill("none")
+                                .stroke({ width: 1, color: "#00CCFF99" });
+                        }
                     }
-                }
-            } else {
-                if (nodeL.row === nodeR.row) {
+                } else if (nodeL.row === nodeR.row) {
                     const slotY = rectL.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
                     plotElbowHorizontal(drawing,
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
@@ -197,6 +206,25 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             ).fill("none")
                                 .stroke({ width: 1, color: "#00CCFF99" });
                         }
+                    }
+                }
+            } else {
+                // ISingleParentLayoutConnection
+                const {id1, childrenSlot, childrenId} = connection;
+                const node1 = layout.nodeFromId(id1);
+                console.assert(node1, "Single parent node missing", id1);
+                if (!node1) continue;
+                const rect1 = getNodeRect(node1);
+                if (childrenId && childrenSlot) {
+                    for (const childId of childrenId) {
+                        const nodeC = layout.nodeFromId(childId)!;
+                        const rectC = getNodeRect(nodeC);
+                        plotElbowHorizontal(drawing,
+                            rect1.left + rect1.width / 2, rect1.top + rect1.height,
+                            rect1.top + rect1.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
+                            rectC.left + rectC.width / 2, rectC.top
+                        ).fill("none")
+                            .stroke({ width: 1, color: "#00CCFF99" });
                     }
                 }
             }

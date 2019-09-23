@@ -1,5 +1,5 @@
 import List from "linked-list";
-import wu, { WuIterable } from "wu";
+import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { ListItem } from "../../utility/linkedList";
 import { IFamilyTree } from "./FamilyTree";
@@ -12,7 +12,7 @@ export interface ILayoutNode {
     offsetX: number;
 }
 
-export interface ILayoutConnection {
+export interface ICoupleLayoutConnection {
     // Upper row node
     id1: string;
     // Lower row node
@@ -22,6 +22,14 @@ export interface ILayoutConnection {
     childrenSlot?: number;
     childrenId?: string[];
 }
+
+export interface ISingleParentLayoutConnection {
+    id1: string;
+    childrenSlot?: number;
+    childrenId?: string[];
+}
+
+export type ILayoutConnection = ICoupleLayoutConnection | ISingleParentLayoutConnection;
 
 export interface IFamilyTreeLayoutInfo {
     rows: ILayoutNode[][];
@@ -168,7 +176,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         console.assert(!slots[slotIndex]);
         slots[slotIndex] = true;
     }
-    const mateConnections: ILayoutConnection[] = [];
+    const connections: ILayoutConnection[] = [];
     const visitedNodes = new Set<string>();
     for (const row of rows) {
         // internal representation: slot index increases as slot goes above.
@@ -186,7 +194,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                 const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
                 if (!occupiedSlots[0]) {
                     if (next && next.id === mate) {
-                        mateConnections.push({ id1: node.id, id2: mate, slot1: 0 });
+                        connections.push({ id1: node.id, id2: mate, slot1: 0 });
                         occupiedSlots[0] = true;
                         continue;
                     }
@@ -200,7 +208,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                     console.assert(lNode.column <= rNode.column);
                     // Same row.
                     const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id), true);
-                    mateConnections.push({ id1: node.id, id2: mate, slot1: slot });
+                    connections.push({ id1: node.id, id2: mate, slot1: slot });
                 } else {
                     // Different row. Prefer to use slot of the upper node.
                     const uNode = node.row < mateNode.row ? node : mateNode;
@@ -209,13 +217,17 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                     const slot1 = findVacantSlot(wu(uRow)
                         .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
                         .map(r => r.id), true);
-                    mateConnections.push({ id1: uNode.id, id2: dNode.id, slot1 });
+                    connections.push({ id1: uNode.id, id2: dNode.id, slot1 });
                 }
             }
         }
     }
     // Children
-    for (const connection of mateConnections) {
+    for (const connection of connections) {
+        if (!("id2" in connection)) {
+            console.assert("id2" in connection);
+            continue;
+        }
         // TODO children with single parent
         const node1 = laidoutNodes.get(connection.id1)!;
         const node2 = laidoutNodes.get(connection.id2)!;
@@ -229,12 +241,22 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         connection.childrenSlot = slot;
         connection.childrenId = Array.from(children);
     }
+    for (const [id, node] of laidoutNodes) {
+        const children = childrenLookup.get(buildUnorderedIdPair(id));
+        if (!children) continue;
+        const minOffsetX = Math.min(node.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
+        const maxOffsetX = Math.max(node.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
+        const slot = findVacantSlot(wu(rows[node.row])
+            .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
+            .map(n => n.id), true);
+        connections.push({ id1: id, childrenSlot: slot, childrenId: Array.from(children) });
+    }
     return {
         rows: rows,
         rootNodeCount: rows[0].length,
         rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
         rawWidth, minNodeSpacingX: nodeSpacing,
-        mateConnections,
+        mateConnections: connections,
         nodeFromId: id => laidoutNodes.get(id),
         children: wu(childrenLookup).map(([p, c]) => {
             const [p1, p2] = parseUnorderedIdPair(p);
