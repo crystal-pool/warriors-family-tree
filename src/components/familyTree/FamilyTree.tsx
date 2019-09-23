@@ -1,10 +1,11 @@
+import classNames from "classnames";
 import _ from "lodash";
 import * as React from "react";
 import ReactDOM from "react-dom";
 import Svg from "svgjs";
 import { ILayoutNode, layoutFamilyTree } from "./layout";
 
-export interface IFamilyTree {
+export interface IFamilyTreeData {
     roots: string[];
     // s - s
     mates: [string, string][];
@@ -22,7 +23,8 @@ export interface IRect {
 export type NodeRenderCallback = (id: string, boundingRect: Readonly<IRect>) => React.ReactNode;
 
 export interface IFamilyTreeProps {
-    familyTree: Readonly<IFamilyTree>;
+    className?: string;
+    familyTree: Readonly<IFamilyTreeData>;
     onRenderNode?: NodeRenderCallback;
     debugInfo?: boolean;
 }
@@ -243,7 +245,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         this._updateDrawing();
     }
     public render(): React.ReactNode {
-        return (<React.Fragment><div ref={this._onDrawingRootChanged} className="family-tree-drawing"></div></React.Fragment>);
+        return (<div ref={this._onDrawingRootChanged} className={classNames("family-tree-drawing", this.props.className)}></div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
         if (prevProps.familyTree !== this.props.familyTree) {

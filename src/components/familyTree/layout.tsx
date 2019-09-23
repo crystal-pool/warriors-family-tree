@@ -2,7 +2,7 @@ import List from "linked-list";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { ListItem } from "../../utility/linkedList";
-import { IFamilyTree } from "./FamilyTree";
+import { IFamilyTreeData } from "./FamilyTree";
 
 export interface ILayoutNode {
     id: string;
@@ -42,7 +42,7 @@ export interface IFamilyTreeLayoutInfo {
     children: Iterable<[string, string | undefined, Iterable<string>]>;
 }
 
-export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayoutInfo | null {
+export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeLayoutInfo | null {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
     const rootCandidates = new Set<string>();
