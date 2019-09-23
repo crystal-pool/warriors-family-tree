@@ -100,9 +100,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
                 if (this.props.debugInfo) {
                     const lines = [`${node.row},${node.column}|${node.groupId}`];
-                    for (const { id1, id2, slot1 } of layout.mateConnections) {
+                    for (const { id1, id2, slot1, childrenSlot } of layout.mateConnections) {
                         if (id1 !== node.id && id2 !== node.id) continue;
-                        lines.push(`${id1} -- ${id2} | ${slot1}`);
+                        lines.push(`${id1} -- ${id2} | S${slot1}${childrenSlot && (" | CS" + childrenSlot) || ""}`);
                     }
                     drawing.text(lines.join("\n"))
                         .font({ size: 9 })
@@ -143,19 +143,32 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
             } else {
                 if (nodeL.row === nodeR.row) {
-                    const slotYL = rectL.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
-                    const slotYR = rectR.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
+                    const slotY = rectL.top + rectL.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
                     plotElbowHorizontal(drawing,
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
-                        slotYL,
+                        slotY,
                         rectR.left + rectR.width / 2, rectR.top + rectR.height
                     ).fill("none")
                         .stroke({ width: 1 });
+                    if (childrenId && childrenSlot) {
+                        const startX = ((rectL.left + rectL.width) + rectR.left) / 2;
+                        for (const childId of childrenId) {
+                            const nodeC = layout.nodeFromId(childId)!;
+                            const rectC = getNodeRect(nodeC);
+                            plotElbowHorizontal(drawing,
+                                startX, slotY,
+                                rectL.top + rectL.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
+                                rectC.left + rectC.width / 2, rectC.top
+                            ).fill("none")
+                                .stroke({ width: 1, color: "#00CCFF99" });
+                        }
+                    }
                 } else {
                     console.assert(node1.row < node2.row);
                     const nodeU = node1;
                     const nodeD = node2;
                     const rectU = nodeU === nodeL ? rectL : rectR;
+                    const rectD = nodeD === nodeL ? rectL : rectR;
                     const slotYU = rectU.top + rectU.height + slot1 * FAMILY_TREE_MATE_SLOT_OFFSET;
                     const edgeXL = rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET;
                     const edgeYL = rectL.top + rectL.height / 2;
@@ -170,6 +183,21 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         rectR.left, edgeYR
                     ]).fill("none")
                         .stroke({ width: 1 });
+                    if (childrenId && childrenSlot) {
+                        const startX = nodeD === nodeL
+                            ? rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET / 2
+                            : rectR.left - FAMILY_TREE_MATE_SLOT_OFFSET / 2;
+                        for (const childId of childrenId) {
+                            const nodeC = layout.nodeFromId(childId)!;
+                            const rectC = getNodeRect(nodeC);
+                            plotElbowHorizontal(drawing,
+                                startX, rectD.top + rectD.height / 2,
+                                rectD.top + rectD.height + childrenSlot * FAMILY_TREE_MATE_SLOT_OFFSET,
+                                rectC.left + rectC.width / 2, rectC.top
+                            ).fill("none")
+                                .stroke({ width: 1, color: "#00CCFF99" });
+                        }
+                    }
                 }
             }
         }

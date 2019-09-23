@@ -155,9 +155,13 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
     }
     // Layout connections.
     const occupiedSlotsMap = new Map<string, boolean[]>();
-    function findVacantSlot(ids: Iterable<string>): number {
+    function findVacantSlot(ids: Iterable<string>, occupySlot: boolean): number {
+        // WuIterator does not support iterations more than once.
+        if (occupySlot && !Array.isArray(ids)) ids = Array.from(ids);
         const slots = wu(ids).map(id => occupiedSlotsMap.get(id)).filter(s => !!s).toArray() as boolean[][];
-        return wu.count(1).find(i => slots.every(s => !s[i]))!;
+        const vacant = wu.count(1).find(i => slots.every(s => !s[i]))!;
+        occupySlot && wu(ids).forEach(id => declareSlotOccupied(id, vacant));
+        return vacant;
     }
     function declareSlotOccupied(id: string, slotIndex: number): void {
         const slots = occupiedSlotsMap.get(id) || occupiedSlotsMap.set(id, []).get(id)!;
@@ -174,13 +178,12 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
             const node = row[i];
             const mates = matesLookup.get(node.id);
             if (!mates) continue;
-            const prev = i > 0 ? row[i - 1] : undefined;
             const next = i < row.length - 1 ? row[i + 1] : undefined;
-            const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
             visitedNodes.add(node.id);
             // Mates
             for (const mate of mates) {
                 if (visitedNodes.has(mate)) continue;
+                const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
                 if (!occupiedSlots[0]) {
                     if (next && next.id === mate) {
                         mateConnections.push({ id1: node.id, id2: mate, slot1: 0 });
@@ -196,11 +199,8 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                 if (node.row === mateNode.row) {
                     console.assert(lNode.column <= rNode.column);
                     // Same row.
-                    const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id));
+                    const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id), true);
                     mateConnections.push({ id1: node.id, id2: mate, slot1: slot });
-                    wu(row)
-                        .slice(lNode.column, rNode.column)
-                        .forEach(n => declareSlotOccupied(n.id, slot));
                 } else {
                     // Different row. Prefer to use slot of the upper node.
                     const uNode = node.row < mateNode.row ? node : mateNode;
@@ -208,11 +208,8 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
                     const uRow = rows[uNode.row];
                     const slot1 = findVacantSlot(wu(uRow)
                         .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
-                        .map(r => r.id));
+                        .map(r => r.id), true);
                     mateConnections.push({ id1: uNode.id, id2: dNode.id, slot1 });
-                    wu(uRow)
-                        .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
-                        .forEach(n => declareSlotOccupied(n.id, slot1));
                 }
             }
         }
@@ -227,8 +224,8 @@ export function layoutFamilyTree(props: Readonly<IFamilyTree>): IFamilyTreeLayou
         const minOffsetX = Math.min(node1.offsetX, node2.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
         const maxOffsetX = Math.max(node1.offsetX, node2.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
         const slot = findVacantSlot(wu(rows[node2.row])
-            .filter(n => n.offsetX >= minOffsetX && n.offsetX <= maxOffsetX)
-            .map(n => n.id));
+            .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
+            .map(n => n.id), true);
         connection.childrenSlot = slot;
         connection.childrenId = Array.from(children);
     }
@@ -326,8 +323,8 @@ function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], sp
     let groupStartIndex = 0;
     let currentX = 0;
     let normalizedItemSpacing = spacing;
-    let minItemSpacing = normalizedItemSpacing * 1;
-    let maxItemSpacing = normalizedItemSpacing * 2;
+    let minItemSpacing = normalizedItemSpacing * 0.9;
+    let maxItemSpacing = normalizedItemSpacing * 1.2;
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         const next = nodes[i + 1];
