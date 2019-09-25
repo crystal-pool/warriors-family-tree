@@ -76,14 +76,18 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = (props) 
         return null;
     }
     return familyTreeData
-        && <FamilyTree className="character-family-tree" familyTree={familyTreeData} onRenderNode={renderNode} debugInfo={props.debugInfo} />
+        && <FamilyTree className="character-family-tree" familyTree={familyTreeData}
+            nodeWidth={120} nodeHeight={50}
+            onRenderNode={renderNode} debugInfo={props.debugInfo} />
         || null;
 };
 
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     return (<div className="familytree-node">
-        <RdfEntityLabel qName={props.qName} />
-        <br />
-        <RdfEntityLink qName={props.qName} />
+        <div>
+            <RdfEntityLabel qName={props.qName} />
+            <br />
+            <RdfEntityLink qName={props.qName} />
+        </div>
     </div>);
 };

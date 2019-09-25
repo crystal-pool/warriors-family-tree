@@ -3,11 +3,33 @@
     padding: 1em;
     min-width: 0;
 
+    .family-tree-connection {
+        fill: none;
+        stroke-width: 1;
+
+        &.family-tree-connection-mate {
+            stroke: #333333;
+        }
+
+        &.family-tree-connection-child {
+            stroke: #33FFFF;
+        }
+    }
+
+    foreignObject {
+        overflow: visible;
+    }
+
     .familytree-node {
         background: #cccccc99;
         border: 1px solid #cccccc;
-        padding: 0.5em;
         text-align: center;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 
         .entity-id {
             font-size: 0.625rem;
