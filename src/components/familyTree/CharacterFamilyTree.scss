@@ -30,9 +30,18 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        transition: 200ms;
+        cursor: pointer;
+
+        &:hover {
+            background: #cccccc;
+            border: 2px solid #cccccc;
+            transition: 200ms;
+        }
 
         .entity-id {
             font-size: 0.625rem;
+            color: #999999;
         }
     }
 

@@ -1,9 +1,11 @@
+import { Theme, Tooltip, withStyles } from "@material-ui/core";
 import * as React from "react";
 import wu from "wu";
+import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName } from "../../services/dataService";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
-import { RdfEntityLabel, RdfEntityLink } from "../RdfEntity";
+import { CharacterCard } from "../CharacterCard";
 import "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
 
@@ -82,12 +84,24 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = (props) 
         || null;
 };
 
+const HoverTooltip = withStyles((theme: Theme) => ({
+    tooltip: {
+        padding: "0",
+        backgroundColor: "unset",
+        boxShadow: theme.shadows[1],
+        fontSize: "unset",
+        fontWeight: "unset"
+    },
+}))(Tooltip);
+
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
-    return (<div className="familytree-node">
-        <div>
-            <RdfEntityLabel qName={props.qName} />
-            <br />
-            <RdfEntityLink qName={props.qName} />
+    const label = dataService.getLabelFor(props.qName);
+    return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
+        <div className="familytree-node" onClick={() => {
+            location.href = routePathBuilders.familyTree({ character: props.qName });
+        }}>
+            {label && <div className="entity-name">{label.label}</div>}
+            <div className="entity-id">{props.qName}</div>
         </div>
-    </div>);
+    </HoverTooltip>);
 };

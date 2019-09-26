@@ -4,10 +4,7 @@ import { match } from "react-router";
 import { CharacterFamilyTree } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import "./familyTree.scss";
-
-export interface IFamilyTreeRoutingParams {
-    character?: string;
-}
+import { IFamilyTreeRoutingParams } from "./routes";
 
 export interface IFamilyTreeProps {
     match: match<IFamilyTreeRoutingParams>;

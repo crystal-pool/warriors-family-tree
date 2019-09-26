@@ -1,9 +1,9 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SnackbarContent, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
-import { PromiseLikeResolutionSource, PromiseResolutionSource } from "tasklike-promise-library";
+import { PromiseLikeResolutionSource } from "tasklike-promise-library";
 import * as Pages from "./pages";
 import { dataService } from "./services";
 
@@ -151,15 +151,15 @@ export const App: React.FC<IAppProps> = (props) => {
                     {
                         dataInitialized
                             ? <React.Fragment>
-                                <Route exact path="/" component={Pages.Welcome} />
-                                <Route path="/familyTree/:character" component={Pages.FamilyTree} />
+                                <Route exact path={Pages.routePaths.welcome} component={Pages.Welcome} />
+                                <Route path={Pages.routePaths.familyTree} component={Pages.FamilyTree} />
                             </React.Fragment>
                             : <Pages.InitializationScreen />
                     }
 
                 </main>
             </HashRouter>
-            <Snackbar open={!!error} message={<div style={{whiteSpace: "pre-wrap"}}>{errorMessage}</div>} />
+            <Snackbar open={!!error} message={<div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>} />
         </div>
     );
 };
