@@ -43,6 +43,14 @@
             font-size: 0.625rem;
             color: #999999;
         }
+
+        &.current {
+            background: #fff2c599;
+
+            &:hover {
+                background: #fff2c5;
+            }
+        }
     }
 
 }

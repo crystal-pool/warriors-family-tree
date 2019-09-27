@@ -1,4 +1,5 @@
 import { Theme, Tooltip, withStyles } from "@material-ui/core";
+import classNames from "classnames";
 import * as React from "react";
 import wu from "wu";
 import { routePathBuilders } from "../../pages";
@@ -18,11 +19,8 @@ export interface ICharacterFamilyTreeProps {
 
 export interface IFamilyTreeNodeProps {
     qName: string;
+    isCurrent: boolean;
 }
-
-const renderNode: NodeRenderCallback = (id, brct) => {
-    return (<FamilyTreeNode qName={id} />);
-};
 
 function walk(characterId: RdfQName, maxDistance?: number): IFamilyTreeData {
     if (maxDistance && maxDistance < 0)
@@ -67,7 +65,7 @@ function walk(characterId: RdfQName, maxDistance?: number): IFamilyTreeData {
     };
 }
 
-export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = (props) => {
+export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.memo((props) => {
     const [familyTreeData, setFamilyTreeData] = React.useState<IFamilyTreeData | undefined>();
     React.useEffect(() => {
         if (!props.centerQName) return;
@@ -77,12 +75,15 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = (props) 
     if (!props.centerQName) {
         return null;
     }
+    const renderNode: NodeRenderCallback = (id, brct) => {
+        return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
+    };
     return familyTreeData
         && <FamilyTree className="character-family-tree" familyTree={familyTreeData}
             nodeWidth={120} nodeHeight={50}
             onRenderNode={renderNode} debugInfo={props.debugInfo} />
         || null;
-};
+});
 
 const HoverTooltip = withStyles((theme: Theme) => ({
     tooltip: {
@@ -97,7 +98,7 @@ const HoverTooltip = withStyles((theme: Theme) => ({
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     const label = dataService.getLabelFor(props.qName);
     return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
-        <div className="familytree-node" onClick={() => {
+        <div className={classNames("familytree-node", props.isCurrent && "current")} onClick={() => {
             location.href = routePathBuilders.familyTree({ character: props.qName });
         }}>
             {label && <div className="entity-name">{label.label}</div>}
