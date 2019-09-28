@@ -1,4 +1,4 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
 import { fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
@@ -40,6 +40,7 @@ const useStyles = makeStyles(theme => ({
     title: {
         flexGrow: 1,
         display: "none",
+        color: "inherit",
         [theme.breakpoints.up("sm")]: {
             display: "block",
         }
@@ -77,6 +78,10 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+function openUrl(url: string): void {
+    window.open(url, "_blank");
+}
+
 export const App: React.FC<IAppProps> = (props) => {
     const classes = useStyles();
     const theme = useTheme();
@@ -106,6 +111,10 @@ export const App: React.FC<IAppProps> = (props) => {
         return () => { cleanupPrs.tryResolve(); };
     });
 
+    React.useEffect(() => {
+        document.title = "Welcome - Warriors Family Tree";
+    });
+
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
     }
@@ -115,13 +124,13 @@ export const App: React.FC<IAppProps> = (props) => {
             <div className={classes.toolbar} />
             <Divider />
             <List>
-                <ListItem button>
-                    <ListItemIcon><Icons.Info /></ListItemIcon>
-                    <ListItemText primary="Item1" />
+                <ListItem button onClick={() => openUrl("https://github.com/crystal-pool/warriors-family-tree")}>
+                    <ListItemIcon><Icons.Code /></ListItemIcon>
+                    <ListItemText primary="GitHub" secondary="Source code / issues" />
                 </ListItem>
-                <ListItem button>
-                    <ListItemIcon><Icons.Info /></ListItemIcon>
-                    <ListItemText primary="Item2" />
+                <ListItem button onClick={() => openUrl("https://crystalpool.cxuesong.com/")}>
+                    <ListItemIcon><Icons.Storage /></ListItemIcon>
+                    <ListItemText primary="Crystal Pool" secondary="Data source" />
                 </ListItem>
             </List>
             <Divider />
@@ -143,7 +152,9 @@ export const App: React.FC<IAppProps> = (props) => {
                         >
                             <Icons.Menu />
                         </IconButton>
-                        <Typography variant="h6" className={classes.title} noWrap>Warriors Family Tree</Typography>
+                        <Link href={Pages.routePathBuilders.welcome()} className={classes.title}>
+                            <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
+                        </Link>
                         <div>
                             <EntitySearchBox classes={{
                                 root: classes.searchBoxRoot,
