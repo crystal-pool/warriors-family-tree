@@ -1,4 +1,5 @@
 import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
+import wu from "wu";
 
 export type RdfQName = string;
 
@@ -27,10 +28,44 @@ interface ILabelsRoot {
     labels: { [entity: string]: [string?, string?] };
 }
 
+interface IEntityLookupRoot {
+    entries: [string, EntityLookupEntityEntry[]][];
+}
+
+// QName, Language, Priority
+type EntityLookupEntityEntry = [string, string, number];
+
+export interface IEntityLookupResultItem {
+    qName: RdfQName;
+    keyword: string;
+    keywordMatchRange: [number, number];
+    score: number;
+}
+
+function evaluateLanguageSimilarity(baseline: string, target: string): number {
+    if (baseline === target) return 1;
+    // zh, zh-cn
+    if (target.startsWith(baseline)) return 1;
+    const baselineParts = baseline.split("-");
+    const targetParts = target.split("-");
+    let commonParts = 0;
+    for (; baselineParts[commonParts] && targetParts[commonParts]; commonParts++) {
+        if (baselineParts[commonParts] !== targetParts[commonParts]) break;
+    }
+    return Math.max(1, commonParts / baselineParts.length);
+}
+
+function fallbackLanguageTag(language: string): string {
+    const lastSeparatorPos = language.lastIndexOf("-");
+    if (lastSeparatorPos < 0) return "";
+    return language.substr(0, lastSeparatorPos);
+}
+
 export class DataService {
     public readonly initialization: PromiseLike<void>;
     private _isInitialized = false;
     private relations: IRelationsRoot | undefined;
+    private entityLookup: IEntityLookupRoot | undefined;
     private labels: ILabelsRoot | undefined;
     private _language: string;
     private _switchLanguageCts: CancellationTokenSource | undefined;
@@ -60,9 +95,9 @@ export class DataService {
         characterEntityId: RdfQName,
         relationType?: CharacterRelationType | Iterable<CharacterRelationType>
     ): Readonly<ICharacterRelationEntry[]> | undefined {
-        if (!this.relations) return undefined; 
+        if (!this.relations) return undefined;
         const relations = this.relations.relations[characterEntityId];
-        if (!relations)  return undefined; 
+        if (!relations) return undefined;
         if (!relationType) return relations;
         if (typeof relationType === "string") return relations.filter(r => r.relation === relationType);
         const localRelationTypes = relationType instanceof Set ? relationType as Set<CharacterRelationType> : new Set(relationType);
@@ -75,27 +110,73 @@ export class DataService {
         const [label, description] = rawLabel;
         return { label, description };
     }
+    public lookupEntity(keyword: string, limit: number): IEntityLookupResultItem[] {
+        if (limit < 0) throw new RangeError("Invalid limit value.");
+        if (!this.entityLookup || !keyword || !limit) return [];
+        const nonWordRegex = /[^\p{L}\p{Nd}]/ug;
+        let regExCandidates: [RegExp, number][] = [
+            [new RegExp("^" + keyword.replace(nonWordRegex, "\\W+"), "u"), 27],
+            [new RegExp("^" + keyword.replace(nonWordRegex, "\\W+"), "ui"), 26],
+            [new RegExp("^" + keyword.replace(nonWordRegex, "\\W*"), "u"), 25],
+            [new RegExp("^" + keyword.replace(nonWordRegex, "\\W*"), "ui"), 24],
+            [new RegExp(keyword.replace(nonWordRegex, "\\W+"), "u"), 23],
+            [new RegExp(keyword.replace(nonWordRegex, "\\W+"), "ui"), 22],
+            [new RegExp(keyword.replace(nonWordRegex, "\\W*"), "u"), 21],
+            [new RegExp(keyword.replace(nonWordRegex, "\\W*"), "ui"), 20]
+        ];
+        // Prevent using expressions like "\W*" or "\W+"
+        regExCandidates = regExCandidates.filter(([re]) => !(" ".match(re)));
+        if (regExCandidates.length === 0) return [];
+        const entityResultMap = new Map<string, IEntityLookupResultItem>();
+        let currentLowestScore = 0;
+        for (const [kw, kwEntries] of this.entityLookup.entries) {
+            let [match, matchPriority] = wu(regExCandidates)
+                .map(([re, pri]) => [re.exec(kw), pri] as [RegExpExecArray | null, number])
+                .find(([re]) => !!re) || [undefined, 0];
+            if (!match) continue;
+            for (const [qName, language, priority] of kwEntries) {
+                let languageSimilarity = evaluateLanguageSimilarity(this._language, language);
+                let score = matchPriority * 10 + languageSimilarity * 5 + priority;
+                if (entityResultMap.size === 0) {
+                    currentLowestScore = score;
+                } else if (entityResultMap.size >= limit && score < currentLowestScore) {
+                    continue;
+                } else {
+                    currentLowestScore = Math.min(currentLowestScore, score);
+                }
+                const prevItem = entityResultMap.get(qName);
+                // Make sure every entity only shows once in the result.
+                if (prevItem && prevItem.score > score) continue;
+                entityResultMap.set(qName, { qName, score, keyword: kw, keywordMatchRange: [match.index, match[0].length] });
+            }
+        }
+        const results = Array.from(entityResultMap.values());
+        // Sort descending
+        results.sort((a, b) => a.score > b.score ? -1 : a.score < b.score ? 1 : 0);
+        return results.slice(0, limit);
+    }
+    private async _fetchJsonData<T extends {} | []>(localName: string, cancellationToken?: ICancellationToken): Promise<T> {
+        const result = await sendRequest({
+            url: this._dataPathPrefix + localName,
+            method: "GET",
+            responseType: "json"
+        }, cancellationToken);
+        result.ensureSuccessfulStatusCode();
+        return result.xhr.response;
+    }
     private async _initialize(): Promise<void> {
         this._switchLanguageCts = new CancellationTokenSource();
         const slPromise = this._switchLanguage(this._language, this._switchLanguageCts.token);
-        const relations = await sendRequest({
-            url: this._dataPathPrefix + "relations.json",
-            method: "GET",
-            responseType: "json"
-        });
-        relations.ensureSuccessfulStatusCode();
-        this.relations = relations.xhr.response;
+        const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
+        const entityLookup = this._fetchJsonData<IEntityLookupRoot>("entityLookup.json");
+        this.relations = await relations;
+        this.entityLookup = await entityLookup;
         await slPromise;
         this._isInitialized = true;
     }
     private async _switchLanguage(language: string, cancellationToken?: ICancellationToken): Promise<void> {
-        const labels = await sendRequest({
-            url: this._dataPathPrefix + "labels." + language + ".json",
-            method: "GET",
-            responseType: "json"
-        }, cancellationToken);
-        labels.ensureSuccessfulStatusCode();
-        this.labels = labels.xhr.response;
+        const labels = this._fetchJsonData<ILabelsRoot>("labels." + language + ".json", cancellationToken);
+        this.labels = await labels;
         this._languageChanged.raise();
     }
 }

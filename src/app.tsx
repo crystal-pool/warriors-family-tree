@@ -1,9 +1,11 @@
 import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { PromiseLikeResolutionSource } from "tasklike-promise-library";
+import { EntitySearchBox } from "./components/EntitySearchBox";
 import * as Pages from "./pages";
 import { dataService } from "./services";
 
@@ -35,6 +37,36 @@ const useStyles = makeStyles(theme => ({
         },
     },
     toolbar: theme.mixins.toolbar,
+    title: {
+        flexGrow: 1,
+        display: "none",
+        [theme.breakpoints.up("sm")]: {
+            display: "block",
+        }
+    },
+    searchBoxRoot: {
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: fade(theme.palette.common.white, 0.15),
+        "&:hover": {
+            backgroundColor: fade(theme.palette.common.white, 0.25),
+        },
+        marginLeft: 0,
+        width: "100%",
+        [theme.breakpoints.up("sm")]: {
+            marginLeft: theme.spacing(1),
+            width: "auto",
+        },
+    },
+    searchBoxInput: {
+        transition: theme.transitions.create("width"),
+        width: "100%",
+        [theme.breakpoints.up("sm")]: {
+            width: 120,
+            "&:focus": {
+                width: 400,
+            },
+        },
+    },
     drawerPaper: {
         width: drawerWidth,
     },
@@ -111,7 +143,17 @@ export const App: React.FC<IAppProps> = (props) => {
                         >
                             <Icons.Menu />
                         </IconButton>
-                        <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
+                        <Typography variant="h6" className={classes.title} noWrap>Warriors Family Tree</Typography>
+                        <div>
+                            <EntitySearchBox classes={{
+                                root: classes.searchBoxRoot,
+                                inputInput: classes.searchBoxInput
+                            }}
+                                onAccept={(qName) => {
+                                    location.href = Pages.routePathBuilders.familyTree({ character: qName });
+                                }}
+                            />
+                        </div>
                     </Toolbar>
                 </AppBar>
                 <nav className={classes.drawer} aria-label="siderbar actions">
