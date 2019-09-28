@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="./index.css">
+    <script>
+        (function () {
+            function addCDNLink(nominalUrl) {
+                var l = document.createElement("link");
+                var lf = document.createElement("link");
+                var loaded = false;
+                l.rel = lf.rel = "stylesheet";
+                l.onload = function () {
+                    loaded = true;
+                    lf.remove();
+                }
+                l.href = nominalUrl;
+                var fallbackUrl = nominalUrl.replace("fonts.googleapis.com", "fonts.proxy.ustclug.org");
+                if (fallbackUrl !== nominalUrl) {
+                    window.setTimeout(function () {
+                        if (loaded) { return; }
+                        console.info("Use CDN mirror from ustclug.org .")
+                        lf.onload = function () {
+                            l.remove();
+                        }
+                        lf.href = fallbackUrl;
+                        document.head.append(lf);
+                    }, 1500);
+                }
+                document.head.append(l);
+            }
+            addCDNLink("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
+            addCDNLink("https://fonts.googleapis.com/icon?family=Material+Icons");
+        })();
+    </script>
+    <title>Warriors Family Tree</title>
+</head>
+
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="react-root"></div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
