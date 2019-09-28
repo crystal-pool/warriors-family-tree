@@ -6,12 +6,13 @@ import webpack from "webpack";
 // tslint:disable:object-literal-sort-keys
 export default function config(env: any, argv: Record<string, string>): webpack.Configuration {
   const isProduction = argv.mode === "production";
+  const outputPath = path.resolve(__dirname, "dist");
   console.info("mode:", argv.mode);
   console.info("isProduction:", isProduction);
   return {
     mode: isProduction ? "production" : "development",
     entry: "./src/index.tsx",
-    devtool: "inline-source-map",
+    devtool: isProduction ? "source-map" : "inline-source-map",
     devServer: {
       contentBase: path.join(__dirname, "assets"),
       compress: true,
@@ -50,7 +51,7 @@ export default function config(env: any, argv: Record<string, string>): webpack.
     },
     plugins: [
       new CopyPlugin([
-        path.join(__dirname, "assets/**/*")
+        { from: path.join(__dirname, "assets"), to: outputPath }
       ]),
     ],
     optimization: {
@@ -67,7 +68,7 @@ export default function config(env: any, argv: Record<string, string>): webpack.
       ],
     },
     output: {
-      path: path.resolve(__dirname, "dist"),
+      path: outputPath,
       filename: "index.js"
     }
   };
