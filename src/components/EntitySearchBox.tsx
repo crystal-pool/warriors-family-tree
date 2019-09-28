@@ -101,10 +101,22 @@ const EntitySuggestionItem: React.FC<ISuggestionItemProps> = React.memo((props) 
     );
 });
 
+function searchEntities(searchExpr: string): IEntityLookupResultItem[] {
+    const searchResult = dataService.lookupEntity(searchExpr, 50);
+    const entityIdMatch = searchExpr.match(/^\s*(wd:)?(Q\d+)/ui);
+    // Supports search pattern like Q1234 .
+    if (entityIdMatch) {
+        const entityId = entityIdMatch[2].toUpperCase();
+        const qName = "wd:" + entityId;
+        searchResult.splice(0, 0, { qName: qName, keyword: qName, keywordMatchRange: [0, qName.length], score: -1 });
+    }
+    return searchResult;
+}
+
 export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((props) => {
     const classes = useStyles(props);
     const [searchExpr, setSearchExpr] = React.useState("");
-    const suggestions = React.useMemo(() => dataService.lookupEntity(searchExpr, 50), [searchExpr]);
+    const suggestions = React.useMemo(() => searchEntities(searchExpr), [searchExpr]);
     return (
         <Downshift
             itemToString={(item: IEntityLookupResultItem) => item && item.qName}
