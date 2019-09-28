@@ -1,0 +1,6 @@
+SELECT ?entity ?label ?priority
+WHERE {
+VALUES (?prop ?priority) { (skos:prefLabel 2) (skos:altLabel 1) }
+  ?entity   wdt:P3/wdt:P4*  wd:Q624.    # should be fictional character
+  ?entity   ?prop     ?label.
+}

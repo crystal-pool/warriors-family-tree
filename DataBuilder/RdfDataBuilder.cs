@@ -162,5 +162,31 @@ namespace WarriorsFamilyTree.DataBuilder
                 .ToDictionary(g => g.Key, g => (IList<EntityRelationRecord>)g.ToList());
             return root;
         }
+
+        public EntityLookupTableRoot BuildEntityLookupTable()
+        {
+            var resultSet = ExecuteQueryFromResource("EntityLookupLabels.rq");
+            var root = new EntityLookupTableRoot();
+            // ?entity ?label ?priority
+            root.Entries = resultSet.Select(row => (
+                    Entity: SerializeUriNode(row["entity"]),
+                    Text: ((ILiteralNode)row["label"]).Value,
+                    Language: ((ILiteralNode)row["label"]).Language,
+                    Priority: (int)row["priority"].AsValuedNode().AsInteger()))
+                .GroupBy(r => r.Text)
+                .Select(kwg => new EntityLookupKeywordEntry
+                {
+                    Keyword = kwg.Key,
+                    Entities = kwg.Select(e => new EntityLookupEntityEntry
+                    {
+                        QName = e.Entity,
+                        Language = e.Language,
+                        Priority = e.Priority
+                    }).OrderByDescending(e => e.Priority).ThenBy(e => e.QName).ToList()
+                }).OrderBy(e => e.Keyword, StringComparer.InvariantCultureIgnoreCase)
+                .ToList();
+            return root;
+        }
+
     }
 }

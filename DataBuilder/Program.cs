@@ -46,6 +46,7 @@ namespace DataBuilder
             {
                 ExportJson($"labels.{language}.json", root);
             }
+            ExportJson("entityLookup.json", builder.BuildEntityLookupTable());
             return 0;
         }
 
