@@ -5,6 +5,7 @@ import Downshift from "downshift";
 import * as React from "react";
 import { dataService } from "../services";
 import { IEntityLookupResultItem, RdfQName } from "../services/dataService";
+import { resourceManager } from "../localization";
 
 export type EntitySearchBoxClassName = "root"
     | "searchIcon" | "inputRoot" | "inputInput"
@@ -131,7 +132,7 @@ export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((prop
                 (options) => {
                     const { onBlur, onChange, onFocus, ...inputProps } = options.getInputProps({
                         "aria-label": "search",
-                        placeholder: "Search a cat…",
+                        placeholder: resourceManager.getPrompt("EntitySearchBoxPlaceholder"),
                         value: searchExpr,
                         onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                             if (e.target.value === "") {

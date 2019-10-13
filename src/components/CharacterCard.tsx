@@ -1,5 +1,6 @@
 import { Button, Card, CardActions, CardContent } from "@material-ui/core";
 import * as React from "react";
+import { resourceManager } from "../localization";
 import { routePathBuilders } from "../pages/routes";
 import { RdfQName } from "../services/dataService";
 import { CharacterInfobox } from "./CharacterInfobox";
@@ -17,7 +18,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
             <CharacterInfobox qName={props.qName} />
         </CardContent>
         <CardActions>
-            <Button href={routePathBuilders.familyTree({ character: props.qName })}>Family tree</Button>
+            <Button href={routePathBuilders.familyTree({ character: props.qName })}>{resourceManager.getPrompt("FamilyTreeTitle")}</Button>
         </CardActions>
     </Card>);
 });

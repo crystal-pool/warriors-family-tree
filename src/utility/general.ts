@@ -7,3 +7,7 @@ export function parseUnorderedIdPair(expr: string): [string, string | undefined]
     const pos = expr.indexOf("\x00");
     return pos >= 0 ? [expr.substr(0, pos), expr.substr(pos + 1)] : [expr, undefined];
 }
+
+export function setDocumentTitle(title: string): void {
+    document.title = (title ? (title + " - ") : "") + "Warriors Family Tree";
+}

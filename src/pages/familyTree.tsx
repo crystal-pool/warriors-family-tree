@@ -7,6 +7,8 @@ import { dataService } from "../services";
 import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
+import { setDocumentTitle } from "../utility/general";
+import { resourceManager } from "../localization";
 
 export interface IFamilyTreeProps {
     match: match<IFamilyTreeRoutingParams>;
@@ -17,16 +19,16 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     const [maxDistance, setMaxDistance] = React.useState(3);
     React.useEffect(() => {
         if (!characterId) {
-            document.title = "Family tree";
+            setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle"));
         } else {
             const label = dataService.getLabelFor(characterId);
-            document.title = "Family tree - " + (label && label.label || characterId);
+            setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
         }
         appInsights.trackPageView();
     }, [props.match]);
     if (!characterId) {
         return (<React.Fragment>
-            <h1>Family tree</h1>
+            <h1>resourceManager.getPrompt("FamilyTreeTitle")</h1>
             <p>Specify a character ID to continue.</p>
         </React.Fragment>);
     }
@@ -34,7 +36,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
         location.replace(routePathBuilders.familyTree({ ...props.match, character: "wd:" + characterId }));
     }
     return (<React.Fragment>
-        <h1>Family tree of <RdfEntityLabel qName={characterId} showEntityId={true} /></h1>
+        <h1>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h1>
         <Typography variant="subtitle1"><RdfEntityDescription qName={characterId} /></Typography>
         <Grid container spacing={1}>
             <Grid item xs={12} md={6} lg={4}>
