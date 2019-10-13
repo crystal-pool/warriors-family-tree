@@ -3,6 +3,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { App } from "./app";
+import { initializeTracking } from "./utility/telemetry";
+
+initializeTracking();
 
 const domRoot = document.querySelector(".react-root");
 ReactDOM.render(<App />, domRoot);

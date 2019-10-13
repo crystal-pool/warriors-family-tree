@@ -5,44 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" type="text/css" href="./index.css">
     <script>
-        (function () {
-            function addCDNLink(nominalUrl) {
-                var l = document.createElement("link");
-                var lf = document.createElement("link");
-                var loaded = false;
-                l.rel = lf.rel = "stylesheet";
-                l.onload = function () {
-                    loaded = true;
-                    lf.remove();
-                }
-                l.href = nominalUrl;
-                var fallbackUrl = nominalUrl.replace("fonts.googleapis.com", "fonts.proxy.ustclug.org");
-                if (fallbackUrl !== nominalUrl) {
-                    window.setTimeout(function () {
-                        if (loaded) { return; }
-                        console.info("Use CDN mirror from ustclug.org .")
-                        lf.onload = function () {
-                            l.remove();
-                        }
-                        lf.href = fallbackUrl;
-                        document.head.append(lf);
-                    }, 1500);
-                }
-                document.head.append(l);
-            }
-            addCDNLink("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
-            addCDNLink("https://fonts.googleapis.com/icon?family=Material+Icons");
-        })();
+    !function(){var n=[],o=function(){n.push([new Date].concat(Array.from(arguments)))};function e(n,o){var e="__rlc_"+o;window[e]=function(){const o=window.event.currentTarget;t(n,o.src||o.href,"load"===window.event.type),delete window[e]}}function t(n,e,t){o("_RL",n,new URL(e,document.location).href,t)}function c(n,e){var c=document.createElement("link"),i=document.createElement("link"),a=!1;c.rel=i.rel="stylesheet",c.onload=function(){a=!0,t(n,e,!0),i.remove()},c.onerror=function(o){console.log(o),t(n,e,!1)},c.href=e;var r=e.replace("fonts.googleapis.com","fonts.proxy.ustclug.org");r!==e&&window.setTimeout(function(){a||(i.onload=function(){t(trackIdf,r,!0),c.remove()},c.onerror=function(){t(trackIdf,r,!1)},i.href=r,document.head.append(i),o("Added fallback CDN link.",n))},1500),document.head.append(c),o("Added CDN link.",n,e)}window.__drainBacklog=function(e){n.forEach(e),n=void 0,o=function(){e([new Date].concat(Array.from(arguments)))},delete window.__drainBacklog},c("mui-css","https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"),c("mui-icon","https://fonts.googleapis.com/icon?family=Material+Icons"),e("index-js","ij"),e("index-css","ic")}();
     </script>
+    <link rel="stylesheet" type="text/css" href="./index.css" onload="__rlc_ic();" onerror="__rlc_ic();">
     <title>Warriors Family Tree</title>
 </head>
 
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="react-root"></div>
-    <script src="./index.js"></script>
+    <script src="./index.js" onload="__rlc_ij();" onerror="__rlc_ij();"></script>
 </body>
 
 </html>
