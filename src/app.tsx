@@ -144,10 +144,6 @@ export const App: React.FC<IAppProps> = (props) => {
         return () => { cleanupPrs.tryResolve(); };
     });
 
-    React.useEffect(() => {
-        document.title = "Welcome - Warriors Family Tree";
-    });
-
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
     }
