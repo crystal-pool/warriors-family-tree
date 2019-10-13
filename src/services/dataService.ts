@@ -1,5 +1,6 @@
 import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
 import wu from "wu";
+import { evaluateLanguageSimilarity, browserLanguage } from "../localization/languages";
 
 export type RdfQName = string;
 
@@ -42,25 +43,6 @@ export interface IEntityLookupResultItem {
     score: number;
 }
 
-function evaluateLanguageSimilarity(baseline: string, target: string): number {
-    if (baseline === target) return 1;
-    // zh, zh-cn
-    if (target.startsWith(baseline)) return 1;
-    const baselineParts = baseline.split("-");
-    const targetParts = target.split("-");
-    let commonParts = 0;
-    for (; baselineParts[commonParts] && targetParts[commonParts]; commonParts++) {
-        if (baselineParts[commonParts] !== targetParts[commonParts]) break;
-    }
-    return Math.max(1, commonParts / baselineParts.length);
-}
-
-function fallbackLanguageTag(language: string): string {
-    const lastSeparatorPos = language.lastIndexOf("-");
-    if (lastSeparatorPos < 0) return "";
-    return language.substr(0, lastSeparatorPos);
-}
-
 export class DataService {
     public readonly initialization: PromiseLike<void>;
     private _isInitialized = false;
@@ -71,7 +53,7 @@ export class DataService {
     private _switchLanguageCts: CancellationTokenSource | undefined;
     private _languageChanged = new EventEmitter();
     constructor(private _dataPathPrefix: string, language?: string) {
-        this._language = language && language.toLowerCase() || "en-us";
+        this._language = language && language.toLowerCase() || browserLanguage;
         this.initialization = this._initialize();
     }
     public get isInitialized(): boolean {
