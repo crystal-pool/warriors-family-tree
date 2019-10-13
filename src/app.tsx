@@ -1,6 +1,7 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
-import { fade } from "@material-ui/core/styles";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
+import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
+import { ThemeProvider } from "@material-ui/styles";
 import * as React from "react";
 import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
@@ -23,6 +24,15 @@ const useStyles = makeStyles(theme => ({
             width: drawerWidth,
             flexShrink: 0,
         },
+    },
+    drawerContent: {
+        display: "flex",
+        flexDirection: "column",
+        height: "100%"
+    },
+    drawerSpacing: {
+        flexGrow: 1,
+        minHeight: "1em"
     },
     appBar: {
         marginLeft: drawerWidth,
@@ -82,6 +92,29 @@ function openUrl(url: string): void {
     window.open(url, "_blank");
 }
 
+const environmentInfoListTheme = createMuiTheme({
+    typography: {
+        fontSize: 12,
+    }
+});
+
+const EnvironmentInfoList: React.FC = () => {
+    return (<ThemeProvider theme={environmentInfoListTheme}>
+        <List dense>
+            {!environment.isProduction && <ListItem><ListItemText primary="Development Mode" /></ListItem>}
+            <Tooltip title="Go to the source code of this revision.">
+                <ListItem button
+                    onClick={() => openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId)} >
+                    <ListItemText primary="Revision" secondary={environment.commitId.substr(0, 8)} />
+                </ListItem>
+            </Tooltip>
+            <ListItem>
+                <ListItemText primary="Build time" secondary={new Date(environment.buildTimestamp).toISOString()} />
+            </ListItem>
+        </List >
+    </ThemeProvider>);
+};
+
 export const App: React.FC<IAppProps> = (props) => {
     const classes = useStyles();
     const theme = useTheme();
@@ -120,7 +153,7 @@ export const App: React.FC<IAppProps> = (props) => {
     }
 
     const drawer = (
-        <div>
+        <div className={classes.drawerContent}>
             <div className={classes.toolbar} />
             <Divider />
             <List>
@@ -134,6 +167,8 @@ export const App: React.FC<IAppProps> = (props) => {
                 </ListItem>
             </List>
             <Divider />
+            <div className={classes.drawerSpacing} />
+            <EnvironmentInfoList />
         </div>
     );
 
