@@ -2,6 +2,7 @@ export interface IEnvironmentInfo {
     isProduction: boolean;
     commitId: string;
     buildTimestamp: number;
+    aiInstrumentationKey?: string;
 }
 
 declare global {

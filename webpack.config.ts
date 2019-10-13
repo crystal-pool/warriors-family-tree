@@ -1,5 +1,7 @@
 import child_process from "child_process";
 import CopyPlugin from "copy-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import fs from "fs";
 import path from "path";
 import { PromiseResolutionSource } from "tasklike-promise-library";
 import TerserPlugin from "terser-webpack-plugin";
@@ -9,7 +11,9 @@ import { flattenKeyPath } from "./shared/utility";
 
 function getGitHead(): Promise<string> {
   const prs = new PromiseResolutionSource<string>();
-  child_process.exec("git rev-parse HEAD", (error, stdout) => {
+  child_process.exec("git rev-parse HEAD", {
+    cwd: __dirname
+  }, (error, stdout) => {
     if (error) {
       prs.tryReject(error);
     } else {
@@ -19,11 +23,40 @@ function getGitHead(): Promise<string> {
   return prs.promise;
 }
 
+async function buildEnvironmentDefinitions(isProduction: boolean) {
+  const definitions = serializeRecordValues(flattenKeyPath({
+    environment: ({
+      commitId: await getGitHead(),
+      buildTimestamp: Date.now(),
+      isProduction,
+      aiInstrumentationKey: undefined
+    }) as IEnvironmentInfo
+  }));
+  const definitionPaths = [
+    "./webpack.env.json",
+    "./_private/webpack.env.json"
+  ];
+  for (const defPath of definitionPaths) {
+    const fullPath = path.join(__dirname, defPath);
+    try {
+      await fs.promises.access(fullPath, fs.constants.F_OK);
+    } catch {
+      // File does not exist.
+      continue;
+    }
+    const content = await fs.promises.readFile(fullPath);
+    console.info("Loaded environment definitions from %s.", fullPath);
+    const contentJson = JSON.parse(content.toString());
+    Object.assign(definitions, contentJson);
+  }
+  return definitions;
+}
+
 function serializeRecordValues(records: Record<string, unknown>): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key in records) {
     if (Object.prototype.hasOwnProperty.call(records, key)) {
-      result[key] = JSON.stringify(records[key]);
+      result[key] = records[key] === undefined ? "undefined" : JSON.stringify(records[key]);
     }
   }
   return result;
@@ -56,6 +89,7 @@ export default async function config(env: any, argv: Record<string, string>): Pr
           ],
           options: {
             experimentalWatchApi: true,
+            transpileOnly: true
           }
         },
         {
@@ -78,13 +112,12 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       new CopyPlugin([
         { from: path.join(__dirname, "assets"), to: outputPath }
       ]),
-      new DefinePlugin(serializeRecordValues(flattenKeyPath({
-        environment: ({
-          commitId: await getGitHead(),
-          buildTimestamp: Date.now(),
-          isProduction
-        }) as IEnvironmentInfo
-      })))
+      new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
+      new ForkTsCheckerWebpackPlugin({
+        useTypescriptIncrementalApi: true,
+        tsconfig: path.join(__dirname, "./src/tsconfig.json"),
+        reportFiles: ["!**/node_modules/**"]
+      })
     ],
     optimization: {
       minimize: isProduction,
