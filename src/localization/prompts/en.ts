@@ -1,4 +1,6 @@
 const prompts = {
+    StarTheRepo: "Star the repo ⭐",
+    ContributeToTheDataSource: "Contribute to the data source",
     WelcomeTitle: "Welcome",
     WelcomeDescription: "This is a still work-in-progress automatic family tree for <i>Warriors</i> series. Type something to in the search box below to continue.<br />E.g. type <b>Firestar</b> and press enter.",
     EntitySearchBoxPlaceholder: "Search for a cat…",

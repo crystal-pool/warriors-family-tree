@@ -211,11 +211,11 @@ export const App: React.FC<IAppProps> = (props) => {
             <List>
                 <ListItem button onClick={() => openUrl("https://github.com/crystal-pool/warriors-family-tree")}>
                     <ListItemIcon><Icons.Code /></ListItemIcon>
-                    <ListItemText primary="GitHub" secondary="Source code / issues" />
+                    <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
                 </ListItem>
                 <ListItem button onClick={() => openUrl("https://crystalpool.cxuesong.com/")}>
                     <ListItemIcon><Icons.Storage /></ListItemIcon>
-                    <ListItemText primary="Crystal Pool" secondary="Data source" />
+                    <ListItemText primary="Crystal Pool" secondary={resourceManager.getPrompt("ContributeToTheDataSource")} />
                 </ListItem>
             </List>
             <Divider />
