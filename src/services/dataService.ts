@@ -68,6 +68,7 @@ export class DataService {
             this._switchLanguageCts && this._switchLanguageCts.cancel();
             this._switchLanguageCts = new CancellationTokenSource();
             this._switchLanguage(value, this._switchLanguageCts.token);
+            this._language = value;
         }
     }
     public onLanguageChanged(listener: () => void): IDisposable {

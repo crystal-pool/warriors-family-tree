@@ -96,7 +96,13 @@ const HoverTooltip = withStyles((theme: Theme) => ({
 }))(Tooltip);
 
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
-    const label = dataService.getLabelFor(props.qName);
+    const [label, setLabel] = React.useState(() => dataService.getLabelFor(props.qName));
+    React.useEffect(() => {
+        const subscription = dataService.onLanguageChanged(() => {
+            setLabel(dataService.getLabelFor(props.qName));
+        });
+        return () => subscription.dispose();
+    });
     return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
         <div className={classNames("familytree-node", props.isCurrent && "current")} onClick={() => {
             location.href = routePathBuilders.familyTree({ character: props.qName });
