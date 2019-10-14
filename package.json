@@ -43,8 +43,8 @@
     "webpack-dev-server": "^3.8.0"
   },
   "dependencies": {
-    "@material-ui/core": "^4.4.2",
-    "@material-ui/icons": "^4.4.1",
+    "@material-ui/core": "^4.5.1",
+    "@material-ui/icons": "^4.5.1",
     "@microsoft/applicationinsights-web": "^2.2.4",
     "@types/wu": "^2.1.39",
     "classnames": "^2.2.6",
@@ -55,7 +55,7 @@
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
     "svgjs": "^2.6.2",
-    "tasklike-promise-library": "^0.0.4",
+    "tasklike-promise-library": "^0.0.5",
     "wu": "^2.1.0"
   }
 }

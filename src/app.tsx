@@ -1,4 +1,4 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Menu, MenuItem, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme, Button } from "@material-ui/core";
 import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
@@ -7,8 +7,11 @@ import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { PromiseLikeResolutionSource } from "tasklike-promise-library";
 import { EntitySearchBox } from "./components/EntitySearchBox";
+import { resourceManager } from "./localization";
+import { browserLanguage, KnownLanguage, knownLanguages, languageInfo } from "./localization/languages";
 import * as Pages from "./pages";
 import { dataService } from "./services";
+import { appInsights } from "./utility/telemetry";
 
 export interface IAppProps {
 }
@@ -55,6 +58,11 @@ const useStyles = makeStyles(theme => ({
             display: "block",
         }
     },
+    farItems: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center"
+    },
     searchBoxRoot: {
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
@@ -62,6 +70,7 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: fade(theme.palette.common.white, 0.25),
         },
         marginLeft: 0,
+        marginRight: theme.spacing(2),
         width: "100%",
         [theme.breakpoints.up("sm")]: {
             marginLeft: theme.spacing(1),
@@ -115,12 +124,52 @@ const EnvironmentInfoList: React.FC = () => {
     </ThemeProvider>);
 };
 
+interface ILanguageSwitchProps {
+    language: KnownLanguage;
+    onLanguageChanged: (language: KnownLanguage) => void;
+}
+
+const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
+    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | undefined>();
+    return (<React.Fragment>
+        <Tooltip
+            aria-label={resourceManager.getPrompt('SwitchLanguage')}
+            title={resourceManager.getPrompt('SwitchLanguage')}
+        >
+            <Button
+                color="inherit"
+                startIcon={<Icons.Translate />}
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+            >
+                {languageInfo[props.language].autonym}
+            </Button>
+        </Tooltip>
+        <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={!!anchorEl}
+            onClose={() => setAnchorEl(undefined)}
+        >
+            {knownLanguages.map(lang => (
+                <MenuItem key={lang} selected={lang === props.language} onClick={() => {
+                    setAnchorEl(undefined);
+                    props.onLanguageChanged(lang);
+                }}>
+                    <ListItemText primary={languageInfo[lang].autonym} />
+                </MenuItem>
+            ))}
+        </Menu>
+    </React.Fragment>)
+};
+
 export const App: React.FC<IAppProps> = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [dataInitialized, setDataInitialized] = React.useState(dataService.isInitialized);
     const [error, setError] = React.useState<Error>();
+    const [language, setLanguage] = React.useState<KnownLanguage>(browserLanguage);
     const errorMessage = error && (error.stack || error.message || error.toString());
 
     React.useEffect(() => {
@@ -135,6 +184,13 @@ export const App: React.FC<IAppProps> = (props) => {
             window.removeEventListener("unhandledrejection", onGlobalError);
         };
     });
+
+    function onLanguageChanged(lang: KnownLanguage) {
+        appInsights.trackEvent({ name: "languageChanged", properties: { language } });
+        resourceManager.language = lang;
+        dataService.language = lang;
+        setLanguage(lang);
+    };
 
     React.useEffect(() => {
         if (dataInitialized) { return; }
@@ -186,7 +242,7 @@ export const App: React.FC<IAppProps> = (props) => {
                         <Link href={Pages.routePathBuilders.welcome()} className={classes.title}>
                             <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
                         </Link>
-                        <div>
+                        <div className={classes.farItems}>
                             <EntitySearchBox classes={{
                                 root: classes.searchBoxRoot,
                                 inputInput: classes.searchBoxInput
@@ -195,6 +251,7 @@ export const App: React.FC<IAppProps> = (props) => {
                                     location.href = Pages.routePathBuilders.familyTree({ character: qName });
                                 }}
                             />
+                            <LanguageSwitch language={language} onLanguageChanged={onLanguageChanged} />
                         </div>
                     </Toolbar>
                 </AppBar>
