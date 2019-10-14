@@ -79,7 +79,7 @@ export function selectLocalizedResource<T>(resourceProvider: (language: string) 
         if (lang === "en") {
             break;
         }
-        lang = fallbackLanguageTag(lang);
+        lang = fallbackLanguageTag(lang) || "en";
     }
     return defaultValue;
 }
