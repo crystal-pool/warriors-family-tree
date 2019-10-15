@@ -32,9 +32,12 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         inputRoot: {
             color: "inherit",
+            width: "100%"
         },
         inputInput: {
-            padding: theme.spacing(1, 1, 1, 7)
+            padding: theme.spacing(1, 1, 1, 7),
+            margin: 0,
+            width: "auto"
         },
         autoCompletePopup: {
             position: "absolute",

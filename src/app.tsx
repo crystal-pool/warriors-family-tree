@@ -1,4 +1,4 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Menu, MenuItem, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme, Button } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
 import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
@@ -7,8 +7,9 @@ import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { PromiseLikeResolutionSource } from "tasklike-promise-library";
 import { EntitySearchBox } from "./components/EntitySearchBox";
+import { LanguageSwitch } from "./components/LanguageSwitch";
 import { resourceManager } from "./localization";
-import { browserLanguage, KnownLanguage, knownLanguages, languageInfo } from "./localization/languages";
+import { browserLanguage, KnownLanguage } from "./localization/languages";
 import * as Pages from "./pages";
 import { dataService } from "./services";
 import { appInsights } from "./utility/telemetry";
@@ -23,7 +24,7 @@ const useStyles = makeStyles(theme => ({
         display: "flex",
     },
     drawer: {
-        [theme.breakpoints.up("sm")]: {
+        [theme.breakpoints.up("md")]: {
             width: drawerWidth,
             flexShrink: 0,
         },
@@ -39,13 +40,13 @@ const useStyles = makeStyles(theme => ({
     },
     appBar: {
         marginLeft: drawerWidth,
-        [theme.breakpoints.up("sm")]: {
+        [theme.breakpoints.up("md")]: {
             width: `calc(100% - ${drawerWidth}px)`,
         },
     },
     menuButton: {
         marginRight: theme.spacing(2),
-        [theme.breakpoints.up("sm")]: {
+        [theme.breakpoints.up("md")]: {
             display: "none",
         },
     },
@@ -61,7 +62,16 @@ const useStyles = makeStyles(theme => ({
     farItems: {
         display: "flex",
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        flexGrow: 1,
+        [theme.breakpoints.up("sm")]: {
+            flexGrow: 0
+        }
+    },
+    languageSwitchButtonText: {
+        [theme.breakpoints.down("sm")]: {
+            display: "none",
+        }
     },
     searchBoxRoot: {
         borderRadius: theme.shape.borderRadius,
@@ -79,9 +89,19 @@ const useStyles = makeStyles(theme => ({
     },
     searchBoxInput: {
         transition: theme.transitions.create("width"),
-        width: "100%",
         [theme.breakpoints.up("sm")]: {
-            width: 120,
+            width: 160,
+            "&:focus": {
+                width: 180,
+            },
+        },
+        [theme.breakpoints.up("md")]: {
+            width: 200,
+            "&:focus": {
+                width: 300,
+            },
+        },
+        [theme.breakpoints.up("lg")]: {
             "&:focus": {
                 width: 400,
             },
@@ -122,45 +142,6 @@ const EnvironmentInfoList: React.FC = () => {
             </ListItem>
         </List >
     </ThemeProvider>);
-};
-
-interface ILanguageSwitchProps {
-    language: KnownLanguage;
-    onLanguageChanged: (language: KnownLanguage) => void;
-}
-
-const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
-    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | undefined>();
-    return (<React.Fragment>
-        <Tooltip
-            aria-label={resourceManager.getPrompt('SwitchLanguage')}
-            title={resourceManager.getPrompt('SwitchLanguage')}
-        >
-            <Button
-                color="inherit"
-                startIcon={<Icons.Translate />}
-                onClick={(e) => setAnchorEl(e.currentTarget)}
-            >
-                {languageInfo[props.language].autonym}
-            </Button>
-        </Tooltip>
-        <Menu
-            id="simple-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={!!anchorEl}
-            onClose={() => setAnchorEl(undefined)}
-        >
-            {knownLanguages.map(lang => (
-                <MenuItem key={lang} selected={lang === props.language} onClick={() => {
-                    setAnchorEl(undefined);
-                    props.onLanguageChanged(lang);
-                }}>
-                    <ListItemText primary={languageInfo[lang].autonym} />
-                </MenuItem>
-            ))}
-        </Menu>
-    </React.Fragment>)
 };
 
 export const App: React.FC<IAppProps> = (props) => {
@@ -251,13 +232,14 @@ export const App: React.FC<IAppProps> = (props) => {
                                     location.href = Pages.routePathBuilders.familyTree({ character: qName });
                                 }}
                             />
-                            <LanguageSwitch language={language} onLanguageChanged={onLanguageChanged} />
+                            <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
+                                language={language} onLanguageChanged={onLanguageChanged} />
                         </div>
                     </Toolbar>
                 </AppBar>
                 <nav className={classes.drawer} aria-label="siderbar actions">
                     {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                    <Hidden smUp implementation="css">
+                    <Hidden mdUp>
                         <SwipeableDrawer
                             container={undefined}
                             variant="temporary"
@@ -275,7 +257,7 @@ export const App: React.FC<IAppProps> = (props) => {
                             {drawer}
                         </SwipeableDrawer>
                     </Hidden>
-                    <Hidden xsDown implementation="css">
+                    <Hidden smDown>
                         <Drawer
                             classes={{
                                 paper: classes.drawerPaper,
