@@ -9,13 +9,19 @@ export const appInsights = new ApplicationInsights({
 
 export function initializeTracking() {
     function processTelemetry(item: ITelemetryItem): boolean {
-        item.tags = item.tags || [];
-        environment.isProduction || (item.tags["wft.isDevelopment"] = true);
-        item.tags["wft.buildCommit"] = environment.commitId;
-        item.tags["wft.buildTimestamp"] = environment.buildTimestamp;
+        item.baseData = {
+            ...item.baseData,
+            properties: {
+                environment: {
+                    "isDevelopment": !environment.isProduction || undefined,
+                    "buildCommit": environment.commitId,
+                    "buildTimestamp": environment.buildTimestamp,
+                },
+                ...(item.baseData && item.baseData.properties || {})
+            }
+        };
         if (!environment.isProduction) {
             console.log("AI", item);
-            return false;
         }
         return true;
     }
