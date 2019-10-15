@@ -10,9 +10,11 @@ import { CharacterCard } from "../CharacterCard";
 import "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
 
+export type CharacterFamilyTreeWalkMode = "naive" | "bloodline";
+
 export interface ICharacterFamilyTreeProps {
     centerQName: string;
-    mode: "naive" | "bloodline";
+    walkMode?: CharacterFamilyTreeWalkMode;
     maxDistance: number;
     debugInfo?: boolean;
 }
@@ -22,25 +24,25 @@ export interface IFamilyTreeNodeProps {
     isCurrent: boolean;
 }
 
-function walk(characterId: RdfQName, maxDistance?: number): IFamilyTreeData {
+function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, maxDistance?: number): IFamilyTreeData {
     if (maxDistance && maxDistance < 0)
         throw new RangeError("maxDistanceUp should be non-negative number.");
     const edgeTypes = new Set<CharacterRelationType>(["parent", "child", "mate"]);
-    const q: [number, RdfQName, RdfQName?][] = [[0, characterId]];
+    const q: [number, RdfQName, number, RdfQName?][] = [[0, characterId, maxDistance == null ? -1 : maxDistance]];
     const visited = new Set<RdfQName>();
     const mates = new Set<string>();
     const children: [RdfQName, RdfQName | undefined, RdfQName][] = [];
     const roots: RdfQName[] = [];
     while (q.length) {
-        const [distance, charId, reachedFrom] = q.shift()!;
+        const [distance, charId, tokensLeft, reachedFrom] = q.shift()!;
         if (visited.has(charId)) continue;
         visited.add(charId);
+        if (tokensLeft === 0) continue;
         const relations = dataService.getRelationsFor(charId, edgeTypes);
         let parentId1: RdfQName | undefined;
         let parentId2: RdfQName | undefined;
-        if (!relations) continue;
+        if (!relations || tokensLeft === 0) continue;
         for (const relation of relations) {
-            if (maxDistance != null && distance + 1 > maxDistance) continue;
             if (relation.relation === "parent") {
                 if (parentId1 == null) parentId1 = relation.target;
                 else if (parentId2 == null) parentId2 = relation.target;
@@ -49,7 +51,14 @@ function walk(characterId: RdfQName, maxDistance?: number): IFamilyTreeData {
                 mates.add(buildUnorderedIdPair(charId, relation.target));
             }
             if (!visited.has(relation.target)) {
-                q.push([distance + 1, relation.target, charId]);
+                const tokens0 = Math.max(tokensLeft - 1, -1);
+                let tokens1 = tokens0;
+                if (walkMode === "bloodline") {
+                    if (relation.relation === "mate") {
+                        tokens1 = 1;
+                    }
+                }
+                q.push([distance + 1, relation.target, tokens0 < 0 ? tokens1 : Math.min(tokens0, tokens1), charId]);
             }
         }
         if (parentId1 == null && parentId2 == null) {
@@ -69,9 +78,9 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     const [familyTreeData, setFamilyTreeData] = React.useState<IFamilyTreeData | undefined>();
     React.useEffect(() => {
         if (!props.centerQName) return;
-        const familyTree = walk(props.centerQName, props.maxDistance);
+        const familyTree = walk(props.centerQName, props.walkMode, props.maxDistance);
         setFamilyTreeData(familyTree);
-    }, [props.centerQName, props.maxDistance]);
+    }, [props.centerQName, props.walkMode, props.maxDistance]);
     if (!props.centerQName) {
         return null;
     }

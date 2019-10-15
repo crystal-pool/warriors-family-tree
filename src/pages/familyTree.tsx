@@ -1,14 +1,15 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import * as React from "react";
 import { match } from "react-router";
-import { CharacterFamilyTree } from "../components/familyTree/CharacterFamilyTree";
+import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
+import { resourceManager } from "../localization";
 import { dataService } from "../services";
+import { setDocumentTitle } from "../utility/general";
 import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
-import { setDocumentTitle } from "../utility/general";
-import { resourceManager } from "../localization";
 
 export interface IFamilyTreeProps {
     match: match<IFamilyTreeRoutingParams>;
@@ -17,6 +18,7 @@ export interface IFamilyTreeProps {
 export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     let characterId = props.match.params.character;
     const [maxDistance, setMaxDistance] = React.useState(3);
+    const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     React.useEffect(() => {
         if (!characterId) {
             setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle"));
@@ -43,9 +45,18 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
                 <Typography id="max-depth-slider">Max depth: {maxDistance}</Typography>
                 <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={30} onChange={(e, v) => setMaxDistance(v as number)} />
             </Grid>
+            <Grid item xs={12} md={6} lg={4}>
+                <Typography id="mode-selector">Mode</Typography>
+                <ToggleButtonGroup
+                    aria-labelledby="mode-selector" size="small"
+                    exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
+                    <ToggleButton value="naive">Naïve</ToggleButton>
+                    <ToggleButton value="bloodline">Bloodline</ToggleButton>
+                </ToggleButtonGroup>
+            </Grid>
         </Grid>
         <Paper className="familytree-container">
-            <CharacterFamilyTree centerQName={characterId} mode="naive" maxDistance={maxDistance} />
+            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={maxDistance} />
         </Paper>
     </React.Fragment>);
 });
