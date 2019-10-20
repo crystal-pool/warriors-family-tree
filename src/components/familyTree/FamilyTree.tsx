@@ -4,6 +4,8 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 import Svg from "svgjs";
 import { ILayoutNode, layoutFamilyTree } from "./layout";
+import { dataService } from "../../services";
+import { RdfQName } from "../../services/dataService";
 
 export interface IFamilyTreeData {
     roots: string[];
@@ -48,6 +50,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         this._updateDrawing = _.debounce(this._updateDrawing, 100);
     }
     private _updateDrawing = (): void => {
+        // console.log(dumpFamilyTreeData(this.props.familyTree));
         // Cleanup
         if (this._drawingReactRoot) {
             ReactDOM.unmountComponentAtNode(this._drawingReactRoot);
@@ -264,4 +267,16 @@ function plotElbowHorizontal(container: Svg.Container, x1: number, y1: number, y
 function plotElbowVertical(container: Svg.Container, x1: number, y1: number, x2: number, x3: number, y3: number): Svg.PolyLine {
     return container
         .polyline([x1, y1, x2, y1, x2, y3, x3, y3]);
+}
+
+export function dumpFamilyTreeData(data: IFamilyTreeData): string {
+    function getLabelFor(qName: RdfQName): string {
+        return (dataService.getLabelFor(qName) || {}).label || qName;
+    }
+    const result: IFamilyTreeData = {
+        roots: data.roots.map(v => getLabelFor(v)),
+        mates: data.mates.map(([v1, v2]) => [getLabelFor(v1), getLabelFor(v2)]),
+        children: data.children.map(([p1, p2, c]) => [getLabelFor(p1), p2 && getLabelFor(p2), getLabelFor(c)])
+    };
+    return JSON.stringify(result);
 }
