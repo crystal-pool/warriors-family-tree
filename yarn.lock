@@ -3247,6 +3247,11 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
+javascript-lp-solver@^0.4.20:
+  version "0.4.20"
+  resolved "https://registry.yarnpkg.com/javascript-lp-solver/-/javascript-lp-solver-0.4.20.tgz#e95dd5578e7d3958599380a3286c93921c18993f"
+  integrity sha512-JsCyxHEkqK300iJBRxSgy43IrvDM8Tz9FCpyoIietQ9wZNI/hvk5LwZCf5bixf5+DZU23GWkJr/J7USxpSSMaw==
+
 jest-worker@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-24.9.0.tgz#5dbfdb5b2d322e98567898238a9697bcce67b3e5"

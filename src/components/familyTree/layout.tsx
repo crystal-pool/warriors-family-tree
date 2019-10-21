@@ -3,12 +3,13 @@ import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { ListItem } from "../../utility/linkedList";
 import { IFamilyTreeData } from "./FamilyTree";
+import { Polynomial, Contraint, buildJSLPModel } from "../../utility/lpsolverUtility";
+import * as Solver from "javascript-lp-solver";
 
 export interface ILayoutNode {
     id: string;
     row: number;
     column: number;
-    groupId: number;
     offsetX: number;
 }
 
@@ -45,7 +46,7 @@ export interface IFamilyTreeLayoutInfo {
 export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeLayoutInfo | null {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
-    const rootCandidates = new Set<string>();
+    const knownNodes = new Set<string>();
     for (const [id1, id2] of wu.chain(props.mates,
         wu.filter(t => !!t[1], props.children).map(t => [t[0], t[1]!]))
     ) {
@@ -54,113 +55,27 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         let siblings2 = matesLookup.get(id2) || matesLookup.set(id2, new Set()).get(id2)!;
         siblings1.add(id2);
         siblings2.add(id1);
-        rootCandidates.add(id1).add(id2);
+        knownNodes.add(id1).add(id2);
     }
     for (const [id1, id2, id3] of props.children) {
         const key = buildUnorderedIdPair(id1, id2);
         let children = childrenLookup.get(key) || childrenLookup.set(key, new Set()).get(key)!;
         children.add(id3);
-        rootCandidates.add(id1);
+        knownNodes.add(id1).add(id3);
+        if (id2) knownNodes.add(id2);
     }
-    for (const [, , id3] of props.children) {
-        rootCandidates.delete(id3);
-    }
-    const freeNodes = new Set<string>();
-    for (const id of rootCandidates) {
-        const mates = matesLookup.get(id);
-        if (mates && wu(mates).every(m => !rootCandidates.has(m))) {
-            // If any root candidate only have mates in the rows below, we push it down.
-            freeNodes.add(id);
-        }
-    }
-    for (const id of freeNodes)
-        rootCandidates.delete(id);
-    if (rootCandidates.size === 0) return null;
-    const laidoutNodes = new Map<string, ILayoutNode>();
-    const rows: ILayoutNode[][] = [];
-    {
-        const row0 = arrangeRow(wu(rootCandidates)
-            .map<ILayoutNode>(id => ({
-                id, groupId: 0,
-                offsetX: NaN,
-                row: 0,
-                column: NaN
-            })).toArray(), matesLookup);
-        rows.push(row0);
-    }
-    // node index 1, node index 2
-    const rowGroupBoundaries: [undefined, ...[ILayoutNode, ILayoutNode][][]] = [undefined];
-    while (true) {
-        const prevRow = rows[rows.length - 1];
-        for (const n of prevRow)
-            laidoutNodes.set(n.id, n);
-        const seenChildren = new Set<string>();
-        const nextRow: ILayoutNode[] = [];
-        const groupBoundaries: [ILayoutNode, ILayoutNode][] = [];
-        for (const node of prevRow) {
-            for (const mate of wu.chain([undefined], matesLookup.get(node.id) || [])) {
-                const mateNode = mate && laidoutNodes.get(mate);
-                if (mate) {
-                    if (!mateNode) continue;
-                    console.assert(mateNode.row <= node.row);
-                    if (mateNode.row === node.row && mateNode.column < node.column) continue;
-                }
-                const children = childrenLookup.get(buildUnorderedIdPair(node.id, mate));
-                if (children) {
-                    for (const child of children) {
-                        console.assert(!seenChildren.has(child));
-                        if (seenChildren.has(child)) continue;
-                        const childMates = matesLookup.get(child);
-                        let newNodeIds: string[] | undefined;
-                        if (childMates) {
-                            newNodeIds = wu(childMates).filter(m => freeNodes.has(m)).toArray();
-                            for (const m of newNodeIds) {
-                                freeNodes.delete(m);
-                            }
-                        }
-                        if (!newNodeIds || newNodeIds.length === 0)
-                            newNodeIds = [child];
-                        else
-                            newNodeIds.splice(1, 0, child);
-                        for (const id of newNodeIds) {
-                            nextRow.push({
-                                id,
-                                groupId: groupBoundaries.length,
-                                offsetX: NaN,
-                                row: rows.length,
-                                column: NaN
-                            });
-                        }
-                        seenChildren.add(child);
-                    }
-                    if (mateNode)
-                        groupBoundaries.push([node, mateNode]);
-                    else
-                        groupBoundaries.push([node, node]);
-                }
-            }
-        }
-        if (nextRow.length === 0) break;
-        // console.log("row", rows.length);
-        const laidoutRow = arrangeRow(nextRow, matesLookup);
-        rows.push(laidoutRow);
-        rowGroupBoundaries.push(groupBoundaries);
+    if (knownNodes.size === 0) return null;
+    const rawRows = arrangeRows(knownNodes, matesLookup, childrenLookup);
+    for (let i = 0; i < rawRows.length; i++) {
+        rawRows[i] = arrangeRow(rawRows[i], rawRows[i - 1], matesLookup, childrenLookup);
     }
     // Layout nodes.
-    // const baselineRowIndex = rows.reduce((p, c, i) => rows[p].length >= c.length ? p : i, 0);
-    const baselineRowIndex = 0;
-    const nodeSpacing = 1;
-    rows[baselineRowIndex].forEach((n, i) => { n.offsetX = nodeSpacing / 2 + nodeSpacing * i; });
-    let rawWidth: number = rows[baselineRowIndex][rows[baselineRowIndex].length - 1].offsetX;
-    for (let i = baselineRowIndex + 1; i < rows.length; i++) {
-        // Note: n1, n2 may cross different rows.
-        const groupBoundaries: [number, number][] = rowGroupBoundaries[i]!.map(([n1, n2]) => [
-            Math.min(n1.offsetX, n2.offsetX),
-            Math.max(n1.offsetX, n2.offsetX)
-        ]);
-        layoutRow(rows[i], groupBoundaries, nodeSpacing);
-        rawWidth = Math.max(rawWidth, rows[i][rows[i].length - 1].offsetX);
-    }
+    const offsetXLookup = layoutRow(rawRows, matesLookup, childrenLookup);
+    const rows = rawRows.map((nodes, row) => nodes.map((id, column): ILayoutNode => ({ id, row, column, offsetX: offsetXLookup[id] })));
+    const layoutNodes = new Map<string, ILayoutNode>();
+    rows.forEach(nodes => nodes.forEach(n => layoutNodes.set(n.id, n)));
+
+    let nodeSpacing = 1;
     // Layout connections.
     const occupiedSlotsMap = new Map<string, boolean[]>();
     function findVacantSlot(ids: Iterable<string>, occupySlot: boolean): number {
@@ -199,7 +114,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
                         continue;
                     }
                 }
-                const mateNode = laidoutNodes.get(mate);
+                const mateNode = layoutNodes.get(mate);
                 console.assert(mateNode);
                 if (!mateNode) continue;
                 const lNode = node.offsetX <= mateNode.offsetX ? node : mateNode;
@@ -229,35 +144,36 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
             continue;
         }
         // TODO children with single parent
-        const node1 = laidoutNodes.get(connection.id1)!;
-        const node2 = laidoutNodes.get(connection.id2)!;
+        const node1 = layoutNodes.get(connection.id1)!;
+        const node2 = layoutNodes.get(connection.id2)!;
         const children = childrenLookup.get(buildUnorderedIdPair(connection.id1, connection.id2));
         if (!children) continue;
-        const minOffsetX = Math.min(node1.offsetX, node2.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
-        const maxOffsetX = Math.max(node1.offsetX, node2.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
+        const minOffsetX = Math.min(node1.offsetX, node2.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
+        const maxOffsetX = Math.max(node1.offsetX, node2.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
         const slot = findVacantSlot(wu(rows[node2.row])
             .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
             .map(n => n.id), true);
         connection.childrenSlot = slot;
         connection.childrenId = Array.from(children);
     }
-    for (const [id, node] of laidoutNodes) {
+    for (const [id, node] of layoutNodes) {
         const children = childrenLookup.get(buildUnorderedIdPair(id));
         if (!children) continue;
-        const minOffsetX = Math.min(node.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
-        const maxOffsetX = Math.max(node.offsetX, ...wu(children).map(id => laidoutNodes.get(id)!.offsetX));
+        const minOffsetX = Math.min(node.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
+        const maxOffsetX = Math.max(node.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
         const slot = findVacantSlot(wu(rows[node.row])
             .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
             .map(n => n.id), true);
         connections.push({ id1: id, childrenSlot: slot, childrenId: Array.from(children) });
     }
+    const rawWidth = rows.reduce((p, row) => row.reduce((p, node) => Math.max(p, node.offsetX), 0), 0) + 2;
     return {
         rows: rows,
         rootNodeCount: rows[0].length,
         rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
         rawWidth, minNodeSpacingX: nodeSpacing,
         mateConnections: connections,
-        nodeFromId: id => laidoutNodes.get(id),
+        nodeFromId: id => layoutNodes.get(id),
         children: wu(childrenLookup).map(([p, c]) => {
             const [p1, p2] = parseUnorderedIdPair(p);
             return [p1, p2, c];
@@ -265,123 +181,223 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
     };
 }
 
-function arrangeRow(nodes: ILayoutNode[], matesLookup: Map<string, Set<string>>): ILayoutNode[] {
-    if (nodes.length < 2) {
-        return nodes;
+function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): string[][] {
+    const orderedNodes = Array.from(knownNodes);
+    const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
+    const objective: Polynomial = {};
+    const constraints: Contraint[] = [];
+    const ints: string[] = [];
+    const yMax = orderedNodes.length;
+    function addObjective(name: string, addition: number): void {
+        const existingCoeff = objective[name];
+        objective[name] = existingCoeff != null ? (existingCoeff + addition) : addition;
     }
-    const nodeList = List.from(wu.map(n => new ListItem(n), nodes));
-    const nodesMap = new Map<string, ListItem<ILayoutNode>>(wu.map(n => [n.data.id, n], nodeList));
-    // const arrangedNodes_DEBUG = new Set<string>();
-    const arrangedNodes = new Set<string>();
-    let node = nodeList.head!;
-    let nextNode: typeof node | null | undefined;
-    do {
-        // console.log(node.data);
-        nextNode = node.next;
-        if (arrangedNodes.has(node.data.id)) continue;
-        // if (arrangedNodes_DEBUG.has(node.data.id) && node.next && node.next.data.groupId === node.data.groupId)
-        //     throw new Error("Detected loop in iteration.");
-        // arrangedNodes_DEBUG.add(node.data.id);
-        const mates = matesLookup.get(node.data.id);
-        if (!mates) continue;
-        const mateNodes = wu.map(m => nodesMap.get(m), mates).filter(m => !!m).toArray() as ListItem<ILayoutNode>[];
-        const firstExtMate = mateNodes.find(m => m.data.groupId > node.data.groupId);
-        if (firstExtMate) {
-            // Move external mates closer.
-            // Move `node` right.
-            if (node.next && node.next.data.groupId === node.data.groupId) {
-                let n = node.next;
-                while (n.next && n.next.data.groupId === node.data.groupId)
-                    n = n.next;
-                n.append(node.detach());
-                // Mark this node as visited becuase we moved it to the right.
-                arrangedNodes.add(node.data.id);
-            }
-            // Move `firstExtMate` left.
-            if (firstExtMate.prev && firstExtMate.prev.data.groupId === firstExtMate.data.groupId) {
-                let n = firstExtMate;
-                while (n.prev && n.prev.data.groupId === firstExtMate.data.groupId)
-                    n = n.prev;
-                if (n !== firstExtMate) n.prepend(firstExtMate.detach());
-            }
-            // console.log("Ext");
-            continue;
+    function buildUnorderedIndexPair(nodeId1: string, nodeId2: string): string {
+        const index1 = nodeIndexLookup.get(nodeId1)!;
+        const index2 = nodeIndexLookup.get(nodeId2)!;
+        console.assert(index1 != null);
+        console.assert(index2 != null);
+        return index1 <= index2 ? (index1 + "_" + index2) : (index2 + "_" + index1);
+    }
+    function varNameY(nodeId: string): string {
+        const index = nodeIndexLookup.get(nodeId);
+        console.assert(index != null);
+        return "ny_" + index;
+    }
+    function varNameDYP(nodeId1: string, nodeId2: string): string {
+        return "dyp_" + buildUnorderedIndexPair(nodeId1, nodeId2);
+    }
+    function varNameDYN(nodeId1: string, nodeId2: string): string {
+        return "dyn_" + buildUnorderedIndexPair(nodeId1, nodeId2);
+    }
+    for (const n1 of orderedNodes) {
+        constraints.push([{ [varNameY(n1)]: 1 }, ">=", 0]);
+        constraints.push([{ [varNameY(n1)]: 1 }, "<=", yMax]);
+        ints.push(varNameY(n1));
+        // Make coordinates as small as possible.
+        addObjective(varNameY(n1), 1);
+    }
+    for (const [n1, mates] of matesLookup) {
+        for (const n2 of mates) {
+            if (n1 >= n2) continue;
+            constraints.push([{ [varNameDYP(n1, n2)]: 1, [varNameDYN(n1, n2)]: -1, [varNameY(n1)]: -1, [varNameY(n2)]: 1 }, "=", 0]);
+            addObjective(varNameDYP(n1, n2), 10);
+            addObjective(varNameDYN(n1, n2), 10);
         }
-        const firstIntMate = mateNodes.find(m => m.data.groupId === node.data.groupId);
-        console.assert(firstIntMate !== node);
-        if (firstIntMate) {
-            // Move interal mates closer.
-            if (node.next !== firstIntMate && node.prev !== firstIntMate) {
-                let n = node;
-                while (n.next && n.next.data.groupId === node.data.groupId) {
-                    if (n === firstIntMate) {
-                        // `node` is on the lhs of `firstIntMate`
-                        node.append(firstIntMate.detach());
-                        break;
-                    }
-                    n = n.next;
-                }
+    }
+    for (const [p, children] of childrenLookup) {
+        const [p1, p2] = parseUnorderedIdPair(p);
+        for (const c of children) {
+            constraints.push([{ [varNameY(c)]: 1, [varNameY(p1)]: -1 }, ">=", 1]);
+            addObjective(varNameY(c), 5);
+            addObjective(varNameY(p1), -5);
+            if (p2) {
+                constraints.push([{ [varNameY(c)]: 1, [varNameY(p2)]: -1 }, ">=", 1]);
+                addObjective(varNameY(c), 5);
+                addObjective(varNameY(p2), -5);
             }
-            // console.log("Int");
-            continue;
         }
-    } while (node = nextNode);
-    console.assert(nodeList.size === nodes.length);
-    const laidoutNodes = wu(nodeList).map(n => n.data).toArray();
-    laidoutNodes.forEach((n, i) => n.column = i);
-    return laidoutNodes;
+    }
+    const model = buildJSLPModel({ opType: "min", objective, constraints, intVariables: ints });
+    model.options = { timeout: 30000 };
+    const solution = Solver.Solve(model);
+    if (!solution.feasible) {
+        throw new Error("Infeasible model: arrangeRows.");
+    }
+    const rows: string[][] = [];
+    for (const node of orderedNodes) {
+        const rowIndex = solution[varNameY(node)] || 0;
+        let row = rows[rowIndex];
+        if (row == null) row = rows[rowIndex] = [];
+        row.push(node);
+    }
+    console.log(rows);
+    return rows;
 }
 
-function layoutRow(nodes: ILayoutNode[], groupBoundaries: [number, number][], spacing: number): void {
-    if (nodes.length === 0) {
-        return;
-    }
-    if (nodes.length === 1) {
-        nodes[0].offsetX = (groupBoundaries[0][0] + groupBoundaries[0][1]) / 2;
-        nodes[0].column = 0;
-        return;
-    }
-    // Layout offsetX
-    let groupStartIndex = 0;
-    let currentX = 0;
-    let normalizedItemSpacing = spacing;
-    let minItemSpacing = normalizedItemSpacing * 0.9;
-    let maxItemSpacing = normalizedItemSpacing * 1.2;
-    for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        const next = nodes[i + 1];
-        if (!next || next.groupId !== node.groupId) {
-            if (node.groupId >= groupBoundaries.length)
-                throw new RangeError("groupId out of range.");
-            const groupItems = i - groupStartIndex + 1;
-            const [left, right] = groupBoundaries[node.groupId];
-            if (groupItems === 1) {
-                if (left >= currentX) {
-                    currentX = node.offsetX = (left + right) / 2;
-                } else if (right >= currentX + minItemSpacing) {
-                    currentX = node.offsetX = (currentX + right) / 2;
-                } else {
-                    node.offsetX = currentX;
+function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): string[] {
+    const arrangedRow: string[] = [];
+    const incomingNodes = new Set(nodes);
+    function pushChildren(children: Iterable<string>): void {
+        const groupStart = arrangedRow.length;
+        const delayedNodes: string[] = [];
+        for (const c of children) {
+            if (!incomingNodes.has(c)) continue;
+            incomingNodes.delete(c);
+            const mates = matesLookup.get(c);
+            let inserted = false;
+            if (mates) {
+                // Put mates nearer to each other.
+                if (arrangedRow.some(n => mates.has(n))) {
+                    arrangedRow.splice(groupStart, 0, c)
+                    inserted = true;
+                } else if (wu(incomingNodes).some(n => mates.has(n))) {
+                    delayedNodes.push(c);
+                    inserted = true;
                 }
-                currentX += normalizedItemSpacing;
-            } else {
-                let spacing = (right - currentX) / (groupItems - 1);
-                if (spacing < minItemSpacing) {
-                    spacing = minItemSpacing;
-                } else if (spacing > maxItemSpacing) {
-                    spacing = maxItemSpacing;
-                    let centeredX = (left + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
-                    if (centeredX >= currentX) {
-                        currentX = centeredX;
-                    } else {
-                        currentX = (currentX + right) / 2 - maxItemSpacing * (groupItems - 1) / 2;
-                    }
-                }
-                for (let j = groupStartIndex; j <= i; j++)
-                    nodes[j].offsetX = currentX + spacing * (j - groupStartIndex);
-                currentX += spacing * (groupItems - 1) + normalizedItemSpacing;
             }
-            groupStartIndex = i + 1;
+            if (!inserted) arrangedRow.push(c);
+        }
+        arrangedRow.push(...delayedNodes);
+    }
+    if (prevRow) {
+        // Arrange children first.
+        for (const prevNode of prevRow) {
+            const singleChildren = childrenLookup.get(buildUnorderedIdPair(prevNode));
+            if (singleChildren) pushChildren(singleChildren);
+            const mates = matesLookup.get(prevNode);
+            if (mates) {
+                for (const mate of mates) {
+                    const children = childrenLookup.get(buildUnorderedIdPair(prevNode, mate));
+                    if (children) pushChildren(children);
+                }
+            }
         }
     }
+    // Then insert the mates.
+    for (const node of incomingNodes) {
+        const mates = matesLookup.get(node);
+        let inserted = false;
+        if (mates) {
+            for (const mate of mates) {
+                if (!incomingNodes.has(mate)) {
+                    const mateIndex = arrangedRow.indexOf(mate);
+                    if (mateIndex >= 0) {
+                        arrangedRow.splice(mateIndex + 1, 0, node);
+                        inserted = true;
+                        break;
+                        // TODO when insert twice or more?
+                    }
+                }
+            }
+        }
+        if (!inserted) {
+            arrangedRow.push(node);
+        }
+        incomingNodes.delete(node);
+    }
+    return arrangedRow;
+}
+
+function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): Record<string, number> {
+    const orderedNodes: string[] = Array.from(wu(rows).flatten());
+    const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
+    const objective: Polynomial = {};
+    const constraints: Contraint[] = [];
+    const ints: string[] = [];
+    const nodeWidth = 1;
+    const xMax = rows.reduce((p, r) => Math.max(p, r.length), 0) * nodeWidth * 2;
+    const dxNodes = new Set<string>();
+    function addObjective(name: string, addition: number): void {
+        const existingCoeff = objective[name];
+        objective[name] = existingCoeff != null ? (existingCoeff + addition) : addition;
+    }
+    function buildUnorderedIndexPair(nodeId1: string, nodeId2: string): string {
+        const index1 = nodeIndexLookup.get(nodeId1)!;
+        const index2 = nodeIndexLookup.get(nodeId2)!;
+        console.assert(index1 != null);
+        console.assert(index2 != null);
+        return index1 <= index2 ? (index1 + "_" + index2) : (index2 + "_" + index1);
+    }
+    function varNameX(nodeId: string): string {
+        return "nx_" + nodeIndexLookup.get(nodeId);
+    }
+    function varNameDXP(nodeId1: string, nodeId2: string): string {
+        return "dxp_" + buildUnorderedIndexPair(nodeId1, nodeId2);
+    }
+    function varNameDXN(nodeId1: string, nodeId2: string): string {
+        return "dxn_" + buildUnorderedIndexPair(nodeId1, nodeId2);
+    }
+    function addDXVars(n1: string, n2: string): void {
+        const nodePair = buildUnorderedIndexPair(n1, n2);
+        console.assert(!dxNodes.has(nodePair));
+        if (dxNodes.has(nodePair)) return;
+        constraints.push([{ [varNameDXP(n1, n2)]: 1, [varNameDXN(n1, n2)]: -1, [varNameX(n1)]: -1, [varNameX(n2)]: 1 }, "=", 0]);
+    }
+    for (const row of rows) {
+        for (let j = 0; j < row.length; j++) {
+            constraints.push([{ [varNameX(row[j])]: 1 }, ">=", j * nodeWidth]);
+            constraints.push([{ [varNameX(row[j])]: 1 }, "<=", xMax]);
+            for (let k = 0; k < j; k++) {
+                constraints.push([{ [varNameX(row[j])]: 1, [varNameX(row[k])]: -1 }, ">=", (j - k) * nodeWidth]);
+            }
+            // Make coordinates as small as possible.
+            addObjective(varNameX(row[j]), 1);
+        }
+    }
+    for (const [n1, mates] of matesLookup) {
+        for (const n2 of mates) {
+            if (n1 >= n2) continue;
+            addDXVars(n1, n2);
+            addObjective(varNameDXP(n1, n2), 5);
+            addObjective(varNameDXN(n1, n2), 5);
+        }
+    }
+    for (const [p, children] of childrenLookup) {
+        const [p1, p2] = parseUnorderedIdPair(p);
+        for (const c of children) {
+            addDXVars(p1, c);
+            addObjective(varNameDXP(p1, c), 10);
+            addObjective(varNameDXN(p1, c), 10);
+            if (p2) {
+                addDXVars(p2, c);
+                addObjective(varNameDXP(p2, c), 10);
+                addObjective(varNameDXN(p2, c), 10);
+            }
+        }
+    }
+    const model = buildJSLPModel({ opType: "min", objective, constraints, intVariables: ints });
+    model.options = { timeout: 30000 };
+    const solution = Solver.Solve(model);
+    if (!solution.feasible) {
+        throw new Error("Infeasible model: layoutRow.");
+    }
+    console.log(solution);
+    const result: Record<string, number> = {};
+    for (const row of rows) {
+        for (const node of row) {
+            result[node] = solution[varNameX(node)] || 0;
+        }
+    }
+    return result;
 }
