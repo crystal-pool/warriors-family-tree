@@ -45,15 +45,16 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
                 <Typography id="max-depth-slider">Max depth: {maxDistance}</Typography>
                 <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={30} onChange={(e, v) => setMaxDistance(v as number)} />
             </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-                <Typography id="mode-selector">Mode</Typography>
-                <ToggleButtonGroup
-                    aria-labelledby="mode-selector" size="small"
-                    exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
-                    <ToggleButton value="naive">Naïve</ToggleButton>
-                    <ToggleButton value="bloodline">Bloodline</ToggleButton>
-                </ToggleButtonGroup>
-            </Grid>
+            {environment.isProduction ||
+                (<Grid item xs={12} md={6} lg={4}>
+                    <Typography id="mode-selector">Mode</Typography>
+                    <ToggleButtonGroup
+                        aria-labelledby="mode-selector" size="small"
+                        exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
+                        <ToggleButton value="naive">Naïve</ToggleButton>
+                        <ToggleButton value="bloodline">Bloodline</ToggleButton>
+                    </ToggleButtonGroup>
+                </Grid>)}
         </Grid>
         <Paper className="familytree-container">
             <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={maxDistance} />
