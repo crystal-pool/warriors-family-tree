@@ -348,11 +348,22 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     function varNameDXN(nodeId1: string, nodeId2: string): string {
         return "dxn_" + buildUnorderedIndexPair(nodeId1, nodeId2);
     }
+    function varNameDMXP(nodeId1: string, nodeId21: string, nodeId22: string): string {
+        const index1 = nodeIndexLookup.get(nodeId1)!;
+        return "dmxp_" + index1 + "_" + buildUnorderedIndexPair(nodeId21, nodeId22);
+    }
+    function varNameDMXN(nodeId1: string, nodeId21: string, nodeId22: string): string {
+        const index1 = nodeIndexLookup.get(nodeId1)!;
+        return "dmxn_" + index1 + "_" + buildUnorderedIndexPair(nodeId21, nodeId22);
+    }
     function addDXVars(n1: string, n2: string): void {
         const nodePair = buildUnorderedIndexPair(n1, n2);
         console.assert(!dxNodes.has(nodePair));
         if (dxNodes.has(nodePair)) return;
         constraints.push([{ [varNameDXP(n1, n2)]: 1, [varNameDXN(n1, n2)]: -1, [varNameX(n1)]: -1, [varNameX(n2)]: 1 }, "=", 0]);
+    }
+    function addDMXVars(n1: string, n21: string, n22: string): void {
+        constraints.push([{ [varNameDMXP(n1, n21, n22)]: 2, [varNameDMXN(n1, n21, n22)]: -2, [varNameX(n1)]: -2, [varNameX(n21)]: 1, [varNameX(n22)]: 1 }, "=", 0]);
     }
     for (const row of rows) {
         for (let j = 0; j < row.length; j++) {
@@ -369,20 +380,21 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
         for (const n2 of mates) {
             if (n1 >= n2) continue;
             addDXVars(n1, n2);
-            addObjective(varNameDXP(n1, n2), 5);
-            addObjective(varNameDXN(n1, n2), 5);
+            addObjective(varNameDXP(n1, n2), 20);
+            addObjective(varNameDXN(n1, n2), 20);
         }
     }
     for (const [p, children] of childrenLookup) {
         const [p1, p2] = parseUnorderedIdPair(p);
         for (const c of children) {
-            addDXVars(p1, c);
-            addObjective(varNameDXP(p1, c), 10);
-            addObjective(varNameDXN(p1, c), 10);
             if (p2) {
-                addDXVars(p2, c);
-                addObjective(varNameDXP(p2, c), 10);
-                addObjective(varNameDXN(p2, c), 10);
+                addDMXVars(c, p1, p2);
+                addObjective(varNameDMXP(c, p1, p2), 40);
+                addObjective(varNameDMXN(c, p1, p2), 40);
+            } else {
+                addDXVars(c, p1);
+                addObjective(varNameDXP(c, p1), 40);
+                addObjective(varNameDXN(c, p1), 40);
             }
         }
     }

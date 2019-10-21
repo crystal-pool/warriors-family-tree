@@ -113,7 +113,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     }
                 }
                 if (this.props.debugInfo) {
-                    const lines = [`${node.row},${node.column}`];
+                    const lines = [`${node.row},${node.column} (${Math.round(node.offsetX * 10) / 10})`];
                     for (const connection of layout.mateConnections) {
                         if ("id2" in connection) {
                             const { id1, id2, slot1, childrenSlot } = connection;
