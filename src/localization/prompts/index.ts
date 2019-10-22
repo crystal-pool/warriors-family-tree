@@ -9,4 +9,6 @@ const resourceTable: Partial<Record<KnownLanguageWithFallback, Partial<PromptsTa
     "zh-tw": zh_tw
 }
 
+export { PromptKey } from './en';
+
 export default resourceTable;

@@ -4,6 +4,8 @@ import wu from "wu";
 import { dataService } from "../services";
 import { ICharacterRelationEntry, RdfQName } from "../services/dataService";
 import { RdfEntityLabel } from "./RdfEntity";
+import { resourceManager } from "../localization";
+import { PromptKey } from "../localization/prompts";
 
 export interface ICharacterInfoboxProps {
     qName: RdfQName;
@@ -13,20 +15,25 @@ function renderRelationEntries(entries: Iterable<ICharacterRelationEntry>): Reac
     const items = Array.from(entries);
     if (items.length === 0) return undefined;
     return items.map((entry, i) => (<React.Fragment key={i}>
-        {i > 0 && ", "}<RdfEntityLabel qName={entry.target} />
+        {i > 0 && resourceManager.getPrompt("ListSeparator")}
+        {i > 0 && <wbr />}
+        <RdfEntityLabel qName={entry.target} />
     </React.Fragment>));
 }
 
 function getInfoboxItems(qName: RdfQName): [string, React.ReactNode][] {
     const relations = dataService.getRelationsFor(qName);
     if (!relations) return [];
+    function buildRow(prompt1: PromptKey, promptn: PromptKey, items: ICharacterRelationEntry[]): [string, React.ReactNode] {
+        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items)];
+    }
     return ([
-        ["Parents", renderRelationEntries(wu(relations).filter(r => r.relation === "parent"))],
-        ["Mates", renderRelationEntries(wu(relations).filter(r => r.relation === "mate"))],
-        ["Children", renderRelationEntries(wu(relations).filter(r => r.relation === "child"))],
-        ["Mentors", renderRelationEntries(wu(relations).filter(r => r.relation === "mentor"))],
-        ["Apprentices", renderRelationEntries(wu(relations).filter(r => r.relation === "apprentice"))],
-    ] as [string, React.ReactNode][]).filter(([label, value]) => value);
+        buildRow("CharacterParent", "CharacterParents", relations.filter(r => r.relation === "parent")),
+        buildRow("CharacterMate", "CharacterMates", relations.filter(r => r.relation === "mate")),
+        buildRow("CharacterChild", "CharacterChildren", relations.filter(r => r.relation === "child")),
+        buildRow("CharacterMentor", "CharacterMentors", relations.filter(r => r.relation === "mentor")),
+        buildRow("CharacterApprentice", "CharacterApprentices", relations.filter(r => r.relation === "apprentice")),
+    ]).filter(([label, value]) => value);
 }
 
 export const CharacterInfobox: React.FC<ICharacterInfoboxProps> = (props) => {
@@ -35,7 +42,7 @@ export const CharacterInfobox: React.FC<ICharacterInfoboxProps> = (props) => {
     return (<Table size="small">
         <TableBody>
             {items.map(([label, value]) => (<TableRow key={label}>
-                <TableCell>{label}</TableCell>
+                <TableCell variant="head" style={{wordBreak: "keep-all"}}>{label}</TableCell>
                 <TableCell>{value}</TableCell>
             </TableRow>))}
         </TableBody>
