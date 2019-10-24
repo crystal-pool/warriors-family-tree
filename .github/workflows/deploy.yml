@@ -1,7 +1,9 @@
 name: App Deploy
 on:
-  - push
-  - schedule:
+  push:
+    branches:
+      - master
+  schedule:
     - cron: '12 3 * * SUN'
 
 jobs:
