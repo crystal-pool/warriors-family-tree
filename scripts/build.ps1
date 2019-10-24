@@ -27,5 +27,7 @@ checkLastExitCode
 
 yarn install
 checkLastExitCode
+git apply ./patch.diff --verbose
+checkLastExitCode
 yarn build-prod
 checkLastExitCode

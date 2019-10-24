@@ -1,0 +1,11 @@
+--- "a/node_modules/javascript-lp-solver/src/main.js"
++++ "b/node_modules/javascript-lp-solver/src/main.js"
+@@ -25,7 +25,7 @@ var Constraint = expressions.Constraint;
+ var Variable = expressions.Variable;
+ var Numeral = expressions.Numeral;
+ var Term = expressions.Term;
+-var External = require("./External/main.js");
++var External = {};
+ 
+ // Place everything under the Solver Name Space
+ var Solver = function () {
