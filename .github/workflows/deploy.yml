@@ -24,6 +24,7 @@ jobs:
         with:
           repository: crystal-pool/Dump
           fetch-depth: 2
+          ref: master
       - name: Build Prep
         shell: pwsh
         run: ./scripts/prep.ps1
