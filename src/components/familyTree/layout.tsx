@@ -251,7 +251,7 @@ function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<
         if (row == null) row = rows[rowIndex] = [];
         row.push(node);
     }
-    console.log(rows);
+    // console.log(rows);
     return rows;
 }
 
@@ -404,7 +404,7 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     if (!solution.feasible) {
         throw new Error("Infeasible model: layoutRow.");
     }
-    console.log(solution);
+    // console.log(solution);
     const result: Record<string, number> = {};
     for (const row of rows) {
         for (const node of row) {

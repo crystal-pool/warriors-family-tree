@@ -43,7 +43,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
         <Grid container spacing={1}>
             <Grid item xs={12} md={6} lg={4}>
                 <Typography id="max-depth-slider">Max depth: {maxDistance}</Typography>
-                <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={30} onChange={(e, v) => setMaxDistance(v as number)} />
+                <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => setMaxDistance(v as number)} />
             </Grid>
             {environment.isProduction ||
                 (<Grid item xs={12} md={6} lg={4}>
