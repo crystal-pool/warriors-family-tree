@@ -25,9 +25,15 @@ jobs:
           repository: crystal-pool/Dump
           fetch-depth: 2
           ref: master
-      - name: Build Prep
+      - name: Prep 1
         shell: pwsh
         run: ./scripts/prep.ps1
+      - name: Prep 2
+        shell: pwsh
+        run: './scripts/BuildSecrets.ps1 -Restore -Key:${{ secrets.BUILD_SECRET }}'
       - name: Build
         shell: pwsh
         run: ./scripts/build.ps1
+      - name: Cleanup
+        shell: pwsh
+        run: './scripts/BuildSecrets.ps1 -Clear'
