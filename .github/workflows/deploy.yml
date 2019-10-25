@@ -34,6 +34,9 @@ jobs:
       - name: Build
         shell: pwsh
         run: ./scripts/build.ps1
-      - name: Cleanup
+      - name: Cleanup 1
         shell: pwsh
         run: './scripts/BuildSecrets.ps1 -Clear'
+      - name: Deploy
+        shell: pwsh
+        run: ./scripts/deploy.ps1
