@@ -9,6 +9,8 @@ function checkLastExitCode() {
 
 $ErrorActionPreference = "Stop"
 
+# Assumes $PWD is repo root
+
 [string[]]$sdks = dotnet --list-sdks
 checkLastExitCode
 

@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '*.md'
   schedule:
     - cron: "12 3 * * SUN"
 
@@ -30,7 +32,7 @@ jobs:
         run: ./scripts/prep.ps1
       - name: Prep 2
         shell: pwsh
-        run: './scripts/BuildSecrets.ps1 -Restore -Key:${{ secrets.BUILD_SECRET }}'
+        run: './scripts/BuildSecrets.ps1 -Restore -Key:"${{ secrets.BUILD_SECRET }}"'
       - name: Build
         shell: pwsh
         run: ./scripts/build.ps1
@@ -39,4 +41,4 @@ jobs:
         run: './scripts/BuildSecrets.ps1 -Clear'
       - name: Deploy
         shell: pwsh
-        run: ./scripts/deploy.ps1
+        run: ./scripts/deploy.ps1 -PublishingUser:"${{ secrets.DEPLOY_USER }}" -AuthPrefix:"${{ secrets.DEPLOY_AUTH }}"
