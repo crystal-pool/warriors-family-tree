@@ -2,6 +2,7 @@ import * as Solver from "javascript-lp-solver";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUtility";
+import { appInsights } from "../../utility/telemetry";
 import { IFamilyTreeData } from "./FamilyTree";
 
 export interface ILayoutNode {
@@ -41,6 +42,19 @@ export interface IFamilyTreeLayoutInfo {
     children: Iterable<[string, string | undefined, Iterable<string>]>;
 }
 
+interface IFamilyTreeLayoutTelemetry {
+    totalDuration: number;
+    arrangeDuration: number;
+    a1Duration: number;
+    a2Duration: number;
+    a3Duration: number;
+    connectionDuration: number;
+    nodes: number;
+    rows: number;
+    width: number;
+    successful: boolean;
+}
+
 export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeLayoutInfo | null {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
@@ -63,15 +77,33 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         if (id2) knownNodes.add(id2);
     }
     if (knownNodes.size === 0) return null;
+    const t0 = performance.now();
+    let t1 = performance.now();
+    const telemetryProps: Partial<IFamilyTreeLayoutTelemetry> = {
+        nodes: knownNodes.size,
+        successful: false
+    };
+    function stopwatchDuration(prop: keyof IFamilyTreeLayoutTelemetry) {
+        const now = performance.now();
+        telemetryProps[prop] = (Math.round((now - t1) * 1000) / 1000) as any;
+        t1 = now;
+    }
+    // TODO enable try ... finally block.
+    //try {
     const rawRows = arrangeRows(knownNodes, matesLookup, childrenLookup);
+    stopwatchDuration("a1Duration");
+
     for (let i = 0; i < rawRows.length; i++) {
         rawRows[i] = arrangeRow(rawRows[i], rawRows[i - 1], matesLookup, childrenLookup);
     }
-    // Layout nodes.
+    stopwatchDuration("a2Duration");
+
+    // Arrage & layout nodes by row.
     const offsetXLookup = layoutRow(rawRows, matesLookup, childrenLookup);
     const rows = rawRows.map((nodes, row) => nodes.map((id, column): ILayoutNode => ({ id, row, column, offsetX: offsetXLookup[id] })));
     const layoutNodes = new Map<string, ILayoutNode>();
     rows.forEach(nodes => nodes.forEach(n => layoutNodes.set(n.id, n)));
+    stopwatchDuration("a3Duration");
 
     let nodeSpacing = 1;
     // Layout connections.
@@ -164,19 +196,32 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
             .map(n => n.id), true);
         connections.push({ id1: id, childrenSlot: slot, childrenId: Array.from(children) });
     }
+    stopwatchDuration("connectionDuration");
+
     const rawWidth = rows.reduce((p, row) => row.reduce((p, node) => Math.max(p, node.offsetX), 0), 0) + 2;
-    return {
-        rows: rows,
-        rootNodeCount: rows[0].length,
-        rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
-        rawWidth, minNodeSpacingX: nodeSpacing,
-        mateConnections: connections,
-        nodeFromId: id => layoutNodes.get(id),
-        children: wu(childrenLookup).map(([p, c]) => {
-            const [p1, p2] = parseUnorderedIdPair(p);
-            return [p1, p2, c];
-        })
-    };
+
+    // TODO remove this.
+    try {
+        telemetryProps.rows = rows.length;
+        telemetryProps.width = rawWidth;
+        telemetryProps.successful = true;
+        return {
+            rows: rows,
+            rootNodeCount: rows[0].length,
+            rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
+            rawWidth, minNodeSpacingX: nodeSpacing,
+            mateConnections: connections,
+            nodeFromId: id => layoutNodes.get(id),
+            children: wu(childrenLookup).map(([p, c]) => {
+                const [p1, p2] = parseUnorderedIdPair(p);
+                return [p1, p2, c];
+            })
+        };
+    } finally {
+        telemetryProps.totalDuration = performance.now() - t0;
+        appInsights.trackMetric({ name: "layoutFamilyTree.duration", average: telemetryProps.totalDuration });
+        appInsights.trackEvent({ name: "layoutFamilyTree", properties: telemetryProps });
+    }
 }
 
 function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): string[][] {
