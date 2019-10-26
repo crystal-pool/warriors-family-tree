@@ -114,7 +114,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
                 if (this.props.debugInfo) {
                     const lines = [`${node.row},${node.column} (${Math.round(node.offsetX * 10) / 10})`];
-                    for (const connection of layout.mateConnections) {
+                    for (const connection of layout.connections) {
                         if ("id2" in connection) {
                             const { id1, id2, slot1, childrenSlot } = connection;
                             if (id1 !== node.id && id2 !== node.id) continue;
@@ -132,7 +132,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             }
         }
         // Draw connections.
-        for (const connection of layout.mateConnections) {
+        for (const connection of layout.connections) {
             if ("id2" in connection) {
                 // ICoupleLayoutConnection
                 const { id1, id2, slot1, childrenId, childrenSlot } = connection;
