@@ -3,19 +3,16 @@ import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
 import * as React from "react";
-import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { PromiseLikeResolutionSource } from "tasklike-promise-library";
 import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
-import * as Pages from "../pages";
+import { InitializationScreen, routePathBuilders } from "../pages";
 import { dataService } from "../services";
 import { appInsights } from "../utility/telemetry";
-
-export interface IAppProps {
-}
+import { Routes } from "./routes";
 
 const drawerWidth = 240;
 
@@ -144,7 +141,7 @@ const EnvironmentInfoList: React.FC = () => {
     </ThemeProvider>);
 };
 
-export const App: React.FC<IAppProps> = (props) => {
+export const AppFull: React.FC = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -207,81 +204,74 @@ export const App: React.FC<IAppProps> = (props) => {
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
-            <HashRouter>
-                <AppBar position="fixed" className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            edge="start"
-                            onClick={handleDrawerToggle}
-                            className={classes.menuButton}
-                        >
-                            <Icons.Menu />
-                        </IconButton>
-                        <Link href={Pages.routePathBuilders.welcome()} className={classes.title}>
-                            <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
-                        </Link>
-                        <div className={classes.farItems}>
-                            <EntitySearchBox classes={{
-                                root: classes.searchBoxRoot,
-                                inputInput: classes.searchBoxInput
+            <AppBar position="fixed" className={classes.appBar}>
+                <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        aria-label="open drawer"
+                        edge="start"
+                        onClick={handleDrawerToggle}
+                        className={classes.menuButton}
+                    >
+                        <Icons.Menu />
+                    </IconButton>
+                    <Link href={routePathBuilders.welcome()} className={classes.title}>
+                        <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
+                    </Link>
+                    <div className={classes.farItems}>
+                        <EntitySearchBox classes={{
+                            root: classes.searchBoxRoot,
+                            inputInput: classes.searchBoxInput
+                        }}
+                            onAccept={(qName) => {
+                                location.href = routePathBuilders.familyTree({ character: qName });
                             }}
-                                onAccept={(qName) => {
-                                    location.href = Pages.routePathBuilders.familyTree({ character: qName });
-                                }}
-                            />
-                            <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
-                                language={language} onLanguageChanged={onLanguageChanged} />
-                        </div>
-                    </Toolbar>
-                </AppBar>
-                <nav className={classes.drawer} aria-label="siderbar actions">
-                    {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                    <Hidden mdUp>
-                        <SwipeableDrawer
-                            container={undefined}
-                            variant="temporary"
-                            anchor={theme.direction === "rtl" ? "right" : "left"}
-                            open={mobileOpen}
-                            onOpen={handleDrawerToggle}
-                            onClose={handleDrawerToggle}
-                            classes={{
-                                paper: classes.drawerPaper,
-                            }}
-                            ModalProps={{
-                                keepMounted: true, // Better open performance on mobile.
-                            }}
-                        >
-                            {drawer}
-                        </SwipeableDrawer>
-                    </Hidden>
-                    <Hidden smDown>
-                        <Drawer
-                            classes={{
-                                paper: classes.drawerPaper,
-                            }}
-                            variant="permanent"
-                            open
-                        >
-                            {drawer}
-                        </Drawer>
-                    </Hidden>
-                </nav>
-                <main className={classes.content}>
-                    <div className={classes.toolbar} />
-                    {
-                        dataInitialized
-                            ? <React.Fragment>
-                                <Route exact path={Pages.routePaths.welcome} component={Pages.Welcome} />
-                                <Route path={Pages.routePaths.familyTree} component={Pages.FamilyTree} />
-                            </React.Fragment>
-                            : <Pages.InitializationScreen />
-                    }
-
-                </main>
-            </HashRouter>
+                        />
+                        <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
+                            language={language} onLanguageChanged={onLanguageChanged} />
+                    </div>
+                </Toolbar>
+            </AppBar>
+            <nav className={classes.drawer} aria-label="siderbar actions">
+                {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+                <Hidden mdUp>
+                    <SwipeableDrawer
+                        container={undefined}
+                        variant="temporary"
+                        anchor={theme.direction === "rtl" ? "right" : "left"}
+                        open={mobileOpen}
+                        onOpen={handleDrawerToggle}
+                        onClose={handleDrawerToggle}
+                        classes={{
+                            paper: classes.drawerPaper,
+                        }}
+                        ModalProps={{
+                            keepMounted: true, // Better open performance on mobile.
+                        }}
+                    >
+                        {drawer}
+                    </SwipeableDrawer>
+                </Hidden>
+                <Hidden smDown>
+                    <Drawer
+                        classes={{
+                            paper: classes.drawerPaper,
+                        }}
+                        variant="permanent"
+                        open
+                    >
+                        {drawer}
+                    </Drawer>
+                </Hidden>
+            </nav>
+            <main className={classes.content}>
+                <div className={classes.toolbar} />
+                {
+                    dataInitialized
+                        ? <Routes />
+                        : <InitializationScreen />
+                }
+            </main>
             <Snackbar open={!!error} message={<div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>} />
         </div>
     );
