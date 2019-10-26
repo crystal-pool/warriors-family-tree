@@ -1,6 +1,5 @@
 import { Table, TableBody, TableCell, TableRow } from "@material-ui/core";
 import * as React from "react";
-import wu from "wu";
 import { resourceManager } from "../localization";
 import { PromptKey } from "../localization/prompts";
 import { dataService } from "../services";

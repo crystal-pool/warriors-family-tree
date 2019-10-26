@@ -1,7 +1,7 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
-import { match, RouteComponentProps } from "react-router";
+import { RouteComponentProps } from "react-router";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";

@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "lint": "tslint -p .",
     "start": "webpack-dev-server",
     "build-prod": "webpack --mode production",
     "build": "webpack --mode development",

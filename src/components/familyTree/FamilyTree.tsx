@@ -38,7 +38,7 @@ export interface IFamilyTreeProps {
 const FAMILY_TREE_MATE_SLOT_OFFSET = 10;
 
 export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
-    private static defaultProps: Partial<IFamilyTreeProps> = {
+    public static defaultProps: Partial<IFamilyTreeProps> = {
         onRenderNode(id, brct): React.ReactNode {
             return id;
         }
@@ -263,10 +263,10 @@ function plotElbowHorizontal(container: Svg.Container, x1: number, y1: number, y
         .polyline([x1, y1, x1, y2, x3, y2, x3, y3]);
 }
 
-function plotElbowVertical(container: Svg.Container, x1: number, y1: number, x2: number, x3: number, y3: number): Svg.PolyLine {
-    return container
-        .polyline([x1, y1, x2, y1, x2, y3, x3, y3]);
-}
+// function plotElbowVertical(container: Svg.Container, x1: number, y1: number, x2: number, x3: number, y3: number): Svg.PolyLine {
+//     return container
+//         .polyline([x1, y1, x2, y1, x2, y3, x3, y3]);
+// }
 
 export function dumpFamilyTreeData(data: IFamilyTreeData): string {
     function getLabelFor(qName: RdfQName): string {

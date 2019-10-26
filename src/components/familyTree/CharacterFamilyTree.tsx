@@ -34,7 +34,7 @@ function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, max
     const children: [RdfQName, RdfQName | undefined, RdfQName][] = [];
     const roots: RdfQName[] = [];
     while (q.length) {
-        const [distance, charId, tokensLeft, reachedFrom] = q.shift()!;
+        const [distance, charId, tokensLeft, /*reachedFrom*/] = q.shift()!;
         if (visited.has(charId)) continue;
         visited.add(charId);
         if (tokensLeft === 0) continue;
