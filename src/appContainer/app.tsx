@@ -6,7 +6,6 @@ import { AppEmbed } from "./appEmbed";
 import { AppFull } from "./appFull";
 
 export interface IAppProps {
-    match: match<{}>;
 }
 
 interface IRouteRootProps extends RouteComponentProps {

@@ -246,7 +246,6 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     }
     private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
         this._drawingRoot = root;
-        if (!root) return;
         this._updateDrawing();
     }
     public render(): React.ReactNode {

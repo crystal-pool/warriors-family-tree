@@ -266,11 +266,7 @@ export const AppFull: React.FC = (props) => {
             </nav>
             <main className={classes.content}>
                 <div className={classes.toolbar} />
-                {
-                    dataInitialized
-                        ? <Routes />
-                        : <InitializationScreen />
-                }
+                {dataInitialized ? <Routes /> : <InitializationScreen />}
             </main>
             <Snackbar open={!!error} message={<div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>} />
         </div>

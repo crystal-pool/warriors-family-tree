@@ -1,7 +1,7 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import * as React from "react";
-import { match } from "react-router";
+import { match, RouteComponentProps } from "react-router";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
@@ -10,13 +10,13 @@ import { setDocumentTitle } from "../utility/general";
 import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
+import { parseQueryParams } from "../utility/queryParams";
 
-export interface IFamilyTreeProps {
-    match: match<IFamilyTreeRoutingParams>;
+export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
 }
 
 export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
-    let characterId = props.match.params.character;
+    const characterId = props.match.params.character;
     const [maxDistance, setMaxDistance] = React.useState(3);
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     React.useEffect(() => {
@@ -60,4 +60,18 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={maxDistance} />
         </Paper>
     </React.Fragment>);
+});
+
+export const FamilyTreeEmbed: React.FC<IFamilyTreeProps> = React.memo((props) => {
+    const characterId = props.match.params.character;
+    const { depth } = parseQueryParams(props.location.search);
+    if (!characterId) {
+        return (<React.Fragment>
+            <h1>resourceManager.getPrompt("FamilyTreeTitle")</h1>
+            <p>Specify a character ID to continue.</p>
+        </React.Fragment>);
+    }
+    return (<div className="familytree-container">
+        <CharacterFamilyTree centerQName={characterId} maxDistance={depth || 3} />
+    </div>);
 });
