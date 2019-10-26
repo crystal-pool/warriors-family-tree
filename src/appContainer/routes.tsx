@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Route } from "react-router";
 import * as Pages from "../pages";
+import { dataService } from "../services";
 
 export interface IRoutesProps {
     embed?: boolean;
@@ -12,3 +13,8 @@ export const Routes: React.FC<IRoutesProps> = (props) => {
         <Route path={Pages.routePaths.familyTree} component={props.embed ? Pages.FamilyTreeEmbed : Pages.FamilyTree} />
     </React.Fragment>);
 };
+
+export const RoutesAfterInitialization = React.lazy(async () => {
+    await dataService.initialization;
+    return { default: Routes };
+});

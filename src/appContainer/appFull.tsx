@@ -1,10 +1,8 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
+import { AppBar, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
 import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
 import * as React from "react";
-import { HashRouter } from "react-router-dom";
-import { PromiseLikeResolutionSource } from "tasklike-promise-library";
 import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { resourceManager } from "../localization";
@@ -12,7 +10,7 @@ import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { InitializationScreen, routePathBuilders } from "../pages";
 import { dataService } from "../services";
 import { appInsights } from "../utility/telemetry";
-import { Routes } from "./routes";
+import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
 
@@ -145,7 +143,6 @@ export const AppFull: React.FC = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [dataInitialized, setDataInitialized] = React.useState(dataService.isInitialized);
     const [error, setError] = React.useState<Error>();
     const [language, setLanguage] = React.useState<KnownLanguage>(browserLanguage);
     const errorMessage = error && (error.stack || error.message || error.toString());
@@ -169,14 +166,6 @@ export const AppFull: React.FC = (props) => {
         dataService.language = lang;
         setLanguage(lang);
     };
-
-    React.useEffect(() => {
-        if (dataInitialized) { return; }
-        const cleanupPrs = new PromiseLikeResolutionSource();
-        Promise.race([cleanupPrs.promiseLike, dataService.initialization])
-            .then(p => cleanupPrs && cleanupPrs.tryResolve() && setDataInitialized(true));
-        return () => { cleanupPrs.tryResolve(); };
-    });
 
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
@@ -266,7 +255,9 @@ export const AppFull: React.FC = (props) => {
             </nav>
             <main className={classes.content}>
                 <div className={classes.toolbar} />
-                {dataInitialized ? <Routes /> : <InitializationScreen />}
+                <React.Suspense fallback={<InitializationScreen />}>
+                    <RoutesAfterInitialization />
+                </React.Suspense>
             </main>
             <Snackbar open={!!error} message={<div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>} />
         </div>
