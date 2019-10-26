@@ -10,8 +10,11 @@
   "scripts": {
     "lint": "tslint -p .",
     "start": "webpack-dev-server",
-    "build-prod": "webpack --mode production",
     "build": "webpack --mode development",
+    "build-prod": "webpack --mode production",
+    "start-embed": "webpack-dev-server --config ./embed/webpack.config.ts",
+    "build-embed": "webpack --config ./embed/webpack.config.ts --mode development",
+    "build-embed-prod": "webpack --config ./embed/webpack.config.ts --mode production",
     "test": "mocha --require ts-node/register --timeout 10000 tests/**/*.test.ts",
     "deploy-prod": "gh-pages -d ./dist",
     "deploy": "pause && gh-pages -d ./dist"

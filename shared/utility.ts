@@ -18,3 +18,13 @@ export function flattenKeyPath(obj: NestableObject): FlattenedObject {
     flattenInner(obj, "");
     return result;
 }
+
+export function serializeRecordValues(records: Record<string, unknown>): Record<string, string> {
+    const result: Record<string, string> = {};
+    for (const key in records) {
+      if (Object.prototype.hasOwnProperty.call(records, key)) {
+        result[key] = records[key] === undefined ? "undefined" : JSON.stringify(records[key]);
+      }
+    }
+    return result;
+}

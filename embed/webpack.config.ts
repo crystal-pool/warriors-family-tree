@@ -1,12 +1,10 @@
-import CopyPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import fs from "fs";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack, { DefinePlugin } from "webpack";
-import { IEnvironmentInfo } from "./shared/environment";
-import { getGitHead } from "./shared/git";
-import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
+import { IEnvironmentInfo } from "../shared/environment";
+import { getGitHead } from "../shared/git";
+import { flattenKeyPath, serializeRecordValues } from "../shared/utility";
 
 async function buildEnvironmentDefinitions(isProduction: boolean) {
   const definitions = serializeRecordValues(flattenKeyPath({
@@ -17,23 +15,6 @@ async function buildEnvironmentDefinitions(isProduction: boolean) {
       aiInstrumentationKey: undefined
     }) as IEnvironmentInfo
   }));
-  const definitionPaths = [
-    "./webpack.env.json",
-    "./_private/webpack.env.json"
-  ];
-  for (const defPath of definitionPaths) {
-    const fullPath = path.join(__dirname, defPath);
-    try {
-      await fs.promises.access(fullPath, fs.constants.F_OK);
-    } catch {
-      // File does not exist.
-      continue;
-    }
-    const content = await fs.promises.readFile(fullPath);
-    console.info("Loaded environment definitions from %s.", fullPath);
-    const contentJson = JSON.parse(content.toString());
-    Object.assign(definitions, contentJson);
-  }
   return definitions;
 }
 
@@ -45,12 +26,12 @@ export default async function config(env: any, argv: Record<string, string>): Pr
   console.info("isProduction:", isProduction);
   return {
     mode: isProduction ? "production" : "development",
-    entry: "./src/index.tsx",
+    entry: path.join(__dirname, "./src/index.ts"),
     devtool: isProduction ? "source-map" : "inline-source-map",
     devServer: {
       contentBase: path.join(__dirname, "assets"),
       compress: true,
-      port: 3080,
+      port: 3082,
       watchContentBase: true
     },
     module: {
@@ -84,15 +65,12 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       extensions: [".tsx", ".ts", ".js"]
     },
     plugins: [
-      new CopyPlugin([
-        { from: path.join(__dirname, "assets"), to: outputPath }
-      ]),
-      new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
       new ForkTsCheckerWebpackPlugin({
         useTypescriptIncrementalApi: true,
         tsconfig: path.join(__dirname, "./src/tsconfig.json"),
         reportFiles: ["!**/node_modules/**"]
-      })
+      }),
+      new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
     ],
     optimization: {
       minimize: isProduction,
@@ -109,7 +87,9 @@ export default async function config(env: any, argv: Record<string, string>): Pr
     },
     output: {
       path: outputPath,
-      filename: "index.js"
+      filename: "wft-embed-umd.js",
+      library: "WarriorsFamilyTreeEmbed",
+      libraryTarget: "umd"
     }
   };
 }
