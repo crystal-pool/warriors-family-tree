@@ -38,7 +38,7 @@ export function parseQueryParams(queryExpr: string): IQueryParams {
     };
 }
 
-export function replaceQueryParam<T extends {} = IQueryParams>(queryExpr: string, replacements: Partial<T>): string {
+export function setQueryParams<T extends IQueryParams>(queryExpr: string, replacements: Partial<T>): string {
     var s = new URLSearchParams(queryExpr);
     for (const k in replacements) {
         if (replacements.hasOwnProperty(k)) {

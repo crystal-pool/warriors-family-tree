@@ -10,14 +10,15 @@ import { setDocumentTitle } from "../utility/general";
 import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
-import { parseQueryParams } from "../utility/queryParams";
+import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 
 export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
 }
 
 export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     const characterId = props.match.params.character;
-    const [maxDistance, setMaxDistance] = React.useState(3);
+    const queryParams = parseQueryParams(props.location.search);
+    const depth = queryParams.depth || 3;
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     React.useEffect(() => {
         if (!characterId) {
@@ -35,43 +36,40 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
         </React.Fragment>);
     }
     if (characterId.indexOf(":") < 0) {
-        location.replace(routePathBuilders.familyTree({ ...props.match, character: "wd:" + characterId }));
+        location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + characterId }, props.location.search));
     }
     return (<React.Fragment>
-        <h1>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h1>
-        <Typography variant="subtitle1"><RdfEntityDescription qName={characterId} /></Typography>
-        <Grid container spacing={1}>
-            <Grid item xs={12} md={6} lg={4}>
-                <Typography id="max-depth-slider">Max depth: {maxDistance}</Typography>
-                <Slider aria-labelledby="discrete-slider" marks value={maxDistance} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => setMaxDistance(v as number)} />
-            </Grid>
-            {environment.isProduction ||
-                (<Grid item xs={12} md={6} lg={4}>
-                    <Typography id="mode-selector">Mode</Typography>
-                    <ToggleButtonGroup
-                        aria-labelledby="mode-selector" size="small"
-                        exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
-                        <ToggleButton value="naive">Naïve</ToggleButton>
-                        <ToggleButton value="bloodline">Bloodline</ToggleButton>
-                    </ToggleButtonGroup>
-                </Grid>)}
-        </Grid>
+        {queryParams.embed
+            ? (<React.Fragment>
+                <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
+                <Typography variant="subtitle2"><RdfEntityDescription qName={characterId} /></Typography>
+            </React.Fragment>)
+            : (<React.Fragment>
+                <h1>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h1>
+                <Typography variant="subtitle1"><RdfEntityDescription qName={characterId} /></Typography>
+                <Grid container spacing={1}>
+                    <Grid item xs={12} md={6} lg={4}>
+                        <Typography id="max-depth-slider">Max depth: {depth}</Typography>
+                        <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => {
+                            location.replace(routePathBuilders.familyTree(props.match.params, setQueryParams(props.location.search, { depth: v as number })));
+                        }} />
+                    </Grid>
+                    {environment.isProduction ||
+                        (<Grid item xs={12} md={6} lg={4}>
+                            <Typography id="mode-selector">Mode</Typography>
+                            <ToggleButtonGroup
+                                aria-labelledby="mode-selector" size="small"
+                                exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
+                                <ToggleButton value="naive">Naïve</ToggleButton>
+                                <ToggleButton value="bloodline">Bloodline</ToggleButton>
+                            </ToggleButtonGroup>
+                        </Grid>)}
+                </Grid>
+            </React.Fragment>
+            )
+        }
         <Paper className="familytree-container">
-            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={maxDistance} />
+            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} />
         </Paper>
     </React.Fragment>);
-});
-
-export const FamilyTreeEmbed: React.FC<IFamilyTreeProps> = React.memo((props) => {
-    const characterId = props.match.params.character;
-    const { depth } = parseQueryParams(props.location.search);
-    if (!characterId) {
-        return (<React.Fragment>
-            <h1>resourceManager.getPrompt("FamilyTreeTitle")</h1>
-            <p>Specify a character ID to continue.</p>
-        </React.Fragment>);
-    }
-    return (<div className="familytree-container">
-        <CharacterFamilyTree centerQName={characterId} maxDistance={depth || 3} />
-    </div>);
 });
