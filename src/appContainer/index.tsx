@@ -6,13 +6,13 @@ import * as React from "react";
 import { Route } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { PromiseLikeResolutionSource } from "tasklike-promise-library";
-import { EntitySearchBox } from "./components/EntitySearchBox";
-import { LanguageSwitch } from "./components/LanguageSwitch";
-import { resourceManager } from "./localization";
-import { browserLanguage, KnownLanguage } from "./localization/languages";
-import * as Pages from "./pages";
-import { dataService } from "./services";
-import { appInsights } from "./utility/telemetry";
+import { EntitySearchBox } from "../components/EntitySearchBox";
+import { LanguageSwitch } from "../components/LanguageSwitch";
+import { resourceManager } from "../localization";
+import { browserLanguage, KnownLanguage } from "../localization/languages";
+import * as Pages from "../pages";
+import { dataService } from "../services";
+import { appInsights } from "../utility/telemetry";
 
 export interface IAppProps {
 }
