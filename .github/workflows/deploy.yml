@@ -27,12 +27,15 @@ jobs:
           repository: crystal-pool/Dump
           fetch-depth: 2
           ref: master
-      - name: Prep 1
+      - name: PrepEnv
         shell: pwsh
-        run: ./scripts/prep.ps1
-      - name: Prep 2
+        run: ./scripts/prepEnv.ps1
+      - name: PrepSecrets
         shell: pwsh
         run: './scripts/BuildSecrets.ps1 -Restore -Key:"${{ secrets.BUILD_SECRET }}"'
+      - name: PrepProject
+        shell: pwsh
+        run: ./scripts/prepProject.ps1
       - name: Build
         shell: pwsh
         run: ./scripts/build.ps1

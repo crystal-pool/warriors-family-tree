@@ -20,14 +20,8 @@ $DataPath = (New-Item "./assets/data" -ItemType Directory -Force).FullName
 $DataBuilderProjectDir = (Resolve-Path "./DataBuilder/DataBuilder.csproj").Path
 
 # Assumes $PWD is repo root
-dotnet build -c Release $DataBuilderProjectDir
-checkLastExitCode
 dotnet run -c Release -p $DataBuilderProjectDir -- $RdfPath $DataPath
 checkLastExitCode
 
-yarn install
-checkLastExitCode
-git apply ./patch.diff --verbose --ignore-whitespace
-checkLastExitCode
 yarn build-prod
 checkLastExitCode
