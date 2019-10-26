@@ -15,6 +15,7 @@
             "dom"
         ],
         "esModuleInterop": true,
-        "downlevelIteration": true
+        "downlevelIteration": true,
+        "importHelpers": true
     }
 }
