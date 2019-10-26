@@ -165,7 +165,7 @@ export const AppFull: React.FC = (props) => {
         resourceManager.language = lang;
         dataService.language = lang;
         setLanguage(lang);
-    };
+    }
 
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);

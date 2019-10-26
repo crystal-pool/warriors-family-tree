@@ -3,9 +3,9 @@ import _ from "lodash";
 import * as React from "react";
 import ReactDOM from "react-dom";
 import Svg from "svgjs";
-import { ILayoutNode, layoutFamilyTree } from "./layout";
 import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
+import { ILayoutNode, layoutFamilyTree } from "./layout";
 
 export interface IFamilyTreeData {
     roots: string[];

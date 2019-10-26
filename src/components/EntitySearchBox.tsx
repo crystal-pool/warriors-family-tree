@@ -3,9 +3,9 @@ import { MenuItemProps } from "@material-ui/core/MenuItem";
 import SearchIcon from "@material-ui/icons/Search";
 import Downshift from "downshift";
 import * as React from "react";
+import { resourceManager } from "../localization";
 import { dataService } from "../services";
 import { IEntityLookupResultItem, RdfQName } from "../services/dataService";
-import { resourceManager } from "../localization";
 
 export type EntitySearchBoxClassName = "root"
     | "searchIcon" | "inputRoot" | "inputInput"

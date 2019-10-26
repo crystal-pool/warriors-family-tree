@@ -2,9 +2,9 @@ import { Typography } from "@material-ui/core";
 import * as React from "react";
 import { EntitySearchBox } from "../components/EntitySearchBox";
 import { resourceManager } from "../localization";
+import { setDocumentTitle } from "../utility/general";
 import { appInsights } from "../utility/telemetry";
 import { routePathBuilders } from "./routes";
-import { setDocumentTitle } from "../utility/general";
 
 export const Welcome: React.FC = (props) => {
     React.useEffect(() => {

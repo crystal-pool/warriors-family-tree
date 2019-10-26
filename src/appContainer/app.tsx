@@ -14,11 +14,11 @@ interface IRouteRootProps extends RouteComponentProps {
 const RouteRoot: React.FC<IRouteRootProps> = (props) => {
     const queryParams = parseQueryParams(props.location.search);
     if (queryParams.embed) {
-        return <AppEmbed />
+        return <AppEmbed />;
     } else {
-        return <AppFull />
+        return <AppFull />;
     }
-}
+};
 
 export const App: React.FC<IAppProps> = (props) => {
     return (
@@ -26,4 +26,4 @@ export const App: React.FC<IAppProps> = (props) => {
             <Route component={RouteRoot} />
         </HashRouter>
     );
-}
+};

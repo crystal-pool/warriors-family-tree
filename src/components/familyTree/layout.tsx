@@ -1,10 +1,8 @@
-import List from "linked-list";
+import * as Solver from "javascript-lp-solver";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
-import { ListItem } from "../../utility/linkedList";
+import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUtility";
 import { IFamilyTreeData } from "./FamilyTree";
-import { Polynomial, Contraint, buildJSLPModel } from "../../utility/lpsolverUtility";
-import * as Solver from "javascript-lp-solver";
 
 export interface ILayoutNode {
     id: string;
@@ -269,7 +267,7 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
             if (mates) {
                 // Put mates nearer to each other.
                 if (arrangedRow.some(n => mates.has(n))) {
-                    arrangedRow.splice(groupStart, 0, c)
+                    arrangedRow.splice(groupStart, 0, c);
                     inserted = true;
                 } else if (wu(incomingNodes).some(n => mates.has(n))) {
                     delayedNodes.push(c);

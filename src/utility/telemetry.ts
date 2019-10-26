@@ -45,7 +45,7 @@ export function initializeTracking() {
                     success,
                     type: "Resource",
                     properties: { originalTimestamp: timestamp.toISOString() }
-                })
+                });
                 return;
             }
             appInsights.trackTrace({ message, properties: { originalTimestamp: timestamp.toISOString(), rest } });

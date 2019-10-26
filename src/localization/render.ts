@@ -6,7 +6,7 @@ export function renderTemplate(template: string, args?: TemplateArguments<React.
     if (!args) {
         return template;
     }
-    var re = /\{(.+?)\}/g;
+    let re = /\{(.+?)\}/g;
     const result: React.ReactNodeArray = [];
     do {
         const lastIndex = re.lastIndex;

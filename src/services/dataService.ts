@@ -1,6 +1,6 @@
 import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
 import wu from "wu";
-import { evaluateLanguageSimilarity, browserLanguage } from "../localization/languages";
+import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
 
 export type RdfQName = string;
 
@@ -67,6 +67,7 @@ export class DataService {
         if (value !== this._language) {
             this._switchLanguageCts && this._switchLanguageCts.cancel();
             this._switchLanguageCts = new CancellationTokenSource();
+            // tslint:disable-next-line: no-floating-promises
             this._switchLanguage(value, this._switchLanguageCts.token);
             this._language = value;
         }

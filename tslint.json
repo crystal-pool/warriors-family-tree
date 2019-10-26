@@ -11,7 +11,11 @@
         ],
         "ordered-imports": true,
         "eofline": true,
-        "await-promise": true,
+        "await-promise": [
+            true,
+            "Promise",
+            "PromiseLike"
+        ],
         "quotemark": [
             true,
             "double"

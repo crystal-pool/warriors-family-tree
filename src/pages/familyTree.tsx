@@ -1,5 +1,5 @@
 import { Grid, Paper, Slider, Typography } from "@material-ui/core";
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { match, RouteComponentProps } from "react-router";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
@@ -7,10 +7,10 @@ import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
 import { dataService } from "../services";
 import { setDocumentTitle } from "../utility/general";
+import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
-import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 
 export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
 }

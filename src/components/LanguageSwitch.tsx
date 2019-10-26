@@ -26,8 +26,8 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
     return (<React.Fragment>
         <Tooltip
             className={classes.root}
-            aria-label={resourceManager.getPrompt('SwitchLanguage')}
-            title={resourceManager.getPrompt('SwitchLanguage')}
+            aria-label={resourceManager.getPrompt("SwitchLanguage")}
+            title={resourceManager.getPrompt("SwitchLanguage")}
         >
             <Button
                 color="inherit"
@@ -50,5 +50,5 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
                 </MenuItem>
             ))}
         </Menu>
-    </React.Fragment>)
+    </React.Fragment>);
 };
