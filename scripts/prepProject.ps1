@@ -9,6 +9,8 @@ function checkLastExitCode() {
 
 $ErrorActionPreference = "Stop"
 
+$DataBuilderProjectDir = (Resolve-Path "./DataBuilder/DataBuilder.csproj").Path
+
 # Assumes $PWD is repo root
 yarn install
 checkLastExitCode
