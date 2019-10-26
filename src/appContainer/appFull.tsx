@@ -1,4 +1,4 @@
-import { AppBar, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
+import { AppBar, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme, CssBaseline } from "@material-ui/core";
 import { createMuiTheme, fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
@@ -193,6 +193,7 @@ export const AppFull: React.FC = (props) => {
 
     return (
         <div className={classes.root}>
+            <CssBaseline />
             <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar>
                     <IconButton

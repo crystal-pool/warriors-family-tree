@@ -98,12 +98,15 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         // Arrage & layout nodes by row.
         const offsetXLookup = layoutRow(rawRows, matesLookup, childrenLookup);
         const rows = rawRows.map((nodes, row) => nodes.map((id, column): ILayoutNode => ({ id, row, column, offsetX: offsetXLookup[id] })));
+        telemetryProps.rows = rows.length;
         stopwatchDuration("a3Duration");
 
-        const {connections, rowSlotCount} = arrangeConnections(rows, matesLookup, childrenLookup);
+        const { connections, rowSlotCount } = arrangeConnections(rows, matesLookup, childrenLookup);
         stopwatchDuration("connectionDuration");
 
-        const rawWidth = rows.reduce((p, row) => row.reduce((p, node) => Math.max(p, node.offsetX), 0), 0) + 2;
+        const rawWidth = rows.reduce((p, row) =>
+            Math.max(p, row.reduce((p, node) => Math.max(p, node.offsetX), 0)
+            ), 0) + 2;
         const layoutNodes = new Map<string, ILayoutNode>();
         rows.forEach(nodes => nodes.forEach(n => layoutNodes.set(n.id, n)));
         let minNodeSpacingX: number | undefined;
@@ -117,7 +120,6 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         }
         if (minNodeSpacingX == null) minNodeSpacingX = 1;
 
-        telemetryProps.rows = rows.length;
         telemetryProps.width = rawWidth;
         telemetryProps.successful = true;
         return {
