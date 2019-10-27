@@ -1,11 +1,10 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Tooltip, Typography, useTheme } from "@material-ui/core";
-import { createMuiTheme, fade } from "@material-ui/core/styles";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
-import { ThemeProvider } from "@material-ui/styles";
 import * as React from "react";
+import { AppActionsList, EnvironmentInfoList } from "../components/DrawerActions";
 import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
-import { resourceManager } from "../localization";
 import { LanguageContext } from "../localization/react";
 import { InitializationScreen, routePathBuilders } from "../pages";
 import { RoutesAfterInitialization } from "./routes";
@@ -110,33 +109,6 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function openUrl(url: string): void {
-    window.open(url, "_blank");
-}
-
-const environmentInfoListTheme = createMuiTheme({
-    typography: {
-        fontSize: 12,
-    }
-});
-
-const EnvironmentInfoList: React.FC = () => {
-    return (<ThemeProvider theme={environmentInfoListTheme}>
-        <List dense>
-            {!environment.isProduction && <ListItem><ListItemText primary="Development Mode" /></ListItem>}
-            <Tooltip title="Go to the source code of this revision.">
-                <ListItem button
-                    onClick={() => openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId)} >
-                    <ListItemText primary="Revision" secondary={environment.commitId.substr(0, 8)} />
-                </ListItem>
-            </Tooltip>
-            <ListItem>
-                <ListItemText primary="Build time" secondary={new Date(environment.buildTimestamp).toISOString()} />
-            </ListItem>
-        </List >
-    </ThemeProvider>);
-};
-
 export const AppFull: React.FC = (props) => {
     const classes = useStyles();
     const theme = useTheme();
@@ -166,16 +138,7 @@ export const AppFull: React.FC = (props) => {
         <div className={classes.drawerContent}>
             <div className={classes.toolbar} />
             <Divider />
-            <List>
-                <ListItem button onClick={() => openUrl("https://github.com/crystal-pool/warriors-family-tree")}>
-                    <ListItemIcon><Icons.Code /></ListItemIcon>
-                    <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
-                </ListItem>
-                <ListItem button onClick={() => openUrl("https://crystalpool.cxuesong.com/")}>
-                    <ListItemIcon><Icons.Storage /></ListItemIcon>
-                    <ListItemText primary="Crystal Pool" secondary={resourceManager.getPrompt("ContributeToTheDataSource")} />
-                </ListItem>
-            </List>
+            <AppActionsList />
             <Divider />
             <div className={classes.drawerSpacing} />
             <EnvironmentInfoList />

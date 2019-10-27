@@ -40,7 +40,7 @@ export function parseQueryParams(queryExpr: string): IQueryParams {
     };
 }
 
-export function setQueryParams<T extends IQueryParams>(queryExpr: string, replacements: Partial<T>): string {
+export function setQueryParams<T extends IQueryParams>(queryExpr: string, replacements: { [k in keyof T]?: T[k] | null }): string {
     let s = new URLSearchParams(queryExpr);
     for (const k in replacements) {
         if (replacements.hasOwnProperty(k)) {

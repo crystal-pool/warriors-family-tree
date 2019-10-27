@@ -9,10 +9,14 @@ export const routePaths = {
     familyTree: "/familyTree/:character"
 };
 
+export function buildRoutePath(pathName: string, search?: string): string {
+    if (search && !search.startsWith("?")) search = "?" + search;
+    return "#" + pathName + (search || "");
+}
+
 function createRoutePathBuilder<TRoutingParams extends {}>(routeName: keyof typeof routePaths) {
     return function (params?: TRoutingParams, search?: string): string {
-        if (search && !search.startsWith("?")) search = "?" + search;
-        return "#" + generatePath(routePaths[routeName], params) + (search || "");
+        return buildRoutePath(generatePath(routePaths[routeName], params), search);
     };
 }
 

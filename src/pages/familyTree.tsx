@@ -1,8 +1,8 @@
-import { Button, Grid, IconButton, Paper, Slider, Tooltip, Typography } from "@material-ui/core";
-import * as Icons from "@material-ui/icons";
+import { Grid, Paper, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
+import { EmbedAppBar } from "../components/EmbedAppBar";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
@@ -42,19 +42,9 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     return (<React.Fragment>
         {queryParams.embed
             ? (<React.Fragment>
-                <Grid container>
-                    <Grid item xs={10}>
-                        <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
-                    </Grid>
-                    <Grid item xs={2}>
-                        <Tooltip title="Open in new window">
-                            <IconButton><Icons.OpenInNew /></IconButton>
-                        </Tooltip>
-                        <Tooltip title="Open app menu">
-                            <Button>Warriros Family Tree<Icons.Menu /></Button>
-                        </Tooltip>
-                    </Grid>
-                </Grid>
+                <EmbedAppBar>
+                    <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
+                </EmbedAppBar>
                 <Typography variant="subtitle2"><RdfEntityDescription qName={characterId} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
