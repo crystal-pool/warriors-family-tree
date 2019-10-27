@@ -6,10 +6,8 @@ import * as React from "react";
 import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { resourceManager } from "../localization";
-import { browserLanguage, KnownLanguage } from "../localization/languages";
+import { LanguageContext } from "../localization/react";
 import { InitializationScreen, routePathBuilders } from "../pages";
-import { dataService } from "../services";
-import { appInsights } from "../utility/telemetry";
 import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
@@ -144,7 +142,7 @@ export const AppFull: React.FC = (props) => {
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [error, setError] = React.useState<Error>();
-    const [language, setLanguage] = React.useState<KnownLanguage>(browserLanguage);
+    const languageContext = React.useContext(LanguageContext);
     const errorMessage = error && (error.stack || error.message || error.toString());
 
     React.useEffect(() => {
@@ -159,13 +157,6 @@ export const AppFull: React.FC = (props) => {
             window.removeEventListener("unhandledrejection", onGlobalError);
         };
     });
-
-    function onLanguageChanged(lang: KnownLanguage) {
-        appInsights.trackEvent({ name: "languageChanged", properties: { language } });
-        resourceManager.language = lang;
-        dataService.language = lang;
-        setLanguage(lang);
-    }
 
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
@@ -218,7 +209,7 @@ export const AppFull: React.FC = (props) => {
                             }}
                         />
                         <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
-                            language={language} onLanguageChanged={onLanguageChanged} />
+                            language={languageContext.language} onLanguageChanged={languageContext.setLanguage} />
                     </div>
                 </Toolbar>
             </AppBar>

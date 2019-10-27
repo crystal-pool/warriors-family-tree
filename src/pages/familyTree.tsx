@@ -1,4 +1,5 @@
-import { Grid, Paper, Slider, Typography } from "@material-ui/core";
+import { Button, Grid, IconButton, Paper, Slider, Tooltip, Typography } from "@material-ui/core";
+import * as Icons from "@material-ui/icons";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
@@ -41,7 +42,19 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     return (<React.Fragment>
         {queryParams.embed
             ? (<React.Fragment>
-                <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
+                <Grid container>
+                    <Grid item xs={10}>
+                        <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Tooltip title="Open in new window">
+                            <IconButton><Icons.OpenInNew /></IconButton>
+                        </Tooltip>
+                        <Tooltip title="Open app menu">
+                            <Button>Warriros Family Tree<Icons.Menu /></Button>
+                        </Tooltip>
+                    </Grid>
+                </Grid>
                 <Typography variant="subtitle2"><RdfEntityDescription qName={characterId} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
