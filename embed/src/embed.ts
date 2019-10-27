@@ -122,6 +122,7 @@ class EmbedMessageTarget implements IDisposable {
                 case "ready":
                     this.postMessage({
                         type: "initialize",
+                        url: location.href,
                         revision: environment.commitId,
                         buildTimestamp: environment.buildTimestamp,
                         settings: this._hostSettings
