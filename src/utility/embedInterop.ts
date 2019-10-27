@@ -86,7 +86,7 @@ function observeDocumentHeight(): void {
     if (documentHeightObserver) return;
     let currentHeight = 0;
     documentHeightObserver = new window.ResizeObserver(() => {
-        const h = document.documentElement.scrollHeight;
+        const h = document.documentElement.offsetHeight;
         if (h !== currentHeight) {
             postInteropMessage({ type: "documentHeightChanged", height: h });
             currentHeight = h;
