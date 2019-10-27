@@ -20,6 +20,9 @@ const prompts = {
     CharacterApprentice: "Apprentice",
     CharacterApprentices: "Apprentices",
     ListSeparator: ", ",
+    OpenInNewWindow: "Open in new window",
+    EmbedPoweredBy1: "Powered by {0}",
+    EmbedAppMenu: "Click to see more actions",
 };
 
 export type PromptsTable = typeof prompts;

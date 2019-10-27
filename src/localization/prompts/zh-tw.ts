@@ -22,6 +22,9 @@ const prompts: Partial<PromptsTable> = {
     CharacterApprentice: "見習生",
     CharacterApprentices: "見習生",
     ListSeparator: "、",
+    OpenInNewWindow: "在新窗口打開",
+    EmbedPoweredBy1: "由{0}強力驅動",
+    EmbedAppMenu: "點擊以查看更多操作",
 };
 
 export default prompts;

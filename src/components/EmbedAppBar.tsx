@@ -2,6 +2,7 @@ import { Button, createStyles, Divider, IconButton, ListItemText, makeStyles, Me
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { useLocation } from "react-router";
+import { resourceManager } from "../localization";
 import { LanguageContext } from "../localization/react";
 import { buildRoutePath } from "../pages";
 import { setQueryParams } from "../utility/queryParams";
@@ -51,7 +52,10 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
             </Tooltip>
             <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
                 language={languageContext.language} onLanguageChanged={languageContext.setLanguage} />
-            <Tooltip title={<ListItemText primary="Powered by Warriors Family Tree" secondary="Click to see more information" />}>
+            <Tooltip title={<ListItemText
+                primary={resourceManager.renderPrompt("EmbedPoweredBy1", [<span key={1} style={{ fontVariant: "small-caps" }}>Warriors Family Tree</span>])}
+                secondary={resourceManager.getPrompt("EmbedAppMenu")} />}
+            >
                 <Button onClick={(e) => setMenuAnchor(e.currentTarget)}>Warriors Family Tree<Icons.MoreVert /></Button>
             </Tooltip>
         </div>
