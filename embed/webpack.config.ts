@@ -18,6 +18,8 @@ async function buildEnvironmentDefinitions(isProduction: boolean) {
   return definitions;
 }
 
+const exportModuleName = "WarriorsFamilyTreeEmbed";
+
 // tslint:disable:object-literal-sort-keys
 export default async function config(env: any, argv: Record<string, string>): Promise<webpack.Configuration> {
   const isProduction = argv.mode === "production";
@@ -45,7 +47,11 @@ export default async function config(env: any, argv: Record<string, string>): Pr
           ],
           options: {
             experimentalWatchApi: true,
-            transpileOnly: true
+            // We need to turn off transpileOnly to generate .d.ts files.
+            transpileOnly: !isProduction,
+            compilerOptions: {
+              outDir: outputPath
+            }
           }
         },
         {
@@ -65,13 +71,13 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       extensions: [".tsx", ".ts", ".js"]
     },
     plugins: [
-      new ForkTsCheckerWebpackPlugin({
+      isProduction || new ForkTsCheckerWebpackPlugin({
         useTypescriptIncrementalApi: true,
         tsconfig: path.join(__dirname, "./src/tsconfig.json"),
         reportFiles: ["!**/node_modules/**"]
       }),
       new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
-    ],
+    ].filter((p): p is webpack.Plugin => typeof p === "object"),
     optimization: {
       minimize: isProduction,
       minimizer: [
@@ -88,7 +94,7 @@ export default async function config(env: any, argv: Record<string, string>): Pr
     output: {
       path: outputPath,
       filename: "wft-embed-umd.js",
-      library: "WarriorsFamilyTreeEmbed",
+      library: exportModuleName,
       libraryTarget: "umd"
     }
   };

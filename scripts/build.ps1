@@ -25,3 +25,8 @@ checkLastExitCode
 
 yarn build-prod
 checkLastExitCode
+
+yarn build-embed-prod
+checkLastExitCode
+New-Item -ItemType Directory ./dist/embed -Force
+Copy-Item ./embed/dist/* ./dist/embed/ -Recurse
