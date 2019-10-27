@@ -1,6 +1,7 @@
 import { Theme, Tooltip, withStyles } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
+import { useLocation } from "react-router";
 import wu from "wu";
 import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
@@ -112,9 +113,10 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
         });
         return () => subscription.dispose();
     });
+    const loc = useLocation();
     return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
         <div className={classNames("familytree-node", props.isCurrent && "current")} onClick={() => {
-            location.href = routePathBuilders.familyTree({ character: props.qName });
+            location.href = routePathBuilders.familyTree({ character: props.qName }, loc.search);
         }}>
             {label && <div className="entity-name">{label.label}</div>}
             <div className="entity-id">{props.qName}</div>

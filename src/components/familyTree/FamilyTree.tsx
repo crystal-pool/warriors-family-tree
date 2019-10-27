@@ -44,19 +44,15 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         }
     };
     private _drawingRoot: HTMLDivElement | null | undefined;
-    private _drawingReactRoot: HTMLElement | undefined;
+    private _portalNodes: [HTMLElement, React.ReactNode][] = [];
     public constructor(props: IFamilyTreeProps) {
         super(props);
         this._updateDrawing = _.debounce(this._updateDrawing, 100);
     }
     private _updateDrawing = (): void => {
         // console.log(dumpFamilyTreeData(this.props.familyTree));
-        // Cleanup
-        if (this._drawingReactRoot) {
-            ReactDOM.unmountComponentAtNode(this._drawingReactRoot);
-            this._drawingReactRoot = undefined;
-        }
         if (!this._drawingRoot) return;
+        this._portalNodes = [];
         while (this._drawingRoot.hasChildNodes())
             this._drawingRoot.firstChild!.remove();
         // Render
@@ -79,7 +75,6 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         const drawing = Svg(this._drawingRoot)
             .size(drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight)
             .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
-        const nodeContentRenderQueue: [HTMLElement, React.ReactNode][] = [];
         function getNodeRect(node: ILayoutNode): IRect {
             return {
                 left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
@@ -109,7 +104,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             .element("foreignObject")
                             .move(bRect.left, bRect.top)
                             .size(bRect.width, bRect.height);
-                        nodeContentRenderQueue.push([container.native(), renderedNode]);
+                        this._portalNodes.push([container.native(), renderedNode]);
                     }
                 }
                 if (this.props.debugInfo) {
@@ -236,20 +231,15 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 }
             }
         }
-        // Mount React.
-        const reactPortalDomRoot = document.createElement("div");
-        this._drawingRoot.appendChild(reactPortalDomRoot);
-        const mergedComponent = nodeContentRenderQueue.map(([container, reactRoot], i) =>
-            ReactDOM.createPortal(reactRoot, container));
-        ReactDOM.render(<React.Fragment>{mergedComponent}</React.Fragment>, reactPortalDomRoot);
-        this._drawingReactRoot = reactPortalDomRoot;
+        this.forceUpdate();
     }
     private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
         this._drawingRoot = root;
         this._updateDrawing();
     }
     public render(): React.ReactNode {
-        return (<div ref={this._onDrawingRootChanged} className={classNames("family-tree-drawing", this.props.className)}></div>);
+        const mergedComponent = this._portalNodes.map(([container, reactRoot], i) => ReactDOM.createPortal(reactRoot, container));
+        return (<div ref={this._onDrawingRootChanged} className={classNames("family-tree-drawing", this.props.className)}>{mergedComponent}</div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
         if (prevProps.familyTree !== this.props.familyTree) {

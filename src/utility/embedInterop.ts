@@ -1,4 +1,4 @@
-import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from "@microsoft/applicationinsights-web";
 import { ResizeObserver } from "resize-observer";
 import { ICancellationToken, PromiseLikeResolutionSource } from "tasklike-promise-library";
 import { EmbedMessage, HostMessage, IHostSettings } from "../../shared/messages";

@@ -68,13 +68,14 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         // Style preset
         frame.style.borderWidth = "0";
         frame.style.width = "100%";
+        frame.style.transition = "height 0.5s ease-out";
     }
     frame.allow = "fullscreen";
     frame.sandbox.add("allow-popups", "allow-popups-to-escape-sandbox", "allow-scripts", "allow-same-origin");
     const autoResize = intrinsicOptions.autoResize == null ? true : intrinsicOptions.autoResize;
     const embedMessageTarget = new EmbedMessageTarget(frame, postMessageToken, {
         observeDocumentHeight: autoResize,
-        scrollable: intrinsicOptions.scrollable || true
+        scrollable: intrinsicOptions.scrollable
     }, (message) => {
         switch (message.type) {
             case "documentHeightChanged":

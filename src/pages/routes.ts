@@ -12,7 +12,7 @@ export const routePaths = {
 function createRoutePathBuilder<TRoutingParams extends {}>(routeName: keyof typeof routePaths) {
     return function (params?: TRoutingParams, search?: string): string {
         if (search && !search.startsWith("?")) search = "?" + search;
-        return "#" + generatePath(routePaths[routeName], params) + search;
+        return "#" + generatePath(routePaths[routeName], params) + (search || "");
     };
 }
 
