@@ -14,7 +14,7 @@ interface IRouteRootProps extends RouteComponentProps {
 const RouteRoot: React.FC<IRouteRootProps> = (props) => {
     const queryParams = parseQueryParams(props.location.search);
     if (queryParams.embed) {
-        return <AppEmbed />;
+        return <AppEmbed postMessageToken={queryParams.pmToken} />;
     } else {
         return <AppFull />;
     }

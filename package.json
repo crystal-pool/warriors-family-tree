@@ -61,6 +61,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-router-dom": "^5.1.2",
+    "resize-observer": "^1.0.0",
     "svgjs": "^2.6.2",
     "tasklike-promise-library": "^0.0.5",
     "tslib": "^1.10.0",

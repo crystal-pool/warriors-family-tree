@@ -1,5 +1,6 @@
 export interface IQueryParams {
     embed?: boolean;
+    pmToken?: string;
     depth?: number;
 }
 
@@ -34,7 +35,8 @@ export function parseQueryParams(queryExpr: string): IQueryParams {
     let s = new URLSearchParams(queryExpr);
     return {
         embed: parseBoolean(s.get("embed")),
-        depth: parseIntNumber(s.get("depth"))
+        depth: parseIntNumber(s.get("depth")),
+        pmToken: s.get("pmToken") || undefined
     };
 }
 
