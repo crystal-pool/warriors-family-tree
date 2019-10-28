@@ -1,4 +1,4 @@
-import { Button, createStyles, Divider, IconButton, ListItemText, makeStyles, Menu, Tooltip } from "@material-ui/core";
+import { Button, createStyles, Divider, IconButton, ListItemText, makeStyles, Menu, Tooltip, Typography, Hidden } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { useLocation } from "react-router";
@@ -13,12 +13,15 @@ export type EmbedAppBarClassName = "root" | "title" | "toolbar" | "languageSwitc
 
 interface IEmbedAppBarProps {
     classes?: Partial<Record<EmbedAppBarClassName, string>>;
+    title?: React.ReactNode;
 }
 
 const useStyles = makeStyles(theme => createStyles<EmbedAppBarClassName, IEmbedAppBarProps>({
     root: {
-        display: "flex",
-        flexDirection: "row"
+        [theme.breakpoints.up("sm")]: {
+            display: "flex",
+            flexDirection: "row"
+        }
     },
     title: {
         flexGrow: 1
@@ -45,7 +48,7 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
     }, [loc.pathname, loc.search]);
     const onCloseMenu = React.useCallback(() => setMenuAnchor(undefined), []);
     return (<div className={classes.root}>
-        <div className={classes.title}>{props.children}</div>
+        <div className={classes.title}>{props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>): props.children}</div>
         <div className={classes.toolbar}>
             <Tooltip title="Open in new window">
                 <IconButton onClick={onOpenInNewWindowClicked}><Icons.OpenInNew /></IconButton>
@@ -56,7 +59,7 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
                 primary={resourceManager.renderPrompt("EmbedPoweredBy1", [<span key={1} style={{ fontVariant: "small-caps" }}>Warriors Family Tree</span>])}
                 secondary={resourceManager.getPrompt("EmbedAppMenu")} />}
             >
-                <Button onClick={(e) => setMenuAnchor(e.currentTarget)}>Warriors Family Tree<Icons.MoreVert /></Button>
+                <Button onClick={(e) => setMenuAnchor(e.currentTarget)}><Hidden xsDown>Warriors Family Tree</Hidden><Hidden smUp>WFT</Hidden><Icons.MoreVert /></Button>
             </Tooltip>
         </div>
         <Menu

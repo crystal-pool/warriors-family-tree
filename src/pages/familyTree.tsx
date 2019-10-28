@@ -42,9 +42,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     return (<React.Fragment>
         {queryParams.embed
             ? (<React.Fragment>
-                <EmbedAppBar>
-                    <h3>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h3>
-                </EmbedAppBar>
+                <EmbedAppBar title={resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])} />
                 <Typography variant="subtitle2"><RdfEntityDescription qName={characterId} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
