@@ -1,4 +1,4 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, makeStyles, Snackbar, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
+import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, makeStyles, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
 import { fade } from "@material-ui/core/styles";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
@@ -113,22 +113,7 @@ export const AppFull: React.FC = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [error, setError] = React.useState<Error>();
     const languageContext = React.useContext(LanguageContext);
-    const errorMessage = error && (error.stack || error.message || error.toString());
-
-    React.useEffect(() => {
-        function onGlobalError(e: ErrorEvent | PromiseRejectionEvent) {
-            const merged = e as (ErrorEvent & PromiseRejectionEvent);
-            setError(merged.error || merged.reason || "<Error>");
-        }
-        window.addEventListener("error", onGlobalError);
-        window.addEventListener("unhandledrejection", onGlobalError);
-        return () => {
-            window.removeEventListener("error", onGlobalError);
-            window.removeEventListener("unhandledrejection", onGlobalError);
-        };
-    });
 
     function handleDrawerToggle() {
         setMobileOpen(!mobileOpen);
@@ -214,7 +199,6 @@ export const AppFull: React.FC = (props) => {
                     <RoutesAfterInitialization />
                 </React.Suspense>
             </main>
-            <Snackbar open={!!error} message={<div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>} />
         </div>
     );
 };
