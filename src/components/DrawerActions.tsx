@@ -25,6 +25,7 @@ export interface IDrawerActionsProps {
     onItemClick?: () => void;
 }
 
+// Need ref to make Tooltip work
 const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     if (props.asMenuItem) {
         return (<MenuItem ref={ref} {...props}>{props.children}</MenuItem>);
@@ -35,9 +36,10 @@ const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, re
     }
 });
 
-export const AppActionsList: React.FC<IDrawerActionsProps> = React.memo((props) => {
+// Need ref to make Menu work
+export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     return (
-        <List>
+        <List ref={ref}>
             <ItemComponent onClick={() => {
                 openUrl("https://github.com/crystal-pool/warriors-family-tree");
                 props.onItemClick && props.onItemClick();
@@ -55,9 +57,9 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.memo((props) 
         </List>);
 });
 
-export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.memo((props) => {
+export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     return (<ThemeProvider theme={environmentInfoListTheme}>
-        <List dense>
+        <List dense ref={ref}>
             {!environment.isProduction && <ListItem><ListItemText primary="Development Mode" /></ListItem>}
             <Tooltip title="Go to the source code of this revision.">
                 <ItemComponent
