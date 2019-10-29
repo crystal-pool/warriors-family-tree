@@ -25,15 +25,15 @@ export interface IDrawerActionsProps {
     onItemClick?: () => void;
 }
 
-const ItemComponent: React.FC<IItemComponentProps> = (props) => {
+const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     if (props.asMenuItem) {
-        return (<MenuItem {...props}>{props.children}</MenuItem>);
+        return (<MenuItem ref={ref} {...props}>{props.children}</MenuItem>);
     } else if (props.onClick || props.href) {
-        return (<ListItem button {...props}>{props.children}</ListItem>);
+        return (<ListItem ref={ref} button {...props}>{props.children}</ListItem>);
     } else {
-        return (<ListItem {...props}>{props.children}</ListItem>);
+        return (<ListItem ref={ref} {...props}>{props.children}</ListItem>);
     }
-};
+});
 
 export const AppActionsList: React.FC<IDrawerActionsProps> = React.memo((props) => {
     return (
