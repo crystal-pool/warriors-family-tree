@@ -45,11 +45,11 @@
             window.setTimeout(function () {
                 if (loaded) { return; }
                 lf.onload = function () {
-                    emitResourceLoadStatus(trackIdf, fallbackUrl, true);
+                    emitResourceLoadStatus(trackId, fallbackUrl, true);
                     l.remove();
                 }
                 l.onerror = function () {
-                    emitResourceLoadStatus(trackIdf, fallbackUrl, false);
+                    emitResourceLoadStatus(trackId, fallbackUrl, false);
                 }
                 lf.href = fallbackUrl;
                 document.head.append(lf);
