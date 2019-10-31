@@ -1,8 +1,11 @@
 import { Button, Divider, IconButton, Snackbar, Typography } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
+import { TelemetryTrace } from "@microsoft/applicationinsights-properties-js";
+import { Location } from "history";
 import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import { HashRouter } from "react-router-dom";
+import { generateLongRandomId } from "../../shared/utility";
 import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { LanguageContext } from "../localization/react";
@@ -18,8 +21,22 @@ export interface IAppProps {
 interface IRouteRootProps extends RouteComponentProps {
 }
 
+function startNewPageScope(location: Location<any>): string {
+    const id = generateLongRandomId();
+    // Let the previous page tracking stop first.
+    appInsights.startTrackPage(id);
+    appInsights.context.telemetryTrace = new TelemetryTrace(generateLongRandomId());
+    // ISSUE AppInsights will unconditionally overwrite the name.
+    appInsights.context.telemetryTrace.name = location.pathname + location.search;
+    return id;
+}
+
 const RouteRoot: React.FC<IRouteRootProps> = (props) => {
     const queryParams = parseQueryParams(props.location.search);
+    React.useEffect(() => {
+        const id = startNewPageScope(props.location);
+        return () => { appInsights.stopTrackPage(id, undefined, { title: document.title }); };
+    }, [props.location]);
     if (queryParams.embed) {
         return <AppEmbed postMessageToken={queryParams.pmToken} />;
     } else {

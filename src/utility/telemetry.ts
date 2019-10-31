@@ -26,6 +26,8 @@ export function initializeTracking() {
         return true;
     }
     appInsights.loadAppInsights();
+    appInsights.context.application.ver = environment.commitId;
+    appInsights.context.application.build = String(environment.buildTimestamp);
     appInsights.addTelemetryInitializer(processTelemetry);
     appInsights.trackPageView({});
     if ("__drainBacklog" in window) {

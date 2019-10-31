@@ -9,7 +9,6 @@ import { resourceManager } from "../localization";
 import { dataService } from "../services";
 import { setDocumentTitle } from "../utility/general";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
-import { appInsights } from "../utility/telemetry";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
@@ -28,7 +27,6 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             const label = dataService.getLabelFor(characterId);
             setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
         }
-        appInsights.trackPageView();
     }, [props.match]);
     if (!characterId) {
         return (<React.Fragment>
