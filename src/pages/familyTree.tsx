@@ -7,8 +7,8 @@ import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
 import { dataService } from "../services";
-import { setDocumentTitle } from "../utility/general";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
+import { useSetPageTitle } from "../utility/react";
 import "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
@@ -20,12 +20,13 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     const queryParams = parseQueryParams(props.location.search);
     const depth = queryParams.depth || 3;
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
+    const setPageTitle = useSetPageTitle();
     React.useEffect(() => {
         if (!characterId) {
-            setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle"));
+            setPageTitle(resourceManager.getPrompt("FamilyTreeTitle"));
         } else {
             const label = dataService.getLabelFor(characterId);
-            setDocumentTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
+            setPageTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
         }
     }, [props.match]);
     if (!characterId) {
@@ -71,4 +72,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} />
         </Paper>
     </React.Fragment>);
+}, function propsComparer(prevProps, nextProps) {
+    return prevProps.location === nextProps.location;
 });
+FamilyTree.displayName = "FamilyTree";

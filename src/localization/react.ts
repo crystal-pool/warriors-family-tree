@@ -1,12 +1,12 @@
 import * as React from "react";
 import { browserLanguage, KnownLanguage } from "./languages";
 
-export interface ILanguageContextProps {
+export interface ILanguageContextValue {
     language: KnownLanguage;
     setLanguage: (language: KnownLanguage) => void;
 }
 
-export const LanguageContext = React.createContext<ILanguageContextProps>({
+export const LanguageContext = React.createContext<ILanguageContextValue>({
     language: browserLanguage,
     setLanguage(language) {
         throw new Error("Not supported.");

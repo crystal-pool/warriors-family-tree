@@ -6,16 +6,21 @@ import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { generateLongRandomId } from "../../shared/utility";
-import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
-import { LanguageContext } from "../localization/react";
-import { dataService } from "../services";
+import { ILanguageContextValue, LanguageContext } from "../localization/react";
 import { parseQueryParams } from "../utility/queryParams";
+import { IPageTitleContextValue, PageTitleContext } from "../utility/react";
 import { appInsights } from "../utility/telemetry";
 import { AppEmbed } from "./appEmbed";
 import { AppFull } from "./appFull";
 
 export interface IAppProps {
+}
+
+export interface IAppStates {
+    languageContext: ILanguageContextValue;
+    titleContext: IPageTitleContextValue;
+    error?: any;
 }
 
 interface IRouteRootProps extends RouteComponentProps {
@@ -86,52 +91,89 @@ class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
     }
 }
 
-export const App: React.FC<IAppProps> = (props) => {
-    const [language, setLanguage] = React.useState(browserLanguage);
-    const [error, setError] = React.useState<Error>();
-    const onSetLanguage = React.useCallback((lang: KnownLanguage) => {
-        if (language !== lang) {
-            appInsights.trackEvent({ name: "language.changed", properties: { language } });
-            resourceManager.language = lang;
-            dataService.language = lang;
-            setLanguage(lang);
-        }
-    }, [language, setLanguage]);
-    React.useEffect(() => {
-        document.documentElement.lang = language;
-        appInsights.trackEvent({ name: "language.applied", properties: { language } });
-    }, [language]);
-    React.useEffect(() => {
-        function onGlobalError(e: ErrorEvent | PromiseRejectionEvent) {
-            const merged = e as (ErrorEvent & PromiseRejectionEvent);
-            setError(merged.error || merged.reason || "<Error>");
-        }
-        window.addEventListener("error", onGlobalError);
-        window.addEventListener("unhandledrejection", onGlobalError);
-        return () => {
-            window.removeEventListener("error", onGlobalError);
-            window.removeEventListener("unhandledrejection", onGlobalError);
+export class App extends React.PureComponent<IAppProps, IAppStates> {
+    public constructor(props: Readonly<IAppProps>) {
+        super(props);
+        this.state = {
+            languageContext: {
+                language: browserLanguage,
+                setLanguage: this.setLanguage
+            },
+            titleContext: {
+                title: document.title,
+                withAppName: false,
+                setTitle: this.setTitle
+            },
+            error: undefined
         };
-    });
-    const errorMessage = error && formatError(error);
-    return (
-        <HashRouter>
-            <LanguageContext.Provider value={{ language, setLanguage: onSetLanguage }}>
-                <AppErrorBoundary>
-                    <Route component={RouteRoot} />
-                </AppErrorBoundary>
-                <Snackbar
-                    open={!!error}
-                    message={
-                        <div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>
-                    }
-                    action={<IconButton
-                        aria-label="close"
-                        onClick={() => setError(undefined)}
-                    >
-                        <Icons.Close />
-                    </IconButton>} />
-            </LanguageContext.Provider>
-        </HashRouter>
-    );
-};
+    }
+    public setLanguage = (language: KnownLanguage) => {
+        this.setState({ languageContext: { language, setLanguage: this.setLanguage } });
+    }
+    public setTitle = (title: string, withAppName: boolean) => {
+        const context = this.state.titleContext;
+        if (context.title !== title || context.withAppName !== withAppName) {
+            this.setState({ titleContext: { title, withAppName, setTitle: this.setTitle } });
+        }
+    }
+    public clearError = () => {
+        this.setState({ error: undefined });
+    }
+    private _applyLanguage(language: KnownLanguage, prevLanguage?: KnownLanguage): void {
+        document.documentElement.lang = language;
+        appInsights.trackEvent({ name: "language.applied", properties: { language, prevLanguage } });
+    }
+    private _applyTitle(title?: string, withAppName?: boolean): void {
+        if (withAppName || withAppName == null) {
+            document.title = (title ? (title + " - ") : "") + "Warriors Family Tree";
+        } else {
+            document.title = title || "";
+        }
+    }
+    private onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
+        const merged = e as (ErrorEvent & PromiseRejectionEvent);
+        this.setState({ error: merged.error || merged.reason || "<Error>" });
+    }
+    public render() {
+        const errorMessage = this.state.error != null && formatError(this.state.error);
+        return (
+            <HashRouter>
+                <PageTitleContext.Provider value={this.state.titleContext}>
+                    <LanguageContext.Provider value={this.state.languageContext}>
+                        <AppErrorBoundary>
+                            <Route component={RouteRoot} />
+                        </AppErrorBoundary>
+                        <Snackbar
+                            open={this.state.error != null}
+                            message={
+                                <div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>
+                            }
+                            action={<IconButton
+                                aria-label="close"
+                                onClick={this.clearError}
+                            >
+                                <Icons.Close />
+                            </IconButton>} />
+                    </LanguageContext.Provider>
+                </PageTitleContext.Provider>
+            </HashRouter>
+        );
+    }
+    public componentDidMount() {
+        window.addEventListener("error", this.onGlobalError);
+        window.addEventListener("unhandledrejection", this.onGlobalError);
+        this._applyLanguage(this.state.languageContext.language);
+    }
+    public componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
+        if (prevStates.languageContext.language !== this.state.languageContext.language) {
+            this._applyLanguage(this.state.languageContext.language, prevStates.languageContext.language);
+        }
+        if (prevStates.titleContext !== this.state.titleContext) {
+            this._applyTitle(this.state.titleContext.title, this.state.titleContext.withAppName);
+        }
+    }
+    public componentWillUnmount() {
+        window.removeEventListener("error", this.onGlobalError);
+        window.removeEventListener("unhandledrejection", this.onGlobalError);
+    }
+}

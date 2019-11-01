@@ -85,15 +85,16 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     if (!props.centerQName) {
         return null;
     }
-    const renderNode: NodeRenderCallback = (id, brct) => {
+    const renderNode: NodeRenderCallback = React.useCallback((id, brct) => {
         return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
-    };
+    }, [props.centerQName]);
     return familyTreeData
         && <FamilyTree className="character-family-tree" familyTree={familyTreeData}
             nodeWidth={120} nodeHeight={50}
             onRenderNode={renderNode} debugInfo={props.debugInfo} />
         || null;
 });
+CharacterFamilyTree.displayName = "CharacterFamilyTree";
 
 const HoverTooltip = withStyles((theme: Theme) => ({
     tooltip: {
