@@ -9,6 +9,14 @@ export const appInsights = new ApplicationInsights({
 
 export function initializeTracking() {
     function processTelemetry(item: ITelemetryItem): boolean {
+        if (item.baseType === "PageviewData" && item.baseData) {
+            // Allows us to override page title afterwards.
+            const surrogateName = item.baseData.properties && item.baseData.properties._name;
+            if (surrogateName) {
+                item.baseData.name = surrogateName;
+                delete item.baseData.properties._name;
+            }
+        }
         item.baseData = {
             ...item.baseData,
             properties: {

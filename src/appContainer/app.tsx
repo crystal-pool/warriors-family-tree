@@ -9,7 +9,7 @@ import { generateLongRandomId } from "../../shared/utility";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
 import { parseQueryParams } from "../utility/queryParams";
-import { IPageTitleContextValue, PageTitleContext } from "../utility/react";
+import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
 import { appInsights } from "../utility/telemetry";
 import { AppEmbed } from "./appEmbed";
 import { AppFull } from "./appFull";
@@ -36,18 +36,44 @@ function startNewPageScope(location: Location<any>): string {
     return id;
 }
 
-const RouteRoot: React.FC<IRouteRootProps> = (props) => {
-    const queryParams = parseQueryParams(props.location.search);
-    React.useEffect(() => {
-        const id = startNewPageScope(props.location);
-        return () => { appInsights.stopTrackPage(id, undefined, { title: document.title }); };
-    }, [props.location]);
-    if (queryParams.embed) {
-        return <AppEmbed postMessageToken={queryParams.pmToken} />;
-    } else {
-        return <AppFull />;
+function endPageScope(id: string, title?: string) {
+    appInsights.stopTrackPage(id, undefined, { _name: title, contextId: id });
+}
+
+export class RouteRoot extends React.PureComponent<IRouteRootProps> {
+    private _pageScopeId: string | undefined;
+    private _pageTitle: string | undefined;
+    public constructor(props: Readonly<IRouteRootProps>) {
+        super(props);
     }
-};
+    private _onLocationChanged(): void {
+        // Keep track of the last title before routing to the next location.
+        endPageScope(this._pageScopeId!, this._pageTitle);
+        this._pageScopeId = startNewPageScope(this.props.location);
+    }
+    public render() {
+        const queryParams = parseQueryParams(this.props.location.search);
+        return (<PageTitleContext.Consumer unstable_observedBits={PageTitleContextBits.title}>
+            {(state) => {
+                this._pageTitle = state.title;
+                return (queryParams.embed
+                    ? <AppEmbed postMessageToken={queryParams.pmToken} />
+                    : <AppFull />);
+            }}
+        </PageTitleContext.Consumer>);
+    }
+    public componentDidMount() {
+        this._pageScopeId = startNewPageScope(this.props.location);
+    }
+    public componentWillUnmount() {
+        endPageScope(this._pageScopeId!, this._pageTitle);
+    }
+    public componentDidUpdate(prevProps: Readonly<IRouteRootProps>) {
+        if (prevProps.location !== this.props.location) {
+            this._onLocationChanged();
+        }
+    }
+}
 
 function formatError(error: any): string {
     if (!error || typeof error !== "object") return String(error);
