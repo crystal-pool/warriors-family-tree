@@ -3,6 +3,7 @@ import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
 import React from "react";
 import { resourceManager } from "../localization";
+import * as LocalIcons from "../utility/muiIcons";
 
 const environmentInfoListTheme = createMuiTheme({
     typography: {
@@ -44,7 +45,7 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((p
                 openUrl("https://github.com/crystal-pool/warriors-family-tree");
                 props.onItemClick && props.onItemClick();
             }}>
-                <ListItemIcon><Icons.Code /></ListItemIcon>
+                <ListItemIcon><LocalIcons.GitHub /></ListItemIcon>
                 <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
             </ItemComponent>
             <ItemComponent onClick={() => {
