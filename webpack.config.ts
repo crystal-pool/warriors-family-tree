@@ -3,10 +3,18 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import fs from "fs";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
-import webpack, { DefinePlugin } from "webpack";
+import webpack from "webpack";
+import WebpackDevServer from "webpack-dev-server";
 import { IEnvironmentInfo } from "./shared/environment";
 import { getGitHead } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
+
+// Temporary fix for config augmentation.
+declare module "webpack" {
+  interface Configuration {
+      devServer?: WebpackDevServer.Configuration;
+  }
+}
 
 async function buildEnvironmentDefinitions(isProduction: boolean) {
   const definitions = serializeRecordValues(flattenKeyPath({
@@ -87,13 +95,13 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       new CopyPlugin([
         { from: path.join(__dirname, "assets"), to: outputPath }
       ]),
-      new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
+      new webpack.DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
       new ForkTsCheckerWebpackPlugin({
         useTypescriptIncrementalApi: true,
         tsconfig: path.join(__dirname, "./src/tsconfig.json"),
         reportFiles: ["!**/node_modules/**"]
       })
-    ],
+    ] as webpack.Plugin[],
     optimization: {
       minimize: isProduction,
       minimizer: [
