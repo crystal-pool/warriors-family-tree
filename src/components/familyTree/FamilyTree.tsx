@@ -61,26 +61,40 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         if (!layout) return;
         const FAMILY_TREE_BOX_SPACING_Y = this.props.nodeSpacingY == null ? 20 : this.props.nodeSpacingY;
         const drawingWidth = layout.rawWidth;
-        const rowTop: number[] = [0];
-        for (let row = 0; row < layout.rows.length; row++) {
-            rowTop.push(rowTop[row] + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET + layout.rows[row].reduce((p, n) => Math.max(p, n.height), 0) + FAMILY_TREE_BOX_SPACING_Y);
+        // [top, height]
+        const rowDimension: [number, number][] = [];
+        const rowSlotTop: number[] = [];
+        let drawingHeight: number | undefined;
+        {
+            let currentY = 0;
+            for (let row = 0; row < layout.rows.length; row++) {
+                if (row > 0) currentY += FAMILY_TREE_BOX_SPACING_Y;
+                const nodeHeight = layout.rows[row].reduce((p, n) => Math.max(p, n.height), 0);
+                rowDimension.push([currentY, nodeHeight]);
+                rowSlotTop.push(currentY + nodeHeight + FAMILY_TREE_MATE_SLOT_OFFSET);
+                currentY += nodeHeight + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET;
+            }
+            drawingHeight = currentY;
         }
-        const drawingHeight = rowTop[rowTop.length - 1];
         // Note the px in svg represents a physical length.
         const drawing = Svg(this._drawingRoot)
             .size(drawingWidth, drawingHeight)
             .viewbox(0, 0, drawingWidth, drawingHeight);
         function getNodeRect(node: ILayoutNode): IRect {
+            const [rowTop, rowHeight] = rowDimension[node.row];
             return {
                 left: node.offsetX - node.width / 2,
-                top: rowTop[node.row],
+                top: rowTop + (rowHeight - node.height) / 2,
                 width: node.width,
                 height: node.height
             };
         }
-        function getSlotY(rect: IRect, slotIndex: number): number {
-            if (slotIndex === 0) return rect.top + rect.height / 2;
-            return rect.top + rect.height + FAMILY_TREE_BOX_SPACING_Y / 2 + FAMILY_TREE_MATE_SLOT_OFFSET * slotIndex;
+        function getSlotY(node: ILayoutNode, slotIndex: number): number {
+            if (slotIndex === 0){
+                const rect = getNodeRect(node);
+                 return rect.top + rect.height / 2;
+            }
+            return rowSlotTop[node.row] + FAMILY_TREE_MATE_SLOT_OFFSET * (slotIndex - 1);
         }
         // Draw nodes.
         for (let rowi = 0; rowi < layout.rows.length; rowi++) {
@@ -149,13 +163,13 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             const rectC = getNodeRect(nodeC);
                             plotElbowHorizontal(drawing,
                                 centerX, mateLineY,
-                                getSlotY(rectL, childrenSlot),
+                                getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
                             ).addClass("family-tree-connection family-tree-connection-child");
                         }
                     }
                 } else if (nodeL.row === nodeR.row) {
-                    const slotY = getSlotY(rectL, slot1);
+                    const slotY = getSlotY(nodeL, slot1);
                     plotElbowHorizontal(drawing,
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
                         slotY,
@@ -168,7 +182,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             const rectC = getNodeRect(nodeC);
                             plotElbowHorizontal(drawing,
                                 startX, slotY,
-                                getSlotY(rectL, childrenSlot),
+                                getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
                             ).addClass("family-tree-connection family-tree-connection-child");
                         }
@@ -177,9 +191,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     console.assert(node1.row < node2.row);
                     const nodeU = node1;
                     const nodeD = node2;
-                    const rectU = nodeU === nodeL ? rectL : rectR;
                     const rectD = nodeD === nodeL ? rectL : rectR;
-                    const slotYU = getSlotY(rectU, slot1);
+                    const slotYU = getSlotY(nodeU, slot1);
                     const edgeXL = rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET;
                     const edgeYL = rectL.top + rectL.height / 2;
                     const edgeXR = rectR.left - FAMILY_TREE_MATE_SLOT_OFFSET;
@@ -201,7 +214,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             const rectC = getNodeRect(nodeC);
                             plotElbowHorizontal(drawing,
                                 startX, rectD.top + rectD.height / 2,
-                                getSlotY(rectD, childrenSlot),
+                                getSlotY(nodeD, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
                             ).addClass("family-tree-connection family-tree-connection-child");
                         }
@@ -220,7 +233,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         const rectC = getNodeRect(nodeC);
                         plotElbowHorizontal(drawing,
                             rect1.left + rect1.width / 2, rect1.top + rect1.height,
-                            getSlotY(rect1, childrenSlot),
+                            getSlotY(node1, childrenSlot),
                             rectC.left + rectC.width / 2, rectC.top
                         ).addClass("family-tree-connection family-tree-connection-child");
                     }
@@ -255,6 +268,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
         if (prevProps.familyTree !== this.props.familyTree) {
+            this._updateDrawing();
+        } else if (prevProps.onEvalNodeDimension !== this.props.onEvalNodeDimension) {
+            // TODO we might need to determine whether the dimension has really changed.
             this._updateDrawing();
         }
     }

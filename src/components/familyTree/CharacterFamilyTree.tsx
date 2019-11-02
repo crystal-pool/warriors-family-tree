@@ -3,6 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router";
 import wu from "wu";
+import { useLanguage } from "../../localization/react";
 import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName } from "../../services/dataService";
@@ -10,6 +11,7 @@ import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/genera
 import { CharacterCard } from "../CharacterCard";
 import "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
+import { ISize } from "./layout";
 
 export type CharacterFamilyTreeWalkMode = "naive" | "bloodline";
 
@@ -85,6 +87,17 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     const onFamilyTreeRendered = React.useCallback((ft: FamilyTree) => {
         ft.scrollToNode(props.centerQName);
     }, [props.centerQName]);
+    const evaluateNodeDimension = React.useCallback(function evaluateNodeDimension(id: string): ISize {
+        const label = dataService.getLabelFor(id)?.label || id;
+        const CHARACTER_WIDTH = 9;
+        const effectiveLength = label.length + (label.match(/\p{Lo}/ug) || []).length;
+        const subTitleWidth = id.length * CHARACTER_WIDTH + CHARACTER_WIDTH;
+        if (effectiveLength <= 26) {
+            return { width: Math.max(100, subTitleWidth, Math.ceil((effectiveLength * CHARACTER_WIDTH + CHARACTER_WIDTH) / 20) * 20), height: 50 };
+        } else {
+            return { width: 200, height: 30 + Math.ceil(effectiveLength / 24) * 20 };
+        }
+    }, [useLanguage()]);
     if (!props.centerQName) {
         return null;
     }
@@ -95,6 +108,7 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         && <FamilyTree
             className="character-family-tree" familyTree={familyTreeData}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
+            onEvalNodeDimension={evaluateNodeDimension}
             debugInfo={props.debugInfo} />
         || null;
 });
