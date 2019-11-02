@@ -1,3 +1,16 @@
 body.embed.noscroll {
     overflow: hidden;
 }
+
+.error-root-container .error-technical {
+    border: 1px dashed #0000ff;
+    background: #ffffcc;
+    font-size: 0.875em;
+    width: fit-content;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.error-root-container .error-callstack {
+    white-space: pre-wrap;
+}
