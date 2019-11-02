@@ -6,6 +6,7 @@ import { EmbedAppBar } from "../components/EmbedAppBar";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
+import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
@@ -21,6 +22,8 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     const depth = queryParams.depth || 3;
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     const setPageTitle = useSetPageTitle();
+    // Re-render the component when language changes.
+    useLanguage();
     React.useEffect(() => {
         if (!characterId) {
             setPageTitle(resourceManager.getPrompt("FamilyTreeTitle"));
