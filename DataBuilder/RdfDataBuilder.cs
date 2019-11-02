@@ -62,14 +62,19 @@ namespace WarriorsFamilyTree.DataBuilder
             return result;
         }
 
+        private string ReduceUri(Uri uri)
+        {
+            if (namespaceMapper.ReduceToQName(uri.ToString(), out var qname))
+                return qname;
+            return ":" + uri;
+        }
+
         private string SerializeUriNode(INode node)
         {
             if (node is IBlankNode)
                 return "_:";
             var unode = (IUriNode)node;
-            if (namespaceMapper.ReduceToQName(unode.Uri.ToString(), out var qname))
-                return qname;
-            return ":" + unode.Uri;
+            return ReduceUri(unode.Uri);
         }
 
         private static readonly IList<string> localizationLanguages = new List<string>
@@ -185,6 +190,35 @@ namespace WarriorsFamilyTree.DataBuilder
                     }).OrderByDescending(e => e.Priority).ThenBy(e => e.QName).ToList()
                 }).OrderBy(e => e.Keyword, StringComparer.InvariantCultureIgnoreCase)
                 .ToList();
+            return root;
+        }
+
+        public CharacterProfileRoot BuildCharacterProfile()
+        {
+            var root = new CharacterProfileRoot();
+
+            CharacterProfileEntry GetProfileEntry(Uri uri)
+            {
+                var qName = ReduceUri(uri);
+                if (!root.Characters.TryGetValue(qName, out var value))
+                {
+                    value = new CharacterProfileEntry();
+                    root.Characters.Add(qName, value);
+                }
+                return value;
+            }
+
+            CharacterProfileEntry GetProfileEntryFromNode(INode node)
+            {
+                var unode = (IUriNode)node;
+                return GetProfileEntry(unode.Uri);
+            }
+            var resultSet = ExecuteQueryFromResource("CharacterGender.rq");
+            foreach (var row in resultSet)
+            {
+                var entry = GetProfileEntryFromNode(row["character"]);
+                entry.Gender = row["gender"].AsValuedNode().AsString();
+            }
             return root;
         }
 

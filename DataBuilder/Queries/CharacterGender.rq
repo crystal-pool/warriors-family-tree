@@ -1,6 +1,6 @@
 SELECT ?character ?gender
 WHERE {
-    VALUES (?genderEntity ?gender) { (wd:Q678 "m") (wd:Q679 "f") }
+    VALUES (?genderEntity ?gender) { (wd:Q678 "male") (wd:Q679 "female") }
     ?character    wdt:P3/wdt:P4*  wd:Q624.    # should be fictional character
     ?character    wdt:P78         ?genderEntity
 }

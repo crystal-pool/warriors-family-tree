@@ -30,10 +30,13 @@ namespace DataBuilder
                 Directory.CreateDirectory(targetPath);
             void ExportJson(string fileName, object root)
             {
-                using var sw = new StreamWriter(Path.Join(targetPath, fileName));
-                using var jw = new JsonTextWriter(sw);
-                outputJsonSerializer.Serialize(jw, root);
-                Console.WriteLine("Exported {0}.", fileName);
+                var fullName = Path.Join(targetPath, fileName);
+                {
+                    using var sw = new StreamWriter(fullName);
+                    using var jw = new JsonTextWriter(sw);
+                    outputJsonSerializer.Serialize(jw, root);
+                }
+                Console.WriteLine("Exported {0} ({1:#,#} B).", fileName, new FileInfo(fullName).Length);
             }
 
             var graph = new Graph();
@@ -41,6 +44,7 @@ namespace DataBuilder
             Console.WriteLine("Loaded {0} tuples from {1}.", graph.Triples.Count, dumpPath);
             var dataset = new InMemoryDataset(graph);
             var builder = new RdfDataBuilder(dataset, graph.NamespaceMap);
+            ExportJson("characters.json", builder.BuildCharacterProfile());
             ExportJson("relations.json", builder.BuildRelationGraph());
             foreach (var (language, root) in builder.BuildEntityLabels())
             {
