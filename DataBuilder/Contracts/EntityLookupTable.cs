@@ -9,7 +9,7 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     public class EntityLookupTableRoot
     {
 
-        public IList<EntityLookupKeywordEntry> Entries { get; set; }
+        public IList<EntityLookupKeywordEntry> Entries { get; set; } = new List<EntityLookupKeywordEntry>();
 
     }
 
@@ -17,9 +17,9 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     public class EntityLookupKeywordEntry
     {
 
-        public string Keyword { get; set; }
+        public string Keyword { get; set; } = "";
 
-        public IList<EntityLookupEntityEntry> Entities { get; set; }
+        public IList<EntityLookupEntityEntry> Entities { get; set; } = new List<EntityLookupEntityEntry>();
 
     }
 
@@ -27,9 +27,9 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     public class EntityLookupEntityEntry
     {
 
-        public string QName { get; set; }
+        public string QName { get; set; } = "";
 
-        public string Language { get; set; }
+        public string Language { get; set; } = "";
 
         public int Priority { get; set; }
 

@@ -9,7 +9,7 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     public class LabelsRoot
     {
 
-        public IDictionary<string, EntityLabel> Labels { get; set; }
+        public IDictionary<string, EntityLabel> Labels { get; set; } = new Dictionary<string, EntityLabel>();
 
     }
 
@@ -17,9 +17,9 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     public class EntityLabel
     {
 
-        public string Label { get; set; }
+        public string Label { get; set; } = "";
 
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
     }
 

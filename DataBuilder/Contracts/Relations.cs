@@ -12,18 +12,18 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     {
 
         // key: clustered by Subject
-        public IDictionary<string, IList<EntityRelationRecord>> Relations { get; set; }
+        public IDictionary<string, IList<EntityRelationRecord>> Relations { get; set; } = new Dictionary<string, IList<EntityRelationRecord>>();
 
     }
 
     public class EntityRelationRecord
     {
 
-        public string Subject { get; set; }
+        public string Subject { get; set; } = "";
 
-        public string Relation { get; set; }
+        public string Relation { get; set; } = "";
 
-        public string Target { get; set; }
+        public string Target { get; set; } = "";
 
         public int? Ordinal { get; set; }
 
