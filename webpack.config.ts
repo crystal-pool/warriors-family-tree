@@ -9,13 +9,6 @@ import { IEnvironmentInfo } from "./shared/environment";
 import { getGitHead } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
 
-// Temporary fix for config augmentation.
-declare module "webpack" {
-  interface Configuration {
-      devServer?: WebpackDevServer.Configuration;
-  }
-}
-
 async function buildEnvironmentDefinitions(isProduction: boolean) {
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: ({
