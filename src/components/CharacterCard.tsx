@@ -3,7 +3,10 @@ import * as React from "react";
 import { useLocation } from "react-router";
 import { resourceManager } from "../localization";
 import { routePathBuilders } from "../pages/routes";
+import { dataService } from "../services";
 import { RdfQName } from "../services/dataService";
+import { Mars, Venus } from "../utility/muiIcons";
+import "./CharacterCard.scss";
 import { CharacterInfobox } from "./CharacterInfobox";
 import { RdfEntityDescription, RdfEntityLabel } from "./RdfEntity";
 
@@ -13,9 +16,17 @@ export interface ICharacterCardProps {
 
 export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) => {
     const loc = useLocation();
+    const profile = dataService.getCharacterProfileFor(props.qName);
+    const gender = profile?.gender;
     return (<Card className="character-card">
         <CardContent>
-            <h3><RdfEntityLabel qName={props.qName} showEntityId={true} /></h3>
+            <h3>
+                <RdfEntityLabel qName={props.qName} showEntityId={true} />
+                <span className="badges">
+                    {gender === "male" && <Mars fontSize="inherit" />}
+                    {gender === "female" && <Venus fontSize="inherit" />}
+                </span>
+            </h3>
             <p><RdfEntityDescription qName={props.qName} /></p>
             <CharacterInfobox qName={props.qName} />
         </CardContent>

@@ -34,10 +34,12 @@
         transition: 200ms;
         cursor: pointer;
 
-        &:hover {
-            background: #cccccc;
-            border: 2px solid #cccccc;
-            transition: 200ms;
+        &.male {
+            background: #ddf1ff;
+        }
+
+        &.female {
+            background: #ffe3ec;
         }
 
         .entity-id {
@@ -46,12 +48,24 @@
         }
 
         &.current {
-            background: rgba(255, 242, 197, 0.6);
-
-            &:hover {
-                background: #fff2c5;
-            }
+            background: #fff7db;
         }
+
+        &:hover {
+            background: #ffeba0;
+
+            &.male {
+                background: #aef3ff;
+            }
+
+            &.female {
+                background: #fdbdc5;
+            }
+
+            border: 1px solid #999999;
+            transition: 200ms;
+        }
+
     }
 
 }

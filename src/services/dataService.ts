@@ -4,6 +4,17 @@ import { browserLanguage, evaluateLanguageSimilarity } from "../localization/lan
 
 export type RdfQName = string;
 
+export type CharacterGender = "male" | "female";
+
+export interface ICharacterProfileEntry {
+    gender?: CharacterGender;
+    affiliations?: ICharacterAffiliationEntry[];
+}
+
+export interface ICharacterAffiliationEntry {
+
+}
+
 export type CharacterRelationType = "parent" | "child" | "foster-parent" | "foster-child" | "mate" | "mentor" | "apprentice";
 
 export interface ICharacterRelationEntry {
@@ -19,6 +30,10 @@ export interface ICharacterRelationEntry {
 export interface IEntityLabel {
     label?: string;
     description?: string;
+}
+
+interface ICharacterProfileRoot {
+    characters: { [character: string]: ICharacterProfileEntry };
 }
 
 interface IRelationsRoot {
@@ -46,6 +61,7 @@ export interface IEntityLookupResultItem {
 export class DataService {
     public readonly initialization: PromiseLike<void>;
     private _isInitialized = false;
+    private characters: ICharacterProfileRoot | undefined;
     private relations: IRelationsRoot | undefined;
     private entityLookup: IEntityLookupRoot | undefined;
     private labels: ILabelsRoot | undefined;
@@ -74,6 +90,10 @@ export class DataService {
     }
     public onLanguageChanged(listener: () => void): IDisposable {
         return this._languageChanged.addListener(listener);
+    }
+    public getCharacterProfileFor(entityId: RdfQName): Readonly<ICharacterProfileEntry> | undefined {
+        if (!this.characters) return undefined;
+        return this.characters.characters[entityId];
     }
     public getRelationsFor(
         characterEntityId: RdfQName,
@@ -151,8 +171,10 @@ export class DataService {
     private async _initialize(): Promise<void> {
         this._switchLanguageCts = new CancellationTokenSource();
         const slPromise = this._switchLanguage(this._language, this._switchLanguageCts.token);
+        const characters = this._fetchJsonData<ICharacterProfileRoot>("characters.json");
         const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
         const entityLookup = this._fetchJsonData<IEntityLookupRoot>("entityLookup.json");
+        this.characters = await characters;
         this.relations = await relations;
         this.entityLookup = await entityLookup;
         await slPromise;
