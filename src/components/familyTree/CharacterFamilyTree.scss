@@ -21,7 +21,7 @@
     }
 
     .familytree-node {
-        background: #cccccc99;
+        background: rgba(204, 204, 204, 0.6);
         border: 1px solid #cccccc;
         text-align: center;
         width: 100%;
@@ -45,7 +45,7 @@
         }
 
         &.current {
-            background: #fff2c599;
+            background: rgba(255, 242, 197, 0.6);
 
             &:hover {
                 background: #fff2c5;
