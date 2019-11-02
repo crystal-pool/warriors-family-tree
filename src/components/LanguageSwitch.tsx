@@ -42,10 +42,14 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
             onClose={() => setAnchorEl(undefined)}
         >
             {knownLanguages.map(lang => (
-                <MenuItem key={lang} selected={lang === props.language} onClick={() => {
-                    setAnchorEl(undefined);
-                    props.onLanguageChanged(lang);
-                }}>
+                <MenuItem
+                    key={lang}
+                    lang={lang}
+                    selected={lang === props.language}
+                    onClick={() => {
+                        setAnchorEl(undefined);
+                        props.onLanguageChanged(lang);
+                    }}>
                     <ListItemText primary={languageInfo[lang].autonym} />
                 </MenuItem>
             ))}
