@@ -1,6 +1,8 @@
 const prompts = {
     StarTheRepo: "Star the repo ⭐",
     ContributeToTheDataSource: "Contribute to the data source",
+    AboutThisApp: "About this app",
+    AboutThisAppDescription: "Or provide feedback to us",
     InitializationTitle: "Initializing…",
     InitializationDescription: "Hold tight. We are still loading some data.",
     WelcomeTitle: "Welcome",

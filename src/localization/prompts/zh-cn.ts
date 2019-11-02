@@ -3,6 +3,8 @@ import { PromptsTable } from "./en";
 const prompts: Partial<PromptsTable> = {
     StarTheRepo: "为我们点赞⭐",
     ContributeToTheDataSource: "为数据源添砖加瓦",
+    AboutThisApp: "关于此应用",
+    AboutThisAppDescription: "或者向我们提供反馈意见",
     InitializationTitle: "正在初始化……",
     InitializationDescription: "请稍后，我们仍在加载剩余的数据……",
     WelcomeTitle: "欢迎",

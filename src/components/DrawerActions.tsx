@@ -55,6 +55,13 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((p
                 <ListItemIcon><Icons.Storage /></ListItemIcon>
                 <ListItemText primary="Crystal Pool" secondary={resourceManager.getPrompt("ContributeToTheDataSource")} />
             </ItemComponent>
+            <ItemComponent onClick={() => {
+                openUrl("https://crystalpool.cxuesong.com/wiki/Crystal_Pool:Warriors_Family_Tree");
+                props.onItemClick && props.onItemClick();
+            }}>
+                <ListItemIcon><LocalIcons.Cat /></ListItemIcon>
+                <ListItemText primary={resourceManager.getPrompt("AboutThisApp")} secondary={resourceManager.getPrompt("AboutThisAppDescription")} />
+            </ItemComponent>
         </List>);
 });
 

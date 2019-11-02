@@ -1,4 +1,4 @@
-import { Button, Divider, IconButton, Snackbar, Typography } from "@material-ui/core";
+import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import { TelemetryTrace } from "@microsoft/applicationinsights-properties-js";
 import { Location } from "history";
@@ -6,6 +6,7 @@ import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { generateLongRandomId } from "../../shared/utility";
+import { contactUrl, issueTrackerUrl } from "../constants";
 import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
@@ -104,8 +105,11 @@ class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
                 <h3>Oops</h3>
                 <p>We are sorry for the inconvenience. Please refresh the page to see if it helps.</p>
                 <p><Button variant="contained" onClick={() => location.reload()}><Icons.Refresh />Refresh</Button></p>
+                <p>Sincerely,</p>
+                <p>Warriors Family Tree</p>
                 <Divider />
-                <p>If it does not help, consider opening an issue on GitHub to let us know.</p>
+                <p>If it does not help, consider <Link href={issueTrackerUrl} target="_blank">opening an issue on GitHub</Link> to let us know.</p>
+                <p><Link href={contactUrl} target="_blank">Other contact information</Link></p>
                 <Typography variant="subtitle1">Please attach the following information when reporting the issue:</Typography>
                 <div className="error-technical">
                     <Typography variant="subtitle2">Error</Typography>
