@@ -6,8 +6,10 @@ import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { generateLongRandomId } from "../../shared/utility";
+import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
+import { dataService } from "../services";
 import { parseQueryParams } from "../utility/queryParams";
 import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
 import { appInsights } from "../utility/telemetry";
@@ -134,6 +136,11 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         };
     }
     public setLanguage = (language: KnownLanguage) => {
+        if (language === this.state.languageContext.language) return;
+        // Change the languages of external objects first.
+        resourceManager.language = language;
+        dataService.language = language;
+        // Then trigger render.
         this.setState({ languageContext: { language, setLanguage: this.setLanguage } });
     }
     public setTitle = (title: string, withAppName: boolean) => {

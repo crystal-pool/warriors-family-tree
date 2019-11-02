@@ -13,3 +13,7 @@ export const LanguageContext = React.createContext<ILanguageContextValue>({
     }
 });
 LanguageContext.displayName = "LanguageContext";
+
+export function useLanguage(): KnownLanguage {
+    return React.useContext(LanguageContext).language;
+}
