@@ -50,7 +50,7 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
     return (<div className={classes.root}>
         <div className={classes.title}>{props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>): props.children}</div>
         <div className={classes.toolbar}>
-            <Tooltip title="Open in new window">
+            <Tooltip title={resourceManager.getPrompt("OpenInNewWindow")}>
                 <IconButton onClick={onOpenInNewWindowClicked}><Icons.OpenInNew /></IconButton>
             </Tooltip>
             <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
