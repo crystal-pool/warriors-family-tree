@@ -3,10 +3,9 @@ import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router";
 import wu from "wu";
-import { useLanguage } from "../../localization/react";
 import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
-import { CharacterRelationType, RdfQName } from "../../services/dataService";
+import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { CharacterCard } from "../CharacterCard";
 import "./CharacterFamilyTree.scss";
@@ -97,7 +96,7 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         } else {
             return { width: 200, height: 30 + Math.ceil(effectiveLength / 24) * 20 };
         }
-    }, [useLanguage()]);
+    }, [useDataServiceLanguage(dataService)]);
     if (!props.centerQName) {
         return null;
     }
@@ -125,14 +124,8 @@ const HoverTooltip = withStyles((theme: Theme) => ({
 }))(Tooltip);
 
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
-    const [label, setLabel] = React.useState(() => dataService.getLabelFor(props.qName));
+    const label = useLabelFor(dataService, props.qName);
     const profile = dataService.getCharacterProfileFor(props.qName);
-    React.useEffect(() => {
-        const subscription = dataService.onLanguageChanged(() => {
-            setLabel(dataService.getLabelFor(props.qName));
-        });
-        return () => subscription.dispose();
-    });
     const loc = useLocation();
     return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
         <div className={classNames("familytree-node", props.isCurrent && "current", profile?.gender)} onClick={() => {
@@ -143,3 +136,4 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
         </div>
     </HoverTooltip>);
 };
+FamilyTreeNode.displayName = "FamilyTreeNode";

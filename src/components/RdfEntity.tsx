@@ -2,7 +2,7 @@ import { Link } from "@material-ui/core";
 import * as React from "react";
 import { dataService } from "../services";
 import { tryGetFullUri } from "../services/dataConfig";
-import { RdfQName } from "../services/dataService";
+import { RdfQName, useLabelFor } from "../services/dataService";
 
 export interface IRdfEntityLinkProps {
     qName: RdfQName;
@@ -22,16 +22,7 @@ export interface IRdfEntityLabelProps {
 }
 
 export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
-    const [label, setLabel] = React.useState(() => dataService.getLabelFor(props.qName));
-    React.useEffect(() => {
-        const subscription = dataService.onLanguageChanged(() => {
-            setLabel(dataService.getLabelFor(props.qName));
-        });
-        return subscription.dispose.bind(subscription);
-    });
-    React.useEffect(() => {
-        setLabel(dataService.getLabelFor(props.qName));
-    }, [props.qName]);
+    const label = useLabelFor(dataService, props.qName);
     return (<span>
         <span className="entity-label">{label && label.label || props.fallbackContent}</span>
         {props.showEntityId && (<React.Fragment>
@@ -47,15 +38,6 @@ export interface IRdfEntityDescriptionProps {
 }
 
 export const RdfEntityDescription: React.FC<IRdfEntityDescriptionProps> = (props) => {
-    const [label, setLabel] = React.useState(() => dataService.getLabelFor(props.qName));
-    React.useEffect(() => {
-        const subscription = dataService.onLanguageChanged(() => {
-            setLabel(dataService.getLabelFor(props.qName));
-        });
-        return subscription.dispose.bind(subscription);
-    });
-    React.useEffect(() => {
-        setLabel(dataService.getLabelFor(props.qName));
-    }, [props.qName]);
+    const label = useLabelFor(dataService, props.qName);
     return <span>{label && label.description || props.fallbackContent}</span>;
 };

@@ -1,6 +1,7 @@
+import * as React from "react";
 import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
 import wu from "wu";
-import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
+import { browserLanguage, evaluateLanguageSimilarity, KnownLanguage } from "../localization/languages";
 
 export type RdfQName = string;
 
@@ -185,4 +186,35 @@ export class DataService {
         this.labels = await labels;
         this._languageChanged.raise();
     }
+}
+
+export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, equalityComparator?: (oldValue: T, newValue: T) => boolean): T {
+    const [data, setData] = React.useState(() => selector());
+    React.useEffect(() => {
+        const subscription = dataService.onLanguageChanged(() => {
+            const newData = selector();
+            if (equalityComparator && !equalityComparator(data, newData) || !equalityComparator && data !== newData) {
+                setData(newData);
+            }
+        });
+        return () => subscription.dispose();
+    });
+    return data;
+}
+
+export function useDataServiceLanguage(dataService: DataService): string {
+    return useLanguageAwareData(dataService, () => dataService.language);
+}
+
+export function useLabelFor(dataService: DataService, entityId: RdfQName): IEntityLabel | undefined {
+    return useLanguageAwareData(dataService,
+         () => dataService.getLabelFor(entityId), 
+         (oldValue, newValue) => {
+             if (!oldValue !== !newValue) return false;
+             if (oldValue && newValue) {
+                if (oldValue.label !== newValue.label) return false;
+                if (oldValue.description !== newValue.description) return false;
+             }
+             return true;
+         });
 }
