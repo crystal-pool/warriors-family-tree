@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { IDisposable } from "tasklike-promise-library";
 import { EmbedMessage, HostMessage, IHostSettings } from "../../shared/messages";
 
@@ -7,6 +8,7 @@ export interface IEmbedIntrinsicOptions {
     style?: Record<string, string | 0 | null>;
     autoResize?: boolean;
     scrollable?: boolean;
+    eagerRender?: boolean;
 }
 
 export interface IEmbedOptions {
@@ -19,6 +21,13 @@ export interface IEmbedOptions {
  * The URL prefix of Warriors Family Tree.
  */
 export const defaultAppUrlStem = environment.isProduction ? "https://crystal-pool.github.io/warriors-family-tree/#" : "http://localhost:3080/#";
+
+function isInViewport(element: HTMLElement): boolean {
+    if (!element.offsetParent) return false;
+    const boundingRect = element.getBoundingClientRect();
+    return boundingRect.right >= 0 && boundingRect.bottom >= 0
+        && boundingRect.left <= window.innerWidth && boundingRect.top <= window.innerHeight;
+}
 
 /**
  * Embeds the Warriors Family Tree inside the specified HTML element.
@@ -34,6 +43,8 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
     const intrinsicOptions = options.embedOptions || {};
     let url = intrinsicOptions.urlStem || defaultAppUrlStem;
     const postMessageToken = "wft-pmt-" + Math.round(Math.random() * 2821109907456).toString(36);
+    let disposeCallbacks: Array<() => void> | undefined = [];
+    let delayedRenderDisposeCallback: (() => void) | undefined;
     if (options.route) url += options.route;
     if (options.queryParams) {
         let builder: URLSearchParams | undefined;
@@ -54,43 +65,88 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         builder.set("pmToken", postMessageToken);
         url += "?" + String(builder);
     }
-    const frame = document.createElement("iframe");
-    frame.className = "warriors-family-tree-embed " + (intrinsicOptions.className || "");
-    if (intrinsicOptions.style) {
-        for (const k in intrinsicOptions.style) {
-            if (intrinsicOptions.style.hasOwnProperty(k)) {
-                let v = intrinsicOptions.style[k];
-                if (typeof v === "number") v = String(v);
-                frame.style.setProperty(k, v);
-            }
+    function renderIFrame() {
+        if (delayedRenderDisposeCallback) {
+            delayedRenderDisposeCallback();
+            delayedRenderDisposeCallback = undefined;
         }
-    } else {
-        // Style preset
-        frame.style.borderWidth = "0";
-        frame.style.width = "100%";
-        frame.style.transition = "height 0.5s ease-out";
-    }
-    frame.allow = "fullscreen";
-    frame.sandbox.add("allow-popups", "allow-popups-to-escape-sandbox", "allow-scripts", "allow-same-origin");
-    const autoResize = intrinsicOptions.autoResize == null ? true : intrinsicOptions.autoResize;
-    const embedMessageTarget = new EmbedMessageTarget(frame, postMessageToken, {
-        observeDocumentHeight: autoResize,
-        scrollable: intrinsicOptions.scrollable
-    }, (message) => {
-        switch (message.type) {
-            case "documentHeightChanged":
-                if (autoResize) {
-                    frame.style.height = message.height + "px";
+        const frame = document.createElement("iframe");
+        frame.className = "warriors-family-tree-embed " + (intrinsicOptions.className || "");
+        if (intrinsicOptions.style) {
+            for (const k in intrinsicOptions.style) {
+                if (intrinsicOptions.style.hasOwnProperty(k)) {
+                    let v = intrinsicOptions.style[k];
+                    if (typeof v === "number") v = String(v);
+                    frame.style.setProperty(k, v);
                 }
-                break;
+            }
+        } else {
+            // Style preset
+            frame.style.borderWidth = "0";
+            frame.style.width = "100%";
+            frame.style.transition = "height 0.5s ease-out";
         }
-    });
-    frame.src = url;
-    container.appendChild(frame);
+        frame.allow = "fullscreen";
+        frame.sandbox.add("allow-popups", "allow-popups-to-escape-sandbox", "allow-scripts", "allow-same-origin");
+        const autoResize = intrinsicOptions.autoResize == null ? true : intrinsicOptions.autoResize;
+        const embedMessageTarget = new EmbedMessageTarget(frame, postMessageToken, {
+            observeDocumentHeight: autoResize,
+            scrollable: intrinsicOptions.scrollable
+        }, (message) => {
+            switch (message.type) {
+                case "documentHeightChanged":
+                    if (autoResize) {
+                        frame.style.height = message.height + "px";
+                    }
+                    break;
+            }
+        });
+        frame.src = url;
+        container.appendChild(frame);
+        disposeCallbacks!.push(() => embedMessageTarget.dispose());
+        disposeCallbacks!.push(() => frame.remove());
+    }
+    if (intrinsicOptions.eagerRender) {
+        renderIFrame();
+    } else {
+        const checkRenderIFrame = _.debounce(function checkRenderIFrame() {
+            window.requestAnimationFrame(() => {
+                if (!delayedRenderDisposeCallback) return;
+                if (isInViewport(container)) {
+                    renderIFrame();
+                }
+            });
+        }, 200);
+        const placeholder = document.createElement("div");
+        let node: HTMLElement = document.createElement("p");
+        node.innerText = "Did not see family tree?";
+        placeholder.appendChild(node);
+        node = document.createElement("button");
+        node.innerText = "Click here to load it!";
+        node.addEventListener("focus", () => renderIFrame());
+        placeholder.appendChild(node);
+        // 300px is the default IFrame height.
+        placeholder.style.height = String(intrinsicOptions.style?.height ?? "300px");
+        container.appendChild(placeholder);
+        window.addEventListener("scroll", checkRenderIFrame);
+        delayedRenderDisposeCallback = () => {
+            placeholder.remove();
+            window.removeEventListener("scroll", checkRenderIFrame);
+        };
+        // Mount IFrame only when the container is visible.
+        checkRenderIFrame();
+        window.setTimeout(() => checkRenderIFrame.flush(), 0);
+    }
     return {
         dispose() {
-            embedMessageTarget.dispose();
-            frame.remove();
+            if (delayedRenderDisposeCallback) {
+                delayedRenderDisposeCallback();
+                delayedRenderDisposeCallback = undefined;
+            }
+            if (disposeCallbacks) {
+                disposeCallbacks.forEach(cb => cb());
+                disposeCallbacks = undefined;
+            }
         }
     };
 }

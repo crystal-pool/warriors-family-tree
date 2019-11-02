@@ -11,12 +11,17 @@
 
 <body>
     <h1>Embeded family tree sample</h1>
-    <div id="family-tree-container"></div>
+    <div class="family-tree-container" data-family-tree-entity="wd:Q621"></div>
+    <div class="long-spacing"></div>
+    <div class="family-tree-container" data-family-tree-entity="wd:Q621"></div>
     <script src="./wft-embed-umd.js"></script>
     <script>
         (function () {
-            var container = document.getElementById("family-tree-container");
-            WarriorsFamilyTreeEmbed.mountFamilyTree(container, { qName: "wd:Q621" });
+            var containers = document.getElementsByClassName("family-tree-container");
+            for (var i = 0; i < containers.length; i++) {
+                var container = containers[i];
+                WarriorsFamilyTreeEmbed.mountFamilyTree(container, { qName: container.dataset.familyTreeEntity });
+            }
         })()
     </script>
 </body>

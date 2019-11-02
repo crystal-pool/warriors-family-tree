@@ -1,3 +1,8 @@
-#family-tree-container {
+.family-tree-container {
     border: 1px dashed blue;
+}
+
+.long-spacing {
+    height: 100vh;
+    min-height: 100px;
 }
