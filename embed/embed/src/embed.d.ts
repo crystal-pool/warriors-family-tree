@@ -5,6 +5,7 @@ export interface IEmbedIntrinsicOptions {
     style?: Record<string, string | 0 | null>;
     autoResize?: boolean;
     scrollable?: boolean;
+    eagerRender?: boolean;
 }
 export interface IEmbedOptions {
     route?: string;
