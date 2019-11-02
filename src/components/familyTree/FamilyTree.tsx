@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import Svg from "svgjs";
 import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
-import { ILayoutNode, layoutFamilyTree } from "./layout";
+import { ILayoutNode, IRect, ISize, layoutFamilyTree } from "./layout";
 
 export interface IFamilyTreeData {
     roots: string[];
@@ -15,24 +15,16 @@ export interface IFamilyTreeData {
     children: [string, string | null | undefined, string][];
 }
 
-export interface IRect {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-}
-
 export type NodeRenderCallback = (id: string, boundingRect: Readonly<IRect>) => React.ReactNode;
 
 export interface IFamilyTreeProps {
     className?: string;
     familyTree: Readonly<IFamilyTreeData>;
-    nodeWidth?: number;
-    nodeHeight?: number;
     nodeSpacingX?: number;
     nodeSpacingY?: number;
     onRenderNode?: NodeRenderCallback;
     debugInfo?: boolean;
+    onEvalNodeDimension?: (id: string) => ISize;
     onRendered?: (sender: FamilyTree) => void;
 }
 
@@ -40,6 +32,10 @@ const FAMILY_TREE_MATE_SLOT_OFFSET = 10;
 
 export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     public static defaultProps: Partial<IFamilyTreeProps> = {
+        onEvalNodeDimension(id) {
+            // Fixed dimension by default.
+            return { width: 130, height: 50 };
+        },
         onRenderNode(id, brct): React.ReactNode {
             return id;
         }
@@ -61,31 +57,25 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             this._drawingRoot.firstChild!.remove();
         this._idContainerMap.clear();
         // Render
-        const layout = layoutFamilyTree(this.props.familyTree);
+        const layout = layoutFamilyTree(this.props.familyTree, this.props.onEvalNodeDimension!);
         if (!layout) return;
-        const FAMILY_TREE_BOX_WIDTH = this.props.nodeWidth == null ? 100 : this.props.nodeWidth;
-        const FAMILY_TREE_BOX_HEIGHT = this.props.nodeHeight == null ? 50 : this.props.nodeHeight;
-        const FAMILY_TREE_BOX_SPACING_X = this.props.nodeSpacingX == null ? 50 : this.props.nodeSpacingX;
         const FAMILY_TREE_BOX_SPACING_Y = this.props.nodeSpacingY == null ? 20 : this.props.nodeSpacingY;
-        const rootScaleX = FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X;
-        const minSpacingScaleX = (FAMILY_TREE_BOX_WIDTH + FAMILY_TREE_BOX_SPACING_X) / layout.minNodeSpacingX;
-        const scaleX = minSpacingScaleX * 0.8 + rootScaleX * 0.2;
-        const drawingWidth = layout.rawWidth * scaleX;
+        const drawingWidth = layout.rawWidth;
         const rowTop: number[] = [0];
         for (let row = 0; row < layout.rows.length; row++) {
-            rowTop.push(rowTop[row] + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET + FAMILY_TREE_BOX_HEIGHT + FAMILY_TREE_BOX_SPACING_Y);
+            rowTop.push(rowTop[row] + layout.rowSlotCount[row] * FAMILY_TREE_MATE_SLOT_OFFSET + layout.rows[row].reduce((p, n) => Math.max(p, n.height), 0) + FAMILY_TREE_BOX_SPACING_Y);
         }
         const drawingHeight = rowTop[rowTop.length - 1];
         // Note the px in svg represents a physical length.
         const drawing = Svg(this._drawingRoot)
-            .size(drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight)
-            .viewbox(-FAMILY_TREE_BOX_WIDTH / 2, 0, drawingWidth + FAMILY_TREE_BOX_WIDTH, drawingHeight);
+            .size(drawingWidth, drawingHeight)
+            .viewbox(0, 0, drawingWidth, drawingHeight);
         function getNodeRect(node: ILayoutNode): IRect {
             return {
-                left: node.offsetX! * scaleX - FAMILY_TREE_BOX_WIDTH / 2,
+                left: node.offsetX - node.width / 2,
                 top: rowTop[node.row],
-                width: FAMILY_TREE_BOX_WIDTH,
-                height: FAMILY_TREE_BOX_HEIGHT
+                width: node.width,
+                height: node.height
             };
         }
         function getSlotY(rect: IRect, slotIndex: number): number {

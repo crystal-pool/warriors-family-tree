@@ -94,7 +94,6 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     return familyTreeData
         && <FamilyTree
             className="character-family-tree" familyTree={familyTreeData}
-            nodeWidth={120} nodeHeight={50}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
             debugInfo={props.debugInfo} />
         || null;

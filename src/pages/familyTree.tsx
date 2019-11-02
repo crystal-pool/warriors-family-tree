@@ -72,7 +72,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             )
         }
         <Paper className="familytree-container">
-            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} />
+            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} debugInfo={true} />
         </Paper>
     </React.Fragment>);
 }, function propsComparer(prevProps, nextProps) {

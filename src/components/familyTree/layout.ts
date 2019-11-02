@@ -5,10 +5,21 @@ import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUti
 import { appInsights } from "../../utility/telemetry";
 import { IFamilyTreeData } from "./FamilyTree";
 
-export interface ILayoutNode {
+export interface ISize {
+    width: number;
+    height: number;
+}
+
+export interface IRect extends ISize {
+    left: number;
+    top: number;
+}
+
+export interface ILayoutNode extends ISize {
     id: string;
     row: number;
     column: number;
+    // Offset of centeral point.
     offsetX: number;
 }
 
@@ -36,7 +47,6 @@ export interface IFamilyTreeLayoutInfo {
     rowSlotCount: number[];
     connections: ILayoutConnection[];
     rawWidth: number;
-    minNodeSpacingX: number;
     nodeFromId(id: string): ILayoutNode | undefined;
 }
 
@@ -53,7 +63,7 @@ interface IFamilyTreeLayoutTelemetry {
     successful: boolean;
 }
 
-export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeLayoutInfo | null {
+export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDimension: (id: string) => ISize): IFamilyTreeLayoutInfo | null {
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
     const knownNodes = new Set<string>();
@@ -87,17 +97,18 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         t1 = now;
     }
     try {
+        // Arrange rows.
         const rawRows = arrangeRows(knownNodes, matesLookup, childrenLookup);
         stopwatchDuration("a1Duration");
 
+        // Ordering nodes by row.
         for (let i = 0; i < rawRows.length; i++) {
             rawRows[i] = arrangeRow(rawRows[i], rawRows[i - 1], matesLookup, childrenLookup);
         }
         stopwatchDuration("a2Duration");
 
         // Arrage & layout nodes by row.
-        const offsetXLookup = layoutRow(rawRows, matesLookup, childrenLookup);
-        const rows = rawRows.map((nodes, row) => nodes.map((id, column): ILayoutNode => ({ id, row, column, offsetX: offsetXLookup[id] })));
+        const rows = layoutRow(rawRows, matesLookup, childrenLookup, onEvalNodeDimension);
         telemetryProps.rows = rows.length;
         stopwatchDuration("a3Duration");
 
@@ -105,26 +116,16 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>): IFamilyTreeL
         stopwatchDuration("connectionDuration");
 
         const rawWidth = rows.reduce((p, row) =>
-            Math.max(p, row.reduce((p, node) => Math.max(p, node.offsetX), 0)
-            ), 0) + 2;
+            Math.max(p, row.reduce((p, node) => Math.max(p, node.offsetX + node.width / 2), 0)
+            ), 0);
         const layoutNodes = new Map<string, ILayoutNode>();
         rows.forEach(nodes => nodes.forEach(n => layoutNodes.set(n.id, n)));
-        let minNodeSpacingX: number | undefined;
-        for (const row of rows) {
-            for (let i = 0; i < row.length; i++) {
-                if (i > 0) {
-                    const spacing = row[i].offsetX - row[i - 1].offsetX;
-                    minNodeSpacingX = minNodeSpacingX == null ? spacing : Math.min(minNodeSpacingX, spacing);
-                }
-            }
-        }
-        if (minNodeSpacingX == null) minNodeSpacingX = 1;
 
         telemetryProps.width = rawWidth;
         telemetryProps.successful = true;
         return {
             rows,
-            rawWidth, minNodeSpacingX,
+            rawWidth,
             connections,
             rowSlotCount,
             nodeFromId: id => layoutNodes.get(id)
@@ -274,15 +275,27 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
     return arrangedRow;
 }
 
-function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): Record<string, number> {
+function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>, getNodeDimentsion: (id: string) => ISize): ILayoutNode[][] {
     const orderedNodes: string[] = Array.from(wu(rows).flatten());
     const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
     const objective: Polynomial = {};
     const constraints: Contraint[] = [];
     const ints: string[] = [];
-    const nodeWidth = 1;
-    const xMax = rows.reduce((p, r) => Math.max(p, r.length), 0) * nodeWidth * 2;
+    let maxNodeWidth = 0;
     const dxNodes = new Set<string>();
+    const layoutRows: ILayoutNode[][] = [];
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const layoutRow: ILayoutNode[] = [];
+        layoutRows.push(layoutRow);
+        for (let j = 0; j < row.length; j++) {
+            const id = row[j];
+            const dimension = getNodeDimentsion(id);
+            layoutRow.push({ id, row: i, column: j, offsetX: NaN, width: dimension.width, height: dimension.height });
+            maxNodeWidth = Math.max(maxNodeWidth, dimension.width);
+        }
+    }
+    const xMax = rows.reduce((p, r) => Math.max(p, r.length), 0) * maxNodeWidth * 2;
     function addObjective(name: string, addition: number): void {
         const existingCoeff = objective[name];
         objective[name] = existingCoeff != null ? (existingCoeff + addition) : addition;
@@ -320,15 +333,24 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     function addDMXVars(n1: string, n21: string, n22: string): void {
         constraints.push([{ [varNameDMXP(n1, n21, n22)]: 2, [varNameDMXN(n1, n21, n22)]: -2, [varNameX(n1)]: -2, [varNameX(n21)]: 1, [varNameX(n22)]: 1 }, "=", 0]);
     }
-    for (const row of rows) {
-        for (let j = 0; j < row.length; j++) {
-            constraints.push([{ [varNameX(row[j])]: 1 }, ">=", j * nodeWidth]);
-            constraints.push([{ [varNameX(row[j])]: 1 }, "<=", xMax]);
-            for (let k = 0; k < j; k++) {
-                constraints.push([{ [varNameX(row[j])]: 1, [varNameX(row[k])]: -1 }, ">=", (j - k) * nodeWidth]);
+    for (const row of layoutRows) {
+        let currentX = 0;
+        for (const node of row) {
+            currentX += node.width / 2;
+            constraints.push([{ [varNameX(node.id)]: 1 }, ">=", currentX]);
+            constraints.push([{ [varNameX(node.id)]: 1 }, "<=", xMax]);
+            if (node.column > 0) {
+                let distance = currentX + node.width / 2;
+                for (let k = 0; k < node.column; k++) {
+                    let node1 = row[k];
+                    distance -= node1.width / 2;
+                    constraints.push([{ [varNameX(node.id)]: 1, [varNameX(node1.id)]: -1 }, ">=", distance]);
+                    distance -= node1.width / 2;
+                }
             }
             // Make coordinates as small as possible.
-            addObjective(varNameX(row[j]), 1);
+            addObjective(varNameX(node.id), 1);
+            currentX += node.width / 2;
         }
     }
     for (const [n1, mates] of matesLookup) {
@@ -359,14 +381,13 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     if (!solution.feasible) {
         throw new Error("Infeasible model: layoutRow.");
     }
-    // console.log(solution);
-    const result: Record<string, number> = {};
-    for (const row of rows) {
+    console.log(solution);
+    for (const row of layoutRows) {
         for (const node of row) {
-            result[node] = solution[varNameX(node)] || 0;
+            node.offsetX = solution[varNameX(node.id)] || 0;
         }
     }
-    return result;
+    return layoutRows;
 }
 
 interface IConnectionArrangment {
