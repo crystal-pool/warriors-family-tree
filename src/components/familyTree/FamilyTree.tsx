@@ -33,6 +33,7 @@ export interface IFamilyTreeProps {
     nodeSpacingY?: number;
     onRenderNode?: NodeRenderCallback;
     debugInfo?: boolean;
+    onRendered?: (sender: FamilyTree) => void;
 }
 
 const FAMILY_TREE_MATE_SLOT_OFFSET = 10;
@@ -45,6 +46,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     };
     private _drawingRoot: HTMLDivElement | null | undefined;
     private _portalNodes: [HTMLElement, React.ReactNode][] = [];
+    private _idContainerMap = new Map<string, HTMLElement>();
+    private _pendingOnRenderedCall = false;
     public constructor(props: IFamilyTreeProps) {
         super(props);
         this._updateDrawing = _.debounce(this._updateDrawing, 100);
@@ -52,9 +55,11 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     private _updateDrawing = (): void => {
         // console.log(dumpFamilyTreeData(this.props.familyTree));
         if (!this._drawingRoot) return;
+        this._pendingOnRenderedCall = true;
         this._portalNodes = [];
         while (this._drawingRoot.hasChildNodes())
             this._drawingRoot.firstChild!.remove();
+        this._idContainerMap.clear();
         // Render
         const layout = layoutFamilyTree(this.props.familyTree);
         if (!layout) return;
@@ -105,6 +110,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             .move(bRect.left, bRect.top)
                             .size(bRect.width, bRect.height);
                         this._portalNodes.push([container.native(), renderedNode]);
+                        this._idContainerMap.set(node.id, container.native());
                     }
                 }
                 if (this.props.debugInfo) {
@@ -237,8 +243,24 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         this._drawingRoot = root;
         this._updateDrawing();
     }
+    public scrollToNode(id: string): boolean {
+        const container = this._idContainerMap.get(id);
+        if (!container) return false;
+        container.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+        return true;
+    }
     public render(): React.ReactNode {
-        const mergedComponent = this._portalNodes.map(([container, reactRoot], i) => ReactDOM.createPortal(reactRoot, container));
+        const mergedComponent = this._portalNodes.map(([container, reactRoot]) => ReactDOM.createPortal(reactRoot, container));
+        if (this._pendingOnRenderedCall) {
+            this._pendingOnRenderedCall = false;
+            if (this.props.onRendered) {
+                window.setTimeout(() => {
+                    window.requestAnimationFrame(() => {
+                        this.props.onRendered && this.props.onRendered(this);
+                    });
+                });
+            }
+        }
         return (<div ref={this._onDrawingRootChanged} className={classNames("family-tree-drawing", this.props.className)}>{mergedComponent}</div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {

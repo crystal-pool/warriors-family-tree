@@ -82,6 +82,9 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         const familyTree = walk(props.centerQName, props.walkMode, props.maxDistance);
         setFamilyTreeData(familyTree);
     }, [props.centerQName, props.walkMode, props.maxDistance]);
+    const onFamilyTreeRendered = React.useCallback((ft: FamilyTree) => {
+        ft.scrollToNode(props.centerQName);
+    }, [props.centerQName]);
     if (!props.centerQName) {
         return null;
     }
@@ -89,9 +92,11 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
     }, [props.centerQName]);
     return familyTreeData
-        && <FamilyTree className="character-family-tree" familyTree={familyTreeData}
+        && <FamilyTree
+            className="character-family-tree" familyTree={familyTreeData}
             nodeWidth={120} nodeHeight={50}
-            onRenderNode={renderNode} debugInfo={props.debugInfo} />
+            onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
+            debugInfo={props.debugInfo} />
         || null;
 });
 CharacterFamilyTree.displayName = "CharacterFamilyTree";
