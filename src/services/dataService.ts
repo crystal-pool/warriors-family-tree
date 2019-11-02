@@ -1,7 +1,7 @@
 import * as React from "react";
 import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
 import wu from "wu";
-import { browserLanguage, evaluateLanguageSimilarity, KnownLanguage } from "../localization/languages";
+import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
 
 export type RdfQName = string;
 
