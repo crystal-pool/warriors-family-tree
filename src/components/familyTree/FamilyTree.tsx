@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import _ from "lodash";
 import * as React from "react";
-import ReactDOM from "react-dom";
 import Svg from "svgjs";
 import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
+import "./FamilyTree.scss";
 import { ILayoutNode, IRect, ISize, layoutFamilyTree } from "./layout";
 
 export interface IFamilyTreeData {
@@ -41,8 +41,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         }
     };
     private _drawingRoot: HTMLDivElement | null | undefined;
-    private _portalNodes: [HTMLElement, React.ReactNode][] = [];
-    private _idContainerMap = new Map<string, HTMLElement>();
+    private _overlayDomRoot = React.createRef<HTMLDivElement>();
+    private _nodeContainers: React.ReactNode[] = [];
+    // nodeId --> internalNodeId
+    private _nodeInternalIdMap = new Map<string, string>();
     private _pendingOnRenderedCall = false;
     public constructor(props: IFamilyTreeProps) {
         super(props);
@@ -52,10 +54,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         // console.log(dumpFamilyTreeData(this.props.familyTree));
         if (!this._drawingRoot) return;
         this._pendingOnRenderedCall = true;
-        this._portalNodes = [];
+        this._nodeContainers = [];
+        this._nodeInternalIdMap.clear();
         while (this._drawingRoot.hasChildNodes())
             this._drawingRoot.firstChild!.remove();
-        this._idContainerMap.clear();
         // Render
         const layout = layoutFamilyTree(this.props.familyTree, this.props.onEvalNodeDimension!);
         if (!layout) return;
@@ -90,9 +92,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             };
         }
         function getSlotY(node: ILayoutNode, slotIndex: number): number {
-            if (slotIndex === 0){
+            if (slotIndex === 0) {
                 const rect = getNodeRect(node);
-                 return rect.top + rect.height / 2;
+                return rect.top + rect.height / 2;
             }
             return rowSlotTop[node.row] + FAMILY_TREE_MATE_SLOT_OFFSET * (slotIndex - 1);
         }
@@ -109,12 +111,13 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 if (this.props.onRenderNode) {
                     const renderedNode = this.props.onRenderNode(node.id, bRect);
                     if (renderedNode) {
-                        const container = drawing
-                            .element("foreignObject")
-                            .move(bRect.left, bRect.top)
-                            .size(bRect.width, bRect.height);
-                        this._portalNodes.push([container.native(), renderedNode]);
-                        this._idContainerMap.set(node.id, container.native());
+                        const internalId = String(this._nodeInternalIdMap.size + 1);
+                        this._nodeInternalIdMap.set(node.id, internalId);
+                        const container = (<div key={node.id}
+                            className="node-container"
+                            style={{ ...bRect }}
+                            data-node-id={internalId}>{renderedNode}</div>);
+                        this._nodeContainers.push(container);
                     }
                 }
                 if (this.props.debugInfo) {
@@ -247,26 +250,28 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         this._updateDrawing();
     }
     public scrollToNode(id: string): boolean {
-        const container = this._idContainerMap.get(id);
+        const internalId = this._nodeInternalIdMap.get(id);
+        if (internalId == null) return false;
+        const overlayRoot = this._overlayDomRoot.current;
+        if (!overlayRoot) return false;
+        const container = overlayRoot.querySelector(`div[data-node-id="${internalId}"]`);
         if (!container) return false;
         container.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
         return true;
     }
     public render(): React.ReactNode {
-        const mergedComponent = this._portalNodes.map(([container, reactRoot]) => ReactDOM.createPortal(reactRoot, container));
         if (this._pendingOnRenderedCall) {
             this._pendingOnRenderedCall = false;
-            if (this.props.onRendered) {
-                window.setTimeout(() => {
-                    window.requestAnimationFrame(() => {
-                        this.props.onRendered && this.props.onRendered(this);
-                    });
-                });
-            }
         }
-        return (<div ref={this._onDrawingRootChanged} className={classNames("family-tree-drawing", this.props.className)}>{mergedComponent}</div>);
+        return (<div className={classNames("family-tree-drawing", this.props.className)}>
+            <div className="overlay" ref={this._overlayDomRoot}>{this._nodeContainers}</div>
+            <div className="drawing" ref={this._onDrawingRootChanged}></div>
+        </div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
+        if (this.props.onRendered) {
+            this.props.onRendered(this);
+        }
         if (prevProps.familyTree !== this.props.familyTree) {
             this._updateDrawing();
         } else if (prevProps.onEvalNodeDimension !== this.props.onEvalNodeDimension) {

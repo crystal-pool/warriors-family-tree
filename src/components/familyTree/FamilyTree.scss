@@ -1,0 +1,14 @@
+.family-tree-drawing {
+    .overlay {
+        position: relative;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        overflow: visible;
+
+        .node-container {
+            position: absolute;
+            transition: 200ms ease-out;
+        }
+    }
+}
