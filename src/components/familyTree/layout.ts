@@ -2,6 +2,7 @@ import * as Solver from "javascript-lp-solver";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUtility";
+import { Stopwatch } from "../../utility/stopwatch";
 import { appInsights } from "../../utility/telemetry";
 import { IFamilyTreeData } from "./FamilyTree";
 
@@ -85,16 +86,14 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDim
         if (id2) knownNodes.add(id2);
     }
     if (knownNodes.size === 0) return null;
-    const t0 = performance.now();
-    let t1 = performance.now();
+    const sw0 = Stopwatch.startNew(), sw1 = Stopwatch.startNew();
     const telemetryProps: Partial<IFamilyTreeLayoutTelemetry> = {
         nodes: knownNodes.size,
         successful: false
     };
     function stopwatchDuration(prop: keyof IFamilyTreeLayoutTelemetry) {
-        const now = performance.now();
-        telemetryProps[prop] = (Math.round((now - t1) * 1000) / 1000) as any;
-        t1 = now;
+        telemetryProps[prop] = sw1.elapsed as any;
+        sw1.restart();
     }
     try {
         // Arrange rows.
@@ -131,9 +130,10 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDim
             nodeFromId: id => layoutNodes.get(id)
         };
     } finally {
-        telemetryProps.totalDuration = performance.now() - t0;
-        appInsights.trackMetric({ name: "layoutFamilyTree.duration", average: telemetryProps.totalDuration });
-        appInsights.trackEvent({ name: "layoutFamilyTree", properties: telemetryProps });
+        sw0.stop();
+        telemetryProps.totalDuration = sw0.elapsed;
+        appInsights.trackMetric({ name: "layoutFamilyTree.duration", average: sw0.elapsed });
+        appInsights.trackEvent({ name: "layoutFamilyTree" }, telemetryProps);
     }
 }
 

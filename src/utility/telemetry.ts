@@ -37,6 +37,7 @@ export function initializeTracking() {
     appInsights.context.application.ver = environment.commitId;
     appInsights.context.application.build = String(environment.buildTimestamp);
     appInsights.addTelemetryInitializer(processTelemetry);
+    appInsights.trackTrace({ message: "Session started." });
     appInsights.trackPageView({});
     if ("__drainBacklog" in window) {
         (window as any).__drainBacklog(function (args: [Date, string, ...any[]]) {

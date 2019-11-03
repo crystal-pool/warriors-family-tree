@@ -171,10 +171,9 @@ export class DataService {
         });
         appInsights.trackEvent({
             name: "dataService.lookupEntity",
-            properties: {
-                keywordLength: keyword.length, queryLimit: limit,
-                duration: sw.elapsed, internalResults: results.length
-            }
+        }, {
+            keywordLength: keyword.length, queryLimit: limit,
+            duration: sw.elapsed, internalResults: results.length
         });
         return results.slice(0, limit);
     }
@@ -188,21 +187,30 @@ export class DataService {
         return result.xhr.response;
     }
     private async _initialize(): Promise<void> {
+        appInsights.trackTrace({ message: "dataService.initialize: Enter." });
+        const sw = Stopwatch.startNew();
         this._switchLanguageCts = new CancellationTokenSource();
         const slPromise = this._switchLanguage(this._language, this._switchLanguageCts.token);
         const characters = this._fetchJsonData<ICharacterProfileRoot>("characters.json");
         const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
         const entityLookup = this._fetchJsonData<IEntityLookupRoot>("entityLookup.json");
+        appInsights.trackTrace({ message: "dataService.initialize: Waiting response." });
         this.characters = await characters;
         this.relations = await relations;
         this.entityLookup = await entityLookup;
         await slPromise;
         this._isInitialized = true;
+        sw.stop();
+        appInsights.trackTrace({ message: "dataService.initialize: Exit." }, { elapsed: sw.elapsed });
+        appInsights.trackMetric({ name: "dataService.initialize.duration", average: sw.elapsed });
     }
     private async _switchLanguage(language: string, cancellationToken?: ICancellationToken): Promise<void> {
+        appInsights.trackTrace({ message: "dataService.switchLanguage: Enter." }, { language });
         const labels = this._fetchJsonData<ILabelsRoot>("labels." + language + ".json", cancellationToken);
         this.labels = await labels;
+        appInsights.trackTrace({ message: "dataService.switchLanguage: Language changed." }, { language });
         this._languageChanged.raise();
+        appInsights.trackTrace({ message: "dataService.switchLanguage: Exit." }, { language });
     }
 }
 
