@@ -381,7 +381,7 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     if (!solution.feasible) {
         throw new Error("Infeasible model: layoutRow.");
     }
-    console.log(solution);
+    // console.log(solution);
     for (const row of layoutRows) {
         for (const node of row) {
             node.offsetX = solution[varNameX(node.id)] || 0;

@@ -39,11 +39,37 @@ export function useContextEx<T>(context: React.Context<T>, observedBits?: number
     return dispatcher.useContext(context, observedBits);
 }
 
-
 export function usePageTitle(): string | undefined {
     return useContextEx(PageTitleContext, PageTitleContextBits.title).title;
 }
 
 export function useSetPageTitle(): IPageTitleContextValue["setTitle"] {
     return useContextEx(PageTitleContext, PageTitleContextBits.setTitle).setTitle;
+}
+
+export function shallowEquals(objA: unknown, objB: unknown): boolean {
+    if (objA === objB) return true;
+    if (typeof objA !== typeof objB) return false;
+    if (objA === null) {
+        return objB === null;
+    } else if (objB === null) {
+        return false;
+    }
+    switch (typeof objA) {
+        case "object":
+            if (Array.isArray(objA)) {
+                if (!Array.isArray(objB)) return false;
+                if (objA.length !== objB.length) return false;
+                return objA.every((v, i) => objB[i] === v);
+            } else if (Array.isArray(objB)) {
+                return false;
+            }
+            const keysA = Object.keys(objA as {});
+            const keysB = Object.keys(objB as {});
+            if (keysA.length !== keysB.length) return false;
+            return keysA.every(k => (objA as any)[k] === (objB as any)[k]);
+        default:
+            // We've excluded objA === objB case.
+            return false;
+    }
 }

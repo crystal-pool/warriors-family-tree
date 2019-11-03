@@ -3,6 +3,7 @@ import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable,
 import wu from "wu";
 import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
 import { isRegExUnicodeCategorySupported } from "../utility/compatibility";
+import { shallowEquals } from "../utility/react";
 import { Stopwatch } from "../utility/stopwatch";
 import { appInsights } from "../utility/telemetry";
 
@@ -213,18 +214,27 @@ export class DataService {
         appInsights.trackTrace({ message: "dataService.switchLanguage: Exit." }, { language });
     }
 }
-
-export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, equalityComparator?: (oldValue: T, newValue: T) => boolean): T {
+export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, deps?: React.DependencyList): T;
+export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, equalityComparator?: (oldValue: T, newValue: T) => boolean, deps?: React.DependencyList): T;
+export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, arg3?: ((oldValue: T, newValue: T) => boolean) | React.DependencyList, arg4?: React.DependencyList): T {
     const [data, setData] = React.useState(() => selector());
+    const equalityComparator = typeof arg3 === "function" ? arg3 : undefined;
+    const deps = typeof arg3 === "function" ? arg4 : arg3;
+    const prevDeps = deps == null ? undefined : React.useRef(deps);
+    function refreshData() {
+        const newData = selector();
+        if (equalityComparator && !equalityComparator(data, newData) || !equalityComparator && data !== newData) {
+            setData(newData);
+        }
+    }
     React.useEffect(() => {
         const subscription = dataService.onLanguageChanged(() => {
-            const newData = selector();
-            if (equalityComparator && !equalityComparator(data, newData) || !equalityComparator && data !== newData) {
-                setData(newData);
-            }
+            refreshData();
         });
         return () => subscription.dispose();
     });
+    // Update also when the deps changed.
+    if (prevDeps && !shallowEquals(prevDeps.current, deps)) refreshData();
     return data;
 }
 
@@ -242,5 +252,5 @@ export function useLabelFor(dataService: DataService, entityId: RdfQName): IEnti
                 if (oldValue.description !== newValue.description) return false;
             }
             return true;
-        });
+        }, [entityId]);
 }
