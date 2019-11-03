@@ -5,7 +5,7 @@ import { Location } from "history";
 import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import { HashRouter } from "react-router-dom";
-import { generateLongRandomId } from "../../shared/utility";
+import { generateRandomId8 } from "../../shared/utility";
 import { contactUrl, issueTrackerUrl } from "../constants";
 import { resourceManager } from "../localization";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
@@ -30,10 +30,10 @@ interface IRouteRootProps extends RouteComponentProps {
 }
 
 function startNewPageScope(location: Location<any>): string {
-    const id = generateLongRandomId();
+    const id = generateRandomId8();
     // Let the previous page tracking stop first.
     appInsights.startTrackPage(id);
-    appInsights.context.telemetryTrace = new TelemetryTrace(generateLongRandomId());
+    appInsights.context.telemetryTrace = new TelemetryTrace(id);
     // ISSUE AppInsights will unconditionally overwrite the name.
     appInsights.context.telemetryTrace.name = location.pathname + location.search;
     return id;
