@@ -130,7 +130,11 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     const label = useLabelFor(dataService, props.qName);
     const profile = dataService.getCharacterProfileFor(props.qName);
     const loc = useLocation();
-    return (<HoverTooltip style={{ fontSize: "unset" }} title={<CharacterCard qName={props.qName} />} interactive>
+    return (<HoverTooltip
+        style={{ fontSize: "unset" }}
+        title={<CharacterCard qName={props.qName} />}
+        enterDelay={300} leaveDelay={300}
+        interactive>
         <div className={classNames("familytree-node", props.isCurrent && "current", profile?.gender)} onClick={() => {
             location.href = routePathBuilders.familyTree({ character: props.qName }, loc.search);
         }}>
