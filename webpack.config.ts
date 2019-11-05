@@ -1,10 +1,10 @@
 import CopyPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import fs from "fs";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack from "webpack";
-import WebpackDevServer from "webpack-dev-server";
 import { IEnvironmentInfo } from "./shared/environment";
 import { getGitHead } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
@@ -41,8 +41,9 @@ async function buildEnvironmentDefinitions(isProduction: boolean) {
 // tslint:disable:object-literal-sort-keys
 export default async function config(env: any, argv: Record<string, string>): Promise<webpack.Configuration> {
   const isProduction = argv.mode === "production";
+  const isRunAsDevServer = process.env.WEBPACK_DEV_SERVER === "true";
   const outputPath = path.resolve(__dirname, "dist");
-  console.info("mode:", argv.mode);
+  console.info("isRunAsDevServer:", isRunAsDevServer);
   console.info("isProduction:", isProduction);
   return {
     mode: isProduction ? "production" : "development",
@@ -71,10 +72,24 @@ export default async function config(env: any, argv: Record<string, string>): Pr
         {
           test: /\.s[ac]ss$/i,
           loader: [
-            // Creates `style` nodes from JS strings
-            "style-loader",
+            //isRunAsDevServer ? "style-loader" : MiniCssExtractPlugin.loader,
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                hmr: isRunAsDevServer,
+              },
+            },
+            "@teamsupercell/typings-for-css-modules-loader",
             // Translates CSS into CommonJS
-            "css-loader",
+            {
+              loader: "css-loader",
+              options: {
+                modules: {
+                  localIdentName: isProduction ? "[hash:base64]" : "[path][name]__[local]"
+                },
+                localsConvention: "camelCaseOnly",
+              }
+            },
             // Compiles Sass to CSS
             "sass-loader",
           ],
@@ -93,7 +108,8 @@ export default async function config(env: any, argv: Record<string, string>): Pr
         useTypescriptIncrementalApi: true,
         tsconfig: path.join(__dirname, "./src/tsconfig.json"),
         reportFiles: ["!**/node_modules/**"]
-      })
+      }),
+      new MiniCssExtractPlugin({ filename: "index1.css" })
     ] as webpack.Plugin[],
     optimization: {
       minimize: isProduction,

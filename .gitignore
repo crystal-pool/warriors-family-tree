@@ -11,6 +11,7 @@ dist
 _private
 
 /assets/data
+*.s[ac]ss.d.ts
 
 bin
 obj

@@ -4,7 +4,7 @@ import * as React from "react";
 import Svg from "svgjs";
 import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
-import "./FamilyTree.scss";
+import scss from "./FamilyTree.scss";
 import { ILayoutNode, IRect, ISize, layoutFamilyTree } from "./layout";
 
 export interface IFamilyTreeData {
@@ -114,7 +114,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         const internalId = String(this._nodeInternalIdMap.size + 1);
                         this._nodeInternalIdMap.set(node.id, internalId);
                         const container = (<div key={node.id}
-                            className="node-container"
+                            className={scss.nodeContainer}
                             style={{ ...bRect }}
                             data-node-id={internalId}>{renderedNode}</div>);
                         this._nodeContainers.push(container);
@@ -158,7 +158,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     const mateLineY = rectL.top + rectL.height / 2;
                     drawing
                         .line(rectL.left + rectL.width, mateLineY, rectR.left, mateLineY)
-                        .addClass("family-tree-connection family-tree-connection-mate");
+                        .addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const centerX = ((rectL.left + rectL.width) + rectR.left) / 2;
                         for (const childId of childrenId) {
@@ -168,7 +168,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 centerX, mateLineY,
                                 getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass("family-tree-connection family-tree-connection-child");
+                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 } else if (nodeL.row === nodeR.row) {
@@ -177,7 +177,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
                         slotY,
                         rectR.left + rectR.width / 2, rectR.top + rectR.height
-                    ).addClass("family-tree-connection family-tree-connection-mate");
+                    ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const startX = ((rectL.left + rectL.width) + rectR.left) / 2;
                         for (const childId of childrenId) {
@@ -187,7 +187,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 startX, slotY,
                                 getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass("family-tree-connection family-tree-connection-child");
+                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 } else {
@@ -263,9 +263,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         if (this._pendingOnRenderedCall) {
             this._pendingOnRenderedCall = false;
         }
-        return (<div className={classNames("family-tree-drawing", this.props.className)}>
-            <div className="overlay" ref={this._overlayDomRoot}>{this._nodeContainers}</div>
-            <div className="drawing" ref={this._onDrawingRootChanged}></div>
+        return (<div className={classNames(scss.familyTreeDrawing, this.props.className)}>
+            <div className={scss.overlay} ref={this._overlayDomRoot}>{this._nodeContainers}</div>
+            <div className={scss.drawing} ref={this._onDrawingRootChanged}></div>
         </div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {

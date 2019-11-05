@@ -8,7 +8,24 @@
 
         .node-container {
             position: absolute;
+            overflow: visible;
+
             transition: 200ms ease-out;
+        }
+    }
+
+    .drawing {
+        .family-tree-connection {
+            fill: none;
+            stroke-width: 1;
+
+            &.family-tree-connection-mate {
+                stroke: #333333;
+            }
+
+            &.family-tree-connection-child {
+                stroke: #33FFFF;
+            }
         }
     }
 }

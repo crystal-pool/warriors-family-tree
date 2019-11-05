@@ -9,7 +9,7 @@ import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } 
 import { isRegExUnicodeCategorySupported } from "../../utility/compatibility";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { CharacterCard } from "../CharacterCard";
-import "./CharacterFamilyTree.scss";
+import scss from "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
 import { ISize } from "./layout";
 
@@ -108,7 +108,7 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     }, [props.centerQName]);
     return familyTreeData
         && <FamilyTree
-            className="character-family-tree" familyTree={familyTreeData}
+            className={scss.characterFamilyTree} familyTree={familyTreeData}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
             onEvalNodeDimension={evaluateNodeDimension}
             debugInfo={props.debugInfo} />
@@ -135,11 +135,11 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
         title={<CharacterCard qName={props.qName} />}
         enterDelay={300} leaveDelay={300}
         interactive>
-        <div className={classNames("familytree-node", props.isCurrent && "current", profile?.gender)} onClick={() => {
+        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.characterFamilyTree, profile?.gender && scss[profile?.gender])} onClick={() => {
             location.href = routePathBuilders.familyTree({ character: props.qName }, loc.search);
         }}>
-            {label && <div className="entity-name">{label.label}</div>}
-            <div className="entity-id">{props.qName}</div>
+            {label && <div className="entityLabel">{label.label}</div>}
+            <div className={scss.entityId}>{props.qName}</div>
         </div>
     </HoverTooltip>);
 };

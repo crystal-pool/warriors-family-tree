@@ -63,4 +63,5 @@
     addCDNLink("mui-icon", "https://fonts.googleapis.com/icon?family=Material+Icons");
     registerResourceLoadCallback("index-js", "ij");
     registerResourceLoadCallback("index-css", "ic");
+    registerResourceLoadCallback("index1-css", "ic1");
 })();

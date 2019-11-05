@@ -3,23 +3,6 @@
     padding: 1em;
     min-width: 0;
 
-    .family-tree-connection {
-        fill: none;
-        stroke-width: 1;
-
-        &.family-tree-connection-mate {
-            stroke: #333333;
-        }
-
-        &.family-tree-connection-child {
-            stroke: #33FFFF;
-        }
-    }
-
-    foreignObject {
-        overflow: visible;
-    }
-
     .familytree-node {
         background: rgba(204, 204, 204, 0.6);
         border: 1px solid #cccccc;
