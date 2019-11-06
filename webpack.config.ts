@@ -92,7 +92,7 @@ export default async function config(env: any, argv: Record<string, string>): Pr
             },
             // Compiles Sass to CSS
             "sass-loader",
-          ],
+          ]
         },
       ]
     },
