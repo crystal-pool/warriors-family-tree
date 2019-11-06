@@ -135,7 +135,7 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
         title={<CharacterCard qName={props.qName} />}
         enterDelay={300} leaveDelay={300}
         interactive>
-        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.characterFamilyTree, profile?.gender && scss[profile?.gender])} onClick={() => {
+        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])} onClick={() => {
             location.href = routePathBuilders.familyTree({ character: props.qName }, loc.search);
         }}>
             {label && <div className="entityLabel">{label.label}</div>}
