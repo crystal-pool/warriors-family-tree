@@ -207,7 +207,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         edgeXR, slotYU,
                         edgeXR, edgeYR,
                         rectR.left, edgeYR
-                    ]).addClass("family-tree-connection family-tree-connection-mate");
+                    ]).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const startX = nodeD === nodeL
                             ? rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET / 2
@@ -219,7 +219,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 startX, rectD.top + rectD.height / 2,
                                 getSlotY(nodeD, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass("family-tree-connection family-tree-connection-child");
+                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 }
@@ -238,7 +238,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             rect1.left + rect1.width / 2, rect1.top + rect1.height,
                             getSlotY(node1, childrenSlot),
                             rectC.left + rectC.width / 2, rectC.top
-                        ).addClass("family-tree-connection family-tree-connection-child");
+                        ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                     }
                 }
             }
