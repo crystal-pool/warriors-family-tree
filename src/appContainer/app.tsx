@@ -33,9 +33,7 @@ function startNewPageScope(location: Location<any>): string {
     const id = generateRandomId8();
     // Let the previous page tracking stop first.
     appInsights.startTrackPage(id);
-    appInsights.context.telemetryTrace = new TelemetryTrace(id);
-    // ISSUE AppInsights will unconditionally overwrite the name.
-    appInsights.context.telemetryTrace.name = location.pathname + location.search;
+    appInsights.context.telemetryTrace = new TelemetryTrace(id, undefined, location.pathname + location.search);
     return id;
 }
 
