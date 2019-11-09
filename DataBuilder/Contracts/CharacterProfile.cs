@@ -26,7 +26,7 @@ namespace WarriorsFamilyTree.DataBuilder.Contracts
     {
 
         // qName
-        public string Group { get; set; }
+        public string Group { get; set; } = "";
 
         // qName
         public string? Since { get; set; }

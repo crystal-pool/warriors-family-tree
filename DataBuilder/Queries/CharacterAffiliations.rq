@@ -1,0 +1,9 @@
+SELECT ?character ?group ?startTime ?endTime ?ref
+WHERE {
+    ?character    wdt:P3/wdt:P4*  wd:Q624.    # should be fictional character
+    ?character    p:P76           ?claim.
+    ?claim        ps:P76          ?group.
+    OPTIONAL { ?claim   pq:P92              ?startTime }
+    OPTIONAL { ?claim   pq:P93              ?endTime }
+    OPTIONAL { ?claim   prov:wasDerivedFrom ?ref }
+}

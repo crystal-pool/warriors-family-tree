@@ -213,11 +213,25 @@ namespace WarriorsFamilyTree.DataBuilder
                 var unode = (IUriNode)node;
                 return GetProfileEntry(unode.Uri);
             }
+
             var resultSet = ExecuteQueryFromResource("CharacterGender.rq");
             foreach (var row in resultSet)
             {
                 var entry = GetProfileEntryFromNode(row["character"]);
                 entry.Gender = row["gender"].AsValuedNode().AsString();
+            }
+            resultSet = ExecuteQueryFromResource("CharacterAffiliations.rq");
+            foreach (var row in resultSet)
+            {
+                var entry = GetProfileEntryFromNode(row["character"]);
+                var affEntry = new CharacterAffiliationEntry
+                {
+                    Group = SerializeUriNode(row["group"]),
+                    Since = row.TryGetBoundValue("startTime", out INode tempNode) ? SerializeUriNode(tempNode) : null,
+                    Until = row.TryGetBoundValue("endTime", out tempNode) ? SerializeUriNode(tempNode) : null,
+                };
+                if (entry.Affiliations == null) entry.Affiliations = new List<CharacterAffiliationEntry>();
+                entry.Affiliations.Add(affEntry);
             }
             return root;
         }
