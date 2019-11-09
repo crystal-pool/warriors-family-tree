@@ -15,4 +15,4 @@ _private
 
 bin
 obj
-/DataBuilder/Properties/launchSettings.json
+/DataBuilder/**/Properties/launchSettings.json
