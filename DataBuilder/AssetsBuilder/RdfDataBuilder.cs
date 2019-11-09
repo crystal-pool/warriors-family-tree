@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Resources;
-using System.Text;
 using VDS.RDF;
 using VDS.RDF.Nodes;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Datasets;
-using WarriorsFamilyTree.DataBuilder.Contracts;
+using WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
-namespace WarriorsFamilyTree.DataBuilder
+namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 {
     public class RdfDataBuilder
     {
@@ -46,7 +44,7 @@ namespace WarriorsFamilyTree.DataBuilder
 
         public static string GetQueryFromResource(string name)
         {
-            using var s = typeof(RdfDataBuilder).Assembly.GetManifestResourceStream("WarriorsFamilyTree.DataBuilder.Queries." + name);
+            using var s = typeof(RdfDataBuilder).Assembly.GetManifestResourceStream("WarriorsFamilyTree.DataBuilder.AssetsBuilder.Queries." + name);
             if (s == null)
                 throw new ArgumentException("Cannot find the specified query resource: " + name + ".");
             using var sr = new StreamReader(s);

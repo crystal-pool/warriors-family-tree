@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace WarriorsFamilyTree.DataBuilder
+namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 {
     internal static class LanguageUtility
     {

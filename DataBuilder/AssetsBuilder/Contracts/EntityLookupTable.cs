@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json;
 
-namespace WarriorsFamilyTree.DataBuilder.Contracts
+namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
 {
 
     public class EntityLookupTableRoot

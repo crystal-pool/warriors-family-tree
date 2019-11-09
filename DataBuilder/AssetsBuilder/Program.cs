@@ -4,9 +4,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using VDS.RDF;
 using VDS.RDF.Query.Datasets;
-using WarriorsFamilyTree.DataBuilder;
 
-namespace DataBuilder
+namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 {
     static class Program
     {
