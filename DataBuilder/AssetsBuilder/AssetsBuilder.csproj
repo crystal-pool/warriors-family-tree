@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>WarriorsFamilyTree.DataBuilder</RootNamespace>
-    <AssemblyName>WarriorsFamilyTree.DataBuilder</AssemblyName>
+    <RootNamespace>WarriorsFamilyTree.DataBuilder.AssetsBuilder</RootNamespace>
+    <AssemblyName>WarriorsFamilyTree.DataBuilder.AssetsBuilder</AssemblyName>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

@@ -17,10 +17,10 @@ $ErrorActionPreference = "Stop"
 
 $RdfPath = (Resolve-Path $RdfPath).Path
 $DataPath = (New-Item "./assets/data" -ItemType Directory -Force).FullName
-$DataBuilderProjectDir = (Resolve-Path "./DataBuilder/DataBuilder.csproj").Path
+$AssetsBuilderProjectDir = (Resolve-Path "./DataBuilder/AssetsBuilder/AssetsBuilder.csproj").Path
 
 # Assumes $PWD is repo root
-dotnet run -c Release -p $DataBuilderProjectDir -- $RdfPath $DataPath
+dotnet run -c Release -p $AssetsBuilderProjectDir -- $RdfPath $DataPath
 checkLastExitCode
 
 yarn build-prod
