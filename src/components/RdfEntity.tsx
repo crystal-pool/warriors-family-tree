@@ -1,8 +1,11 @@
 import { Link } from "@material-ui/core";
+import classNames from "classnames";
 import * as React from "react";
+import { resourceManager } from "../localization";
 import { dataService } from "../services";
 import { tryGetFullUri } from "../services/dataConfig";
 import { RdfQName, useLabelFor } from "../services/dataService";
+import Scss from "./RdfEntity.scss";
 
 export interface IRdfEntityLinkProps {
     qName: RdfQName;
@@ -17,19 +20,23 @@ export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
 
 export interface IRdfEntityLabelProps {
     qName: RdfQName;
-    fallbackContent?: React.ReactNode;
+    fallbackLabel?: React.ReactNode;
     showEntityId?: boolean;
 }
 
 export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
-    const label = useLabelFor(dataService, props.qName);
-    return (<span>
-        <span className="entity-label">{label && label.label || props.fallbackContent}</span>
-        {props.showEntityId && (<React.Fragment>
-            {" "}
-            <span className="entity-id-container">(<RdfEntityLink qName={props.qName} />)</span>
-        </React.Fragment>)}
-    </span>);
+    const label = useLabelFor(dataService, props.qName)?.label;
+    if (!props.showEntityId && !label) {
+        // Missing label, and we need to show label only.
+        return (<span className={Scss.entityLabelContainer}>
+            <span className={Scss.entityLabelFallback}>{props.fallbackLabel ?? props.qName}</span>
+        </span>);
+    } else {
+        return (<span className={Scss.entityLabelContainer}>
+            <span className={classNames(!label && Scss.entityLabelFallback)}>{label || props.fallbackLabel}</span>
+            {props.showEntityId && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink qName={props.qName} />])}</span>)}
+        </span>);
+    }
 };
 
 export interface IRdfEntityDescriptionProps {

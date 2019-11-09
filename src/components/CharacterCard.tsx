@@ -6,7 +6,7 @@ import { routePathBuilders } from "../pages/routes";
 import { dataService } from "../services";
 import { RdfQName } from "../services/dataService";
 import { Mars, Venus } from "../utility/muiIcons";
-import "./CharacterCard.scss";
+import Scss from "./CharacterCard.scss";
 import { CharacterInfobox } from "./CharacterInfobox";
 import { RdfEntityDescription, RdfEntityLabel } from "./RdfEntity";
 
@@ -18,11 +18,11 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
     const loc = useLocation();
     const profile = dataService.getCharacterProfileFor(props.qName);
     const gender = profile?.gender;
-    return (<Card className="character-card">
+    return (<Card className={Scss.characterCard}>
         <CardContent>
             <h3>
                 <RdfEntityLabel qName={props.qName} showEntityId={true} />
-                <span className="badges">
+                <span className={Scss.badges}>
                     {gender === "male" && <Mars fontSize="inherit" />}
                     {gender === "female" && <Venus fontSize="inherit" />}
                 </span>

@@ -3,6 +3,7 @@ import { PromptsTable } from "./en";
 const prompts: Partial<PromptsTable> = {
     AboutThisApp: "关于此应用",
     AboutThisAppDescription: "或者向我们提供反馈意见",
+    Brackets: "（{0}）",
     CharacterApprentice: "学徒",
     CharacterApprentices: "学徒",
     CharacterChild: "子女",

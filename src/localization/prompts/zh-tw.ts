@@ -3,6 +3,7 @@ import { PromptsTable } from "./en";
 const prompts: Partial<PromptsTable> = {
     CharacterApprentice: "見習生",
     CharacterApprentices: "見習生",
+    Brackets: "（{0}）",
     CharacterChild: "子女",
     CharacterChildren: "子女",
     CharacterMate: "配偶",

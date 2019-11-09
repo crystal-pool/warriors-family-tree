@@ -15,7 +15,6 @@ function renderRelationEntries(entries: Iterable<ICharacterRelationEntry>): Reac
     if (items.length === 0) return undefined;
     return items.map((entry, i) => (<React.Fragment key={i}>
         {i > 0 && resourceManager.getPrompt("ListSeparator")}
-        {i > 0 && <wbr />}
         <RdfEntityLabel qName={entry.target} />
     </React.Fragment>));
 }
@@ -38,10 +37,10 @@ function getInfoboxItems(qName: RdfQName): [string, React.ReactNode][] {
 export const CharacterInfobox: React.FC<ICharacterInfoboxProps> = (props) => {
     const items = getInfoboxItems(props.qName);
     if (items.length === 0) return null;
-    return (<Table size="small">
+    return (<Table size="small" style={{wordBreak: "keep-all"}}>
         <TableBody>
             {items.map(([label, value]) => (<TableRow key={label}>
-                <TableCell variant="head" style={{wordBreak: "keep-all"}}>{label}</TableCell>
+                <TableCell variant="head">{label}</TableCell>
                 <TableCell>{value}</TableCell>
             </TableRow>))}
         </TableBody>

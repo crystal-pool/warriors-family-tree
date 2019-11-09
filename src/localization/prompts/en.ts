@@ -1,6 +1,7 @@
 const prompts = {
     AboutThisApp: "About this app",
     AboutThisAppDescription: "Or provide feedback to us",
+    Brackets: "({0})",
     CharacterApprentice: "Apprentice",
     CharacterApprentices: "Apprentices",
     CharacterChild: "Child",
