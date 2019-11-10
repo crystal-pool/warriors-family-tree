@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using VDS.RDF;
 using VDS.RDF.Query.Datasets;
+using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 {
@@ -20,16 +21,16 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage:\ndotnet run dumpPath targetPath");
+                Console.WriteLine("Usage:\ndotnet run rawDataRoot targetRoot");
                 return 1;
             }
-            var dumpPath = Path.GetFullPath(args[0]);
-            var targetPath = Path.GetFullPath(args[1]);
-            if (!Directory.Exists(targetPath))
-                Directory.CreateDirectory(targetPath);
+            var rawDataRoot = Path.GetFullPath(args[0]);
+            var targetRoot = Path.GetFullPath(args[1]);
+            if (!Directory.Exists(targetRoot))
+                Directory.CreateDirectory(targetRoot);
             void ExportJson(string fileName, object root)
             {
-                var fullName = Path.Join(targetPath, fileName);
+                var fullName = Path.Join(targetRoot, fileName);
                 {
                     using var sw = new StreamWriter(fullName);
                     using var jw = new JsonTextWriter(sw);
@@ -39,12 +40,14 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
             }
 
             var graph = new Graph();
-            graph.LoadFromFile(dumpPath);
-            Console.WriteLine("Loaded {0} tuples from {1}.", graph.Triples.Count, dumpPath);
+            graph.LoadFromFile(Path.Join(rawDataRoot, RawDataFiles.WbDump));
+            Console.WriteLine("Loaded {0} tuples from {1}.", graph.Triples.Count, rawDataRoot);
             var dataset = new InMemoryDataset(graph);
-            var builder = new RdfDataBuilder(dataset, graph.NamespaceMap);
+            var timeline = TimelineTable.LoadFrom(Path.Join(rawDataRoot, RawDataFiles.Timeline));
+            var builder = new RdfDataBuilder(dataset, graph.NamespaceMap, timeline);
             ExportJson("characters.json", builder.BuildCharacterProfile());
             ExportJson("relations.json", builder.BuildRelationGraph());
+            ExportJson("timeline.json", builder.BuildTimelineMarkers());
             foreach (var (language, root) in builder.BuildEntityLabels())
             {
                 ExportJson($"labels.{language}.json", root);

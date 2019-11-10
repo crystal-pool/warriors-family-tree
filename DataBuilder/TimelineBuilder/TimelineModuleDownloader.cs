@@ -23,6 +23,11 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder
 
         public const string MwApiEndpointUrl = "http://warriors.huijiwiki.com/api.php";
 
+        private static readonly IDictionary<string, int> timelineOrigins = new Dictionary<string, int>{
+            { "dotc", 1000 },
+            { "modern", 2000 },
+        };
+
         private static readonly JsonSerializer jsonSerializer = new JsonSerializer
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -52,11 +57,15 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder
                     {
                         name = mappedQName;
                     }
-                    if (!name.StartsWith("Q"))
+                    if (name.StartsWith("Q"))
+                    {
+                        name = "wd:" + name;
+                    }
+                    else
                     {
                         Console.WriteLine("Warning: {0} does not seem like a valid entity name.", name);
+                        name = ":" + name;
                     }
-                    Console.WriteLine(name);
                     return name;
                 }, p => p.Value.ToObject<BookEntry>(jsonSerializer)!);
             return new TimelineTable
@@ -67,7 +76,8 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder
                         Segments = p.Value.Interval.Select(i =>
                         {
                             var details = p.Value.Details[i];
-                            return new TimelineChapterEntry(i, details.Year, details.Month);
+                            var timeline = timelineOrigins.OrderBy(p => Math.Abs(p.Value - details.Year)).First();
+                            return new TimelineSegmentEntry(i, timeline.Key, details.Year - timeline.Value, details.Month);
                         }).ToList()
                     })
             };

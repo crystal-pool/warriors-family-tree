@@ -9,6 +9,7 @@ using VDS.RDF.Parsing;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Datasets;
 using WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
+using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 {
@@ -17,13 +18,15 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
 
         private readonly ISparqlDataset dataset;
         private readonly INamespaceMapper namespaceMapper;
+        private readonly TimelineTable timelineTable;
         private readonly ISparqlQueryProcessor sparqlProcessor;
         private readonly SparqlQueryParser sparqlQueryParser;
 
-        public RdfDataBuilder(ISparqlDataset dataset, INamespaceMapper namespaceMapper)
+        public RdfDataBuilder(ISparqlDataset dataset, INamespaceMapper namespaceMapper, TimelineTable timelineTable)
         {
             this.dataset = dataset ?? throw new ArgumentNullException(nameof(dataset));
             this.namespaceMapper = namespaceMapper ?? throw new ArgumentNullException(nameof(namespaceMapper));
+            this.timelineTable = timelineTable ?? throw new ArgumentNullException(nameof(timelineTable));
             sparqlProcessor = new LeviathanQueryProcessor(dataset);
             sparqlQueryParser = new SparqlQueryParser();
         }
@@ -232,6 +235,37 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
                 entry.Affiliations.Add(affEntry);
             }
             return root;
+        }
+
+        public TimelineRoot BuildTimelineMarkers()
+        {
+            var resultSet = ExecuteQueryFromResource("TimelineMarkers.rq");
+            return new TimelineRoot
+            {
+                Markers = resultSet.Select(r =>
+                    {
+                        var entityQName = SerializeUriNode(r["entity"]);
+                        var bookQName = SerializeUriNode(r["book"]);
+                        TimelineSegmentEntry? segment = null;
+                        TimelineMarkerInfo? marker = null;
+                        if (timelineTable.Books.TryGetValue(bookQName, out var book))
+                        {
+                            if (r.HasBoundValue("serial"))
+                            {
+                                var serial = ((ILiteralNode) r["serial"]).Value;
+                                segment = book.TryMatchSegment(serial);
+                            }
+                            else
+                            {
+                                segment = book.TryGetFirstBookSegment();
+                            }
+                        }
+                        if (segment != null)
+                            marker = new TimelineMarkerInfo { Month = segment.Year * 12 + segment.Month, TimelineName = segment.Timeline };
+                        return (entityQName, marker);
+                    }).Where(i => i.marker != null)
+                    .ToDictionary(i => i.entityQName, i => i.marker!)
+            };
         }
 
     }

@@ -1,0 +1,17 @@
+SELECT ?entity ?type ?book ?serial
+WHERE {
+    {
+        BIND ("book" AS ?type)
+        BIND (?book AS ?entity)
+        ?book       wdt:P3/wdt:P4*  wd:Q46.
+    } UNION {
+        BIND ("chapter" AS ?type)
+        BIND (?chapter AS ?entity)
+        {   # mitiates dotnetrdf/dotnetrdf#271
+            ?chapter    wdt:P3/wdt:P4*  wd:Q109.
+            ?chapter    p:P50           ?chapterClaim.
+        }
+        ?chapterClaim   ps:P50      ?book;
+                        pq:P53      ?serial.
+    }
+}
