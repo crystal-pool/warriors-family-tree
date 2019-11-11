@@ -1,5 +1,10 @@
 SELECT ?entity ?desc
 WHERE {
-  ?entity   wdt:P3/wdt:P4*      wd:Q624.    # should be fictional character
+  VALUES ?typeEntity {
+    wd:Q624     # fictional character
+    wd:Q109     # chapter
+    wd:Q46      # book
+  }
+  ?entity   wdt:P3/wdt:P4*      ?typeEntity.
   ?entity   schema:description  ?desc.
 }
