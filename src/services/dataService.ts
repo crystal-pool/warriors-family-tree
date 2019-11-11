@@ -17,10 +17,14 @@ export interface ICharacterProfileEntry {
 }
 
 export interface ICharacterAffiliationEntry {
-
+    group: RdfQName;
+    since?: RdfQName;
+    until?: RdfQName;
 }
 
 export type CharacterRelationType = "parent" | "child" | "foster-parent" | "foster-child" | "mate" | "mentor" | "apprentice";
+
+export type TimelineName = "dotc" | "modern";
 
 export interface ICharacterRelationEntry {
     subject: RdfQName;
@@ -37,12 +41,21 @@ export interface IEntityLabel {
     description?: string;
 }
 
+export interface ITimelineMarker {
+    timeline: TimelineName;
+    totalMonths: number;
+}
+
 interface ICharacterProfileRoot {
     characters: { [character: string]: ICharacterProfileEntry };
 }
 
 interface IRelationsRoot {
     relations: { [character: string]: ICharacterRelationEntry[] };
+}
+
+interface ITimelineRoot {
+    markers: { [entity: string]: [TimelineName, number] };
 }
 
 interface ILabelsRoot {
@@ -68,6 +81,7 @@ export class DataService {
     private _isInitialized = false;
     private characters: ICharacterProfileRoot | undefined;
     private relations: IRelationsRoot | undefined;
+    private timeline: ITimelineRoot | undefined;
     private entityLookup: IEntityLookupRoot | undefined;
     private labels: ILabelsRoot | undefined;
     private _language: string;
@@ -111,6 +125,13 @@ export class DataService {
         if (typeof relationType === "string") return relations.filter(r => r.relation === relationType);
         const localRelationTypes = relationType instanceof Set ? relationType as Set<CharacterRelationType> : new Set(relationType);
         return relations.filter(r => localRelationTypes.has(r.relation));
+    }
+    public getTimelineMarker(entityId: RdfQName): ITimelineMarker | undefined {
+        if (!this.timeline) return undefined;
+        const rawMarkerInfo = this.timeline.markers[entityId];
+        if (!rawMarkerInfo) return undefined;
+        const [timeline, totalMonths] = rawMarkerInfo;
+        return { timeline, totalMonths };
     }
     public getLabelFor(entityId: RdfQName): Readonly<IEntityLabel> | undefined {
         if (!this.labels) { return undefined; }
@@ -167,10 +188,6 @@ export class DataService {
         results.sort((a, b) => a.score > b.score ? -1 : a.score < b.score ? 1 : 0);
         sw.stop();
         appInsights.trackEvent({
-            name: "dataService.lookupEntity.duration",
-            measurements: { duration: sw.elapsed, keywordLength: keyword.length }
-        });
-        appInsights.trackEvent({
             name: "dataService.lookupEntity",
         }, {
             keywordLength: keyword.length, queryLimit: limit,
@@ -194,10 +211,12 @@ export class DataService {
         const slPromise = this._switchLanguage(this._language, this._switchLanguageCts.token);
         const characters = this._fetchJsonData<ICharacterProfileRoot>("characters.json");
         const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
+        const timeline = this._fetchJsonData<ITimelineRoot>("timeline.json");
         const entityLookup = this._fetchJsonData<IEntityLookupRoot>("entityLookup.json");
         appInsights.trackTrace({ message: "dataService.initialize: Waiting response." });
         this.characters = await characters;
         this.relations = await relations;
+        this.timeline = await timeline;
         this.entityLookup = await entityLookup;
         await slPromise;
         this._isInitialized = true;
@@ -214,6 +233,7 @@ export class DataService {
         appInsights.trackTrace({ message: "dataService.switchLanguage: Exit." }, { language });
     }
 }
+
 export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, deps?: React.DependencyList): T;
 export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, equalityComparator?: (oldValue: T, newValue: T) => boolean, deps?: React.DependencyList): T;
 export function useLanguageAwareData<T>(dataService: DataService, selector: () => T, arg3?: ((oldValue: T, newValue: T) => boolean) | React.DependencyList, arg4?: React.DependencyList): T {

@@ -34,7 +34,7 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
     } else {
         return (<span className={Scss.entityLabelContainer}>
             <span className={classNames(!label && Scss.entityLabelFallback)}>{label || props.fallbackLabel}</span>
-            {props.showEntityId && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink qName={props.qName} />])}</span>)}
+            {props.showEntityId && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} />])}</span>)}
         </span>);
     }
 };
