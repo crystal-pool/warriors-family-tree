@@ -87,11 +87,11 @@ const clanLookup: Record<RdfQName, React.FC<IClanSymbolProps> | string> = {
     "wd:Q664": "Non",
 };
 
-const RdfClanSymbolCore: React.FC<IRdfClanSymbolProps> = React.forwardRef((props) => {
+const RdfClanSymbolCore = React.forwardRef<HTMLDivElement, IRdfClanSymbolProps>((props, ref) => {
     const ClanComponent = clanLookup[props.qName];
     if (typeof ClanComponent === "string") return <div className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</div>;
     if (ClanComponent) return <ClanComponent className={props.className} />;
-    return <div className={classNames(scss.clanSymbolFallback, props.className)}>??</div>;
+    return <div ref={ref} className={classNames(scss.clanSymbolFallback, props.className)}>??</div>;
 });
 RdfClanSymbolCore.displayName = "RdfClanSymbolCore";
 
