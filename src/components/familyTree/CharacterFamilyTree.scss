@@ -16,6 +16,9 @@
         justify-content: center;
         transition: 200ms;
         cursor: pointer;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
 
         &.male {
             background: #ddf1ff;
