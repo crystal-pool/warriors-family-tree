@@ -10,7 +10,7 @@ import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
-import "./familyTree.scss";
+import scss from "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
 export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
@@ -71,7 +71,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             </React.Fragment>
             )
         }
-        <Paper className="familytree-container">
+        <Paper className={scss.familytreeContainer} data-is-scrollable>
             <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} />
         </Paper>
     </React.Fragment>);

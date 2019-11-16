@@ -44,8 +44,9 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     private _overlayDomRoot = React.createRef<HTMLDivElement>();
     private _nodeContainers: React.ReactNode[] = [];
     // nodeId --> internalNodeId
-    private _nodeInternalIdMap = new Map<string, string>();
+    private _nodeInternalIdMap = new Map<string, number>();
     private _pendingOnRenderedCall = false;
+    private _nodeRects = new Map<string, Readonly<IRect>>();
     public constructor(props: IFamilyTreeProps) {
         super(props);
         this._updateDrawing = _.debounce(this._updateDrawing, 100);
@@ -54,6 +55,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         // console.log(dumpFamilyTreeData(this.props.familyTree));
         if (!this._drawingRoot) return;
         this._pendingOnRenderedCall = true;
+        this._nodeRects.clear();
         this._nodeContainers = [];
         this._nodeInternalIdMap.clear();
         while (this._drawingRoot.hasChildNodes())
@@ -109,9 +111,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     .fill("none")
                     .stroke("none");
                 if (this.props.onRenderNode) {
+                    this._nodeRects.set(node.id, bRect);
                     const renderedNode = this.props.onRenderNode(node.id, bRect);
                     if (renderedNode) {
-                        const internalId = String(this._nodeInternalIdMap.size + 1);
+                        const internalId = this._nodeInternalIdMap.size + 1;
                         this._nodeInternalIdMap.set(node.id, internalId);
                         const container = (<div key={node.id}
                             className={scss.nodeContainer}
@@ -252,25 +255,33 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     public scrollToNode(id: string): boolean {
         const internalId = this._nodeInternalIdMap.get(id);
         if (internalId == null) return false;
+        const rect = this._nodeRects.get(id);
+        if (!rect) return false;
         const overlayRoot = this._overlayDomRoot.current;
         if (!overlayRoot) return false;
-        const container = overlayRoot.querySelector(`div[data-node-id="${internalId}"]`);
-        if (!container) return false;
-        container.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+        let scrollContainer: HTMLElement | null = overlayRoot;
+        while (scrollContainer && !scrollContainer.dataset.isScrollable) {
+            scrollContainer = scrollContainer.parentElement;
+        }
+        if (!scrollContainer) return false;
+        // We need to calculate the coordinates. Using scrollIntoView is not stable during CSS transition.
+        scrollContainer.scrollTo({
+            left: rect.left + rect.width / 2 - scrollContainer.clientWidth / 2,
+            top: rect.top + rect.height / 2 - scrollContainer.clientHeight / 2,
+            behavior: "smooth"
+        });
         return true;
     }
     public render(): React.ReactNode {
-        if (this._pendingOnRenderedCall) {
-            this._pendingOnRenderedCall = false;
-        }
         return (<div className={classNames(scss.familyTreeDrawing, this.props.className)}>
             <div className={scss.overlay} ref={this._overlayDomRoot}>{this._nodeContainers}</div>
             <div className={scss.drawing} ref={this._onDrawingRootChanged}></div>
         </div>);
     }
     public componentDidUpdate(prevProps: IFamilyTreeProps) {
-        if (this.props.onRendered) {
+        if (this._pendingOnRenderedCall && this.props.onRendered) {
             this.props.onRendered(this);
+            this._pendingOnRenderedCall = false;
         }
         if (prevProps.familyTree !== this.props.familyTree) {
             this._updateDrawing();
