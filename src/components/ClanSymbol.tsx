@@ -7,18 +7,22 @@ import { RdfEntityLabel } from "./RdfEntity";
 
 export interface IClanSymbolProps {
     className?: string;
+    /** Tooltip of the icon. Defaults to clan name. */
+    title?: React.ReactNode;
 }
 
 function makeClanSymbol(name: string, viewBoxWidth: number, viewBoxHeight: number, path: React.ReactElement): React.FC<IClanSymbolProps> {
-    function clanSymbolHoc(props: IClanSymbolProps) {
+    function clanSymbolHoc(props: IClanSymbolProps, ref: React.Ref<SVGSVGElement>) {
         return (<svg
+            // https://material-ui.com/components/tooltips/#custom-child-element
+            {...props}
+            ref={ref}
             className={classNames(scss.clanSymbolIcon, props.className)}
             viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}>
             {path}
         </svg>);
     }
-    clanSymbolHoc.displayName = name + "[Core]";
-    const component: React.FC<IClanSymbolProps> = React.memo(clanSymbolHoc);
+    const component: React.FC<IClanSymbolProps> = React.memo(React.forwardRef(clanSymbolHoc));
     component.displayName = name;
     return component;
 }
@@ -43,26 +47,10 @@ export const RiverClan = makeClanSymbol("RiverClan", 563, 617,
         d="M563.000,314.000 C550.137,313.216 537.482,313.215 525.000,314.000 C485.133,316.508 458.884,325.760 449.000,313.000 C437.709,298.424 460.175,266.611 450.000,258.000 C447.039,255.494 442.482,255.893 438.000,257.000 C413.862,262.961 311.601,300.734 260.000,320.000 C248.797,323.857 239.970,324.404 235.000,320.000 C222.230,308.685 244.860,273.414 232.000,259.000 C217.614,242.875 171.406,262.559 161.000,267.000 C129.686,280.363 31.340,320.128 0.000,333.000 C0.000,222.000 0.000,111.000 0.000,-0.000 C57.000,49.667 114.000,99.333 171.000,149.000 C245.333,149.000 319.667,149.000 394.000,149.000 C450.333,99.333 506.667,49.667 563.000,-0.000 C563.000,104.667 563.000,209.333 563.000,314.000 ZM563.000,502.000 C548.160,501.342 533.500,501.672 519.000,503.000 C483.677,506.234 457.995,514.137 449.000,502.000 C438.586,487.948 461.638,458.770 452.000,449.000 C446.693,443.620 434.740,447.349 427.000,450.000 C411.478,455.316 396.687,460.898 382.000,467.000 C349.924,477.436 319.895,488.742 292.000,501.000 C277.681,507.292 245.241,521.685 234.000,510.000 C221.604,497.114 245.667,463.481 233.000,449.000 C218.937,432.922 172.282,452.636 162.000,457.000 C121.630,474.136 54.339,501.336 0.000,524.000 C0.000,482.333 0.000,440.667 0.000,399.000 C25.781,384.661 51.825,370.306 78.000,356.000 C96.882,345.680 150.382,317.216 160.000,329.000 C163.995,333.895 157.236,344.191 159.000,355.000 C161.951,373.082 177.544,384.404 187.000,389.000 C195.969,393.359 205.966,395.006 216.000,394.000 C260.035,375.334 330.424,345.898 353.000,335.000 C356.392,333.363 368.582,327.339 374.000,332.000 C376.918,334.510 376.153,338.666 377.000,342.000 C380.919,357.417 421.042,361.179 464.000,361.000 C497.000,355.333 530.000,349.667 563.000,344.000 C563.000,396.667 563.000,449.333 563.000,502.000 ZM85.000,542.000 C105.247,532.642 125.909,524.311 147.000,517.000 C153.409,515.264 158.202,515.439 161.000,518.000 C167.183,523.659 159.462,539.585 163.000,552.000 C166.860,565.545 178.961,574.042 184.000,577.000 C208.169,591.187 240.965,577.849 268.000,565.000 C323.216,538.759 366.378,512.936 375.000,522.000 C377.248,524.363 375.863,528.664 377.000,532.000 C381.118,544.084 401.433,549.478 427.000,551.000 C467.369,553.404 518.326,544.953 563.000,534.000 C563.000,561.667 563.000,589.333 563.000,617.000 C375.333,616.667 187.667,616.333 0.000,616.000 C0.000,607.000 0.000,598.000 0.000,589.000 C27.210,571.285 55.563,555.605 85.000,542.000 Z" />
 );
 
-export const SkyClan: React.FC<IClanSymbolProps> = (props) => {
-    return <div className={classNames(scss.clanSymbolFallback, props.className)}>SkC</div>;
-};
-
 export const StarClan = makeClanSymbol("StarClan", 565, 620,
     <path fillRule="evenodd"
         d="M-0.000,-0.000 C57.333,50.333 114.667,100.667 172.000,151.000 C246.333,151.000 320.667,151.000 395.000,151.000 C451.667,101.000 508.333,51.000 565.000,1.000 C565.000,207.333 565.000,413.666 565.000,619.999 C540.667,620.000 516.333,620.000 492.000,620.000 C458.000,571.333 424.000,522.667 390.000,474.000 C429.667,439.667 469.333,405.333 509.000,371.000 C451.000,371.000 393.000,371.000 335.000,371.000 C319.000,339.000 303.000,307.000 287.000,275.000 C271.333,307.000 255.667,339.000 240.000,371.000 C181.333,371.000 122.667,371.000 64.000,371.000 C104.667,406.000 145.333,441.000 186.000,476.000 C151.667,523.667 117.333,571.333 83.000,619.000 C55.333,619.000 27.667,619.000 -0.000,619.000 C-0.000,412.667 -0.000,206.333 -0.000,-0.000 Z" />
 );
-
-export const Kittypet: React.FC<IClanSymbolProps> = (props) => {
-    return <div className={classNames(scss.clanSymbolFallback, props.className)}>Ktp</div>;
-};
-
-export const Loner: React.FC<IClanSymbolProps> = (props) => {
-    return <div className={classNames(scss.clanSymbolFallback, props.className)}>Lon</div>;
-};
-
-export const Rogue: React.FC<IClanSymbolProps> = (props) => {
-    return <div className={classNames(scss.clanSymbolFallback, props.className)}>Rog</div>;
-};
 
 export interface IRdfClanSymbolProps extends IClanSymbolProps {
     qName: RdfQName;
@@ -73,7 +61,7 @@ const clanLookup: Record<RdfQName, React.FC<IClanSymbolProps> | string> = {
     "wd:Q628": ShadowClan,
     "wd:Q630": RiverClan,
     "wd:Q631": WindClan,
-    "wd:Q632": SkyClan,
+    "wd:Q632": "SkC",
     "wd:Q634": StarClan,
     "wd:Q635": "DaF",
     "wd:Q638": "mTRW",
@@ -81,21 +69,23 @@ const clanLookup: Record<RdfQName, React.FC<IClanSymbolProps> | string> = {
     "wd:Q640": "TEH",
     "wd:Q645": "mTiC",
     "wd:Q646": "mLiC",
-    "wd:Q647": Kittypet,
-    "wd:Q648": Loner,
-    "wd:Q649": Rogue,
+    "wd:Q647": "Ktp",
+    "wd:Q648": "Lon",
+    "wd:Q649": "Rog",
     "wd:Q664": "Non",
 };
 
-const RdfClanSymbolCore = React.forwardRef<HTMLDivElement, IRdfClanSymbolProps>((props, ref) => {
-    const ClanComponent = clanLookup[props.qName];
-    if (typeof ClanComponent === "string") return <div className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</div>;
-    if (ClanComponent) return <ClanComponent className={props.className} />;
-    return <div ref={ref} className={classNames(scss.clanSymbolFallback, props.className)}>??</div>;
-});
-RdfClanSymbolCore.displayName = "RdfClanSymbolCore";
-
 export const RdfClanSymbol: React.FC<IRdfClanSymbolProps> = (props) => {
-    return (<Tooltip title={<RdfEntityLabel qName={props.qName} />}><RdfClanSymbolCore {...props} /></Tooltip>);
+    const ClanComponent = clanLookup[props.qName];
+    let content: React.ReactElement | undefined;
+    if (typeof ClanComponent === "string")
+        content = (<div className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</div>);
+    else if (ClanComponent)
+        content = <ClanComponent className={props.className} />;
+    else
+        content = <div className={classNames(scss.clanSymbolFallback, props.className)}>??</div>;
+    const title = props.title !== undefined ? props.title : <RdfEntityLabel qName={props.qName} />;
+    if (!title) return content;
+    return (<Tooltip title={title}>{content}</Tooltip>);
 };
 RdfClanSymbol.displayName = "RdfClanSymbol";
