@@ -43,10 +43,13 @@ export function compareTimelineTime(x?: TimelineTime, y?: TimelineTime): -1 | 0 
 export class CharacterTimelineBuilder {
     constructor(private _dataService: DataService) {
     }
-    public timelineTimeFromMarker(markerEntityId: RdfQName, offsetMonths?: number): TimelineTime | undefined {
+    public timelineTimeFromMarker(markerEntityId: RdfQName, offsetMonths?: number): TimelineTime {
         if (isBlankNodeUri(markerEntityId)) return "unknown";
         const marker = this._dataService.getTimelineMarker(markerEntityId);
-        if (!marker) return undefined;
+        if (!marker) {
+            console.warn("Cannot find timeline information for marker: ", markerEntityId);
+            return "unknown";
+        }
         return {
             marker: markerEntityId,
             offsetMonths: offsetMonths,

@@ -60,16 +60,19 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel
             if (match != null) return match;
             if (int.TryParse(chapter, out var chapterNumber))
             {
+                // Lower bound
+                // Use nearest chapter before the specified chapter number.
                 TimelineSegmentEntry? prevSegment = null;
                 foreach (var segment in Segments)
                 {
                     if (segment.ChapterNumber < 0) continue;
                     if (segment.ChapterNumber >= chapterNumber)
                     {
-                        return prevSegment;
+                        break;
                     }
                     prevSegment = segment;
                 }
+                return prevSegment;
             }
             return null;
         }
