@@ -21,9 +21,11 @@ const prompts = {
     InitializationDescription: "Hold tight. We are still loading some data.",
     InitializationTitle: "Initializing…",
     ListSeparator: ", ",
+    MissingTimelineInformation: "Missing timeline information.",
     OpenInNewWindow: "Open in new window",
     StarTheRepo: "Star the repo ⭐",
     SwitchLanguage: "Switch language / 語言",
+    TimelineUntilNow: "Now",
     WelcomeDescription: "This is a still work-in-progress automatic family tree for <i>Warriors</i> series. Type something to in the search box below to continue.<br />E.g. type <b>Firestar</b> and press enter.",
     WelcomeTitle: "Welcome",
 };

@@ -1,6 +1,7 @@
 import { Tooltip } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
+import commonScss from "../common.scss";
 import { RdfQName } from "../services/dataService";
 import scss from "./ClanSymbol.scss";
 import { RdfEntityLabel } from "./RdfEntity";
@@ -72,20 +73,21 @@ const clanLookup: Record<RdfQName, React.FC<IClanSymbolProps> | string> = {
     "wd:Q647": "Ktp",
     "wd:Q648": "Lon",
     "wd:Q649": "Rog",
-    "wd:Q664": "Non",
+    "wd:Q663": "Now1",
+    "wd:Q664": "Non2",
 };
 
 export const RdfClanSymbol: React.FC<IRdfClanSymbolProps> = (props) => {
     const ClanComponent = clanLookup[props.qName];
     let content: React.ReactElement | undefined;
     if (typeof ClanComponent === "string")
-        content = (<div className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</div>);
+        content = (<span className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</span>);
     else if (ClanComponent)
         content = <ClanComponent className={props.className} />;
     else
-        content = <div className={classNames(scss.clanSymbolFallback, props.className)}>??</div>;
+        content = <span className={classNames(scss.clanSymbolFallback, props.className)}>??</span>;
     const title = props.title !== undefined ? props.title : <RdfEntityLabel qName={props.qName} />;
     if (!title) return content;
-    return (<Tooltip title={title}>{content}</Tooltip>);
+    return (<Tooltip className={commonScss.abbr} title={title}>{content}</Tooltip>);
 };
 RdfClanSymbol.displayName = "RdfClanSymbol";

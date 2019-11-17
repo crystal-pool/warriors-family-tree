@@ -23,9 +23,11 @@ const prompts: Partial<PromptsTable> = {
     InitializationDescription: "请稍后，我们仍在加载剩余的数据……",
     InitializationTitle: "正在初始化……",
     ListSeparator: "、",
+    MissingTimelineInformation: "时间线信息缺失。",
     OpenInNewWindow: "在新窗口打开",
     StarTheRepo: "为我们点赞⭐",
     SwitchLanguage: "切换语言",
+    TimelineUntilNow: "至今",
     WelcomeDescription: "这是仍在施工中的《猫武士》自动家谱查看工具，请在下面的搜索框中输入一个角色名以继续。<br />例如：键入<b>火星</b>，然后按下回车键。",
     WelcomeTitle: "欢迎",
 };
