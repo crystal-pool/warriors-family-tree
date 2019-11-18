@@ -1,4 +1,4 @@
-export { Entity } from "./entity";
+export { Entity } from "./entity/entityPage";
 export { FamilyTree } from "./familyTree";
 export { InitializationScreen } from "./initialization";
 export * from "./routes";
