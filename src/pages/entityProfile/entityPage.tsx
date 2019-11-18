@@ -12,7 +12,7 @@ import { useSetPageTitle } from "../../utility/react";
 import { IEntityRoutingParams } from "../routes";
 import { CharacterEntityDetails } from "./character";
 
-export interface IEntityPageProps extends RouteComponentProps<IEntityRoutingParams> {
+export interface IEntityProfileProps extends RouteComponentProps<IEntityRoutingParams> {
 }
 
 function renderEntityDetails(qName: string): React.ReactNode {
@@ -20,7 +20,7 @@ function renderEntityDetails(qName: string): React.ReactNode {
     return <p>{resourceManager.getPrompt("EntityNotFound1", [qName])}</p>;
 }
 
-export const Entity: React.FC<IEntityPageProps> = React.memo((props) => {
+export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) => {
     const entityQName = props.match.params.qName;
     const queryParams = parseQueryParams(props.location.search);
     const setPageTitle = useSetPageTitle();
@@ -60,4 +60,4 @@ export const Entity: React.FC<IEntityPageProps> = React.memo((props) => {
 }, function propsComparer(prevProps, nextProps) {
     return prevProps.location === nextProps.location;
 });
-Entity.displayName = "Entity";
+EntityProfile.displayName = "Entity";

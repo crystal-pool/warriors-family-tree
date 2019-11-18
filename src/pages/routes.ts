@@ -10,7 +10,7 @@ export interface IEntityRoutingParams {
 
 export const routePaths = {
     welcome: "/",
-    entity: "/entity/:qName",
+    entityProfile: "/entity/:qName",
     familyTree: "/familyTree/:character",
 };
 
@@ -27,6 +27,6 @@ function createRoutePathBuilder<TRoutingParams extends {}>(routeName: keyof type
 
 export const routePathBuilders = {
     welcome: createRoutePathBuilder("welcome"),
-    entity: createRoutePathBuilder<IEntityRoutingParams>("entity"),
+    entityProfile: createRoutePathBuilder<IEntityRoutingParams>("entityProfile"),
     familyTree: createRoutePathBuilder<IFamilyTreeRoutingParams>("familyTree"),
 };

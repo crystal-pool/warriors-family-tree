@@ -10,4 +10,4 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (p
     return (<>
         <CharacterInfobox qName={qName} />
     </>);
-}
+};

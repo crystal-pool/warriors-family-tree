@@ -11,7 +11,7 @@ export const Routes: React.FC<IRoutesProps> = (props) => {
     return (<React.Fragment>
         <Route exact path={Pages.routePaths.welcome} component={Pages.Welcome} />
         <Route path={Pages.routePaths.familyTree} component={Pages.FamilyTree} />
-        <Route path={Pages.routePaths.entity} component={Pages.Entity} />
+        <Route path={Pages.routePaths.entityProfile} component={Pages.EntityProfile} />
     </React.Fragment>);
 };
 

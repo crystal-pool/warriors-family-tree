@@ -61,7 +61,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
         </CardContent>
         <CardActions>
             <Button href={routePathBuilders.familyTree({ character: props.qName }, loc.search)}>{resourceManager.getPrompt("FamilyTreeTitle")}</Button>
-            <Button href={routePathBuilders.entity({ qName: props.qName }, loc.search)}>{resourceManager.getPrompt("EntityPageTitle")}</Button>
+            <Button href={routePathBuilders.entityProfile({ qName: props.qName }, loc.search)}>{resourceManager.getPrompt("EntityPageTitle")}</Button>
         </CardActions>
     </Card>);
 });
