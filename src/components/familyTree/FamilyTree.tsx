@@ -62,7 +62,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             this._drawingRoot.firstChild!.remove();
         // Render
         const layout = layoutFamilyTree(this.props.familyTree, this.props.onEvalNodeDimension!);
-        if (!layout) return;
+        if (!layout) {
+            this.forceUpdate();
+            return;
+        }
         const FAMILY_TREE_BOX_SPACING_Y = this.props.nodeSpacingY == null ? 20 : this.props.nodeSpacingY;
         const drawingWidth = layout.rawWidth;
         // [top, height]

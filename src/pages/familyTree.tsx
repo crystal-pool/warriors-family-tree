@@ -1,4 +1,4 @@
-import { Grid, Paper, Slider, Typography } from "@material-ui/core";
+import { Grid, Link, Paper, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
@@ -72,7 +72,10 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             )
         }
         <Paper className={scss.familytreeContainer} data-is-scrollable>
-            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth} />
+            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth}
+                emptyPlaceholder={<p>{resourceManager.renderPrompt("NoFamilyTreeInformation1", [
+                <Link key={0} href={routePathBuilders.entityProfile({ qName: characterId }, props.location.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Link>
+                ])}</p>} />
         </Paper>
     </React.Fragment>);
 }, function propsComparer(prevProps, nextProps) {

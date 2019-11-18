@@ -47,8 +47,8 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
             <h3>
                 <RdfEntityLabel qName={props.qName} showEntityId={true} />
                 <span className={Scss.badges}>
-                    {gender === "male" && <Mars className={Scss.badge} fontSize="inherit" />}
-                    {gender === "female" && <Venus className={Scss.badge} fontSize="inherit" />}
+                    {gender === "male" && <Mars className={Scss.badge} />}
+                    {gender === "female" && <Venus className={Scss.badge} />}
                     {currentAffiliations.map((a, i) => (<RdfClanSymbol
                         key={i} className={Scss.badge}
                         qName={a.group}
@@ -61,7 +61,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
         </CardContent>
         <CardActions>
             <Button href={routePathBuilders.familyTree({ character: props.qName }, loc.search)}>{resourceManager.getPrompt("FamilyTreeTitle")}</Button>
-            <Button href={routePathBuilders.entityProfile({ qName: props.qName }, loc.search)}>{resourceManager.getPrompt("EntityPageTitle")}</Button>
+            <Button href={routePathBuilders.entityProfile({ qName: props.qName }, loc.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Button>
         </CardActions>
     </Card>);
 });

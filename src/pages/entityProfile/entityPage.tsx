@@ -28,7 +28,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
     useLanguage();
     React.useEffect(() => {
         if (!entityQName) {
-            setPageTitle(resourceManager.getPrompt("EntityPageTitle"));
+            setPageTitle(resourceManager.getPrompt("EntityProfileTitle"));
         } else {
             const label = dataService.getLabelFor(entityQName);
             setPageTitle(label && label.label || entityQName);
@@ -36,7 +36,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
     }, [props.match]);
     if (!entityQName) {
         return (<React.Fragment>
-            <h1>{resourceManager.getPrompt("EntityPageTitle")}</h1>
+            <h1>{resourceManager.getPrompt("EntityProfileTitle")}</h1>
             <p>{resourceManager.getPrompt("PageNeedsEntityId")}</p>
         </React.Fragment>);
     }

@@ -19,6 +19,7 @@ export interface ICharacterFamilyTreeProps {
     centerQName: string;
     walkMode?: CharacterFamilyTreeWalkMode;
     maxDistance: number;
+    emptyPlaceholder?: React.ReactElement;
     debugInfo?: boolean;
 }
 
@@ -27,7 +28,7 @@ export interface IFamilyTreeNodeProps {
     isCurrent: boolean;
 }
 
-function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, maxDistance?: number): IFamilyTreeData {
+function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, maxDistance?: number): IFamilyTreeData | null {
     if (maxDistance && maxDistance < 0)
         throw new RangeError("maxDistanceUp should be non-negative number.");
     const edgeTypes = new Set<CharacterRelationType>(["parent", "child", "mate"]);
@@ -70,6 +71,11 @@ function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, max
             children.push([parentId1!, parentId2, charId]);
         }
     }
+    if (roots.length === 0) {
+        console.assert(children.length == 0);
+        console.assert(mates.size == 0);
+        return null;
+    }
     return {
         roots,
         children,
@@ -78,7 +84,7 @@ function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, max
 }
 
 export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.memo((props) => {
-    const [familyTreeData, setFamilyTreeData] = React.useState<IFamilyTreeData | undefined>();
+    const [familyTreeData, setFamilyTreeData] = React.useState<IFamilyTreeData | null | undefined>();
     React.useEffect(() => {
         if (!props.centerQName) return;
         const familyTree = walk(props.centerQName, props.walkMode, props.maxDistance);
@@ -107,12 +113,12 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
     }, [props.centerQName]);
     return familyTreeData
-        && <FamilyTree
+        ? <FamilyTree
             className={scss.characterFamilyTree} familyTree={familyTreeData}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
             onEvalNodeDimension={evaluateNodeDimension}
             debugInfo={props.debugInfo} />
-        || null;
+        : props.emptyPlaceholder || null;
 });
 CharacterFamilyTree.displayName = "CharacterFamilyTree";
 

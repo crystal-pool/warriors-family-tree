@@ -27,6 +27,7 @@ export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
             : <span className="entity-id entity-not-expandable">{props.qName}</span>}
     </Tooltip>);
 };
+RdfEntityLink.displayName = "RdfEntityLink";
 
 export interface IRdfEntityLabelProps {
     qName: RdfQName;
@@ -48,6 +49,7 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
         </span>);
     }
 };
+RdfEntityLabel.displayName = "RdfEntityLabel";
 
 export interface IRdfEntityDescriptionProps {
     qName: RdfQName;
@@ -58,3 +60,4 @@ export const RdfEntityDescription: React.FC<IRdfEntityDescriptionProps> = (props
     const label = useLabelFor(dataService, props.qName);
     return <span>{label && label.description || props.fallbackContent}</span>;
 };
+RdfEntityDescription.displayName = "RdfEntityDescription";
