@@ -1,4 +1,4 @@
-import { Link } from "@material-ui/core";
+import { Link, Tooltip } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
 import { resourceManager } from "../localization";
@@ -9,13 +9,23 @@ import Scss from "./RdfEntity.scss";
 
 export interface IRdfEntityLinkProps {
     qName: RdfQName;
+    title?: React.ReactNode;
 }
 
 export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
     const uri = props.qName && tryGetFullUri(props.qName);
-    return uri
-        ? <Link className="entity-id entity-uri-link" href={uri}>{props.qName}</Link>
-        : <span className="entity-id entity-not-expandable">{props.qName}</span>;
+    let title = props.title;
+    if (title === undefined && uri) {
+        title = resourceManager.getPrompt("GoToEntityDataSource");
+        if (props.qName.startsWith("wd:")) {
+            title += resourceManager.getPrompt("Brackets", ["Crystal Pool"]);
+        }
+    }
+    return (<Tooltip title={title}>
+        {uri
+            ? <Link className="entity-id entity-uri-link" href={uri}>{props.qName}</Link>
+            : <span className="entity-id entity-not-expandable">{props.qName}</span>}
+    </Tooltip>);
 };
 
 export interface IRdfEntityLabelProps {

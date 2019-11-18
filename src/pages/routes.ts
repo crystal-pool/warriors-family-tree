@@ -4,9 +4,14 @@ export interface IFamilyTreeRoutingParams {
     character?: string;
 }
 
+export interface IEntityRoutingParams {
+    qName?: string;
+}
+
 export const routePaths = {
     welcome: "/",
-    familyTree: "/familyTree/:character"
+    entity: "/entity/:qName",
+    familyTree: "/familyTree/:character",
 };
 
 export function buildRoutePath(pathName: string, search?: string): string {
@@ -22,5 +27,6 @@ function createRoutePathBuilder<TRoutingParams extends {}>(routeName: keyof type
 
 export const routePathBuilders = {
     welcome: createRoutePathBuilder("welcome"),
+    entity: createRoutePathBuilder<IEntityRoutingParams>("entity"),
     familyTree: createRoutePathBuilder<IFamilyTreeRoutingParams>("familyTree"),
 };

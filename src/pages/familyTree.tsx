@@ -34,8 +34,8 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     }, [props.match]);
     if (!characterId) {
         return (<React.Fragment>
-            <h1>resourceManager.getPrompt("FamilyTreeTitle")</h1>
-            <p>Specify a character ID to continue.</p>
+            <h1>{resourceManager.getPrompt("FamilyTreeTitle")}</h1>
+            <p>{resourceManager.getPrompt("PageNeedsEntityId")}</p>
         </React.Fragment>);
     }
     if (characterId.indexOf(":") < 0) {
