@@ -1,8 +1,9 @@
-import { Theme, Tooltip, withStyles } from "@material-ui/core";
+import { Paper, Theme, Tooltip, withStyles } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router";
 import wu from "wu";
+import { resourceManager } from "../../localization";
 import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
@@ -112,13 +113,15 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     const renderNode: NodeRenderCallback = React.useCallback((id, brct) => {
         return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
     }, [props.centerQName]);
-    return familyTreeData
+    return (<Paper className={scss.familytreeContainer} data-is-scrollable>{familyTreeData
         ? <FamilyTree
             className={scss.characterFamilyTree} familyTree={familyTreeData}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}
             onEvalNodeDimension={evaluateNodeDimension}
             debugInfo={props.debugInfo} />
-        : props.emptyPlaceholder || null;
+        : props.emptyPlaceholder === undefined
+            ? (<h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>)
+            : props.emptyPlaceholder}</Paper>);
 });
 CharacterFamilyTree.displayName = "CharacterFamilyTree";
 

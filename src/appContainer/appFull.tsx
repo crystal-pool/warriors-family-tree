@@ -153,7 +153,7 @@ export const AppFull: React.FC = (props) => {
                             inputInput: classes.searchBoxInput
                         }}
                             onAccept={(qName) => {
-                                location.href = routePathBuilders.familyTree({ character: qName });
+                                location.href = routePathBuilders.entityProfile({ qName });
                             }}
                         />
                         <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}

@@ -15,7 +15,7 @@ export const Welcome: React.FC = (props) => {
         <h1>{resourceManager.getPrompt("WelcomeTitle")}</h1>
         <Typography variant="subtitle1" dangerouslySetInnerHTML={{ __html: resourceManager.getPrompt("WelcomeDescription") }}></Typography>
         <EntitySearchBox onAccept={(qName) => {
-            location.href = routePathBuilders.familyTree({ character: qName });
+            location.href = routePathBuilders.entityProfile({ qName });
         }} />
     </React.Fragment>);
 };

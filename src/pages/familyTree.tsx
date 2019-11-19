@@ -1,4 +1,4 @@
-import { Grid, Link, Paper, Slider, Typography } from "@material-ui/core";
+import { Grid, Link, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
@@ -10,7 +10,6 @@ import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
-import scss from "./familyTree.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
 export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
@@ -71,12 +70,13 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             </React.Fragment>
             )
         }
-        <Paper className={scss.familytreeContainer} data-is-scrollable>
-            <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth}
-                emptyPlaceholder={<p>{resourceManager.renderPrompt("NoFamilyTreeInformation1", [
-                <Link key={0} href={routePathBuilders.entityProfile({ qName: characterId }, props.location.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Link>
-                ])}</p>} />
-        </Paper>
+        <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth}
+            emptyPlaceholder={<>
+                <h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>
+                <p>{resourceManager.renderPrompt("HoweverCheckout1", [
+                    <Link key={0} href={routePathBuilders.entityProfile({ qName: characterId }, props.location.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Link>
+                ])}</p>
+            </>} />
     </React.Fragment>);
 }, function propsComparer(prevProps, nextProps) {
     return prevProps.location === nextProps.location;
