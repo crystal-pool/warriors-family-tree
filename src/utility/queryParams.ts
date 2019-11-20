@@ -4,6 +4,8 @@ export interface IQueryParams {
     depth?: number;
 }
 
+const intrinsicParamNames: Array<keyof IQueryParams> = ["embed", "pmToken"];
+
 /**
  * Parses the pseudo-query string in the URI.
  */
@@ -52,4 +54,14 @@ export function setQueryParams<T extends IQueryParams>(queryExpr: string, replac
         }
     }
     return String(s);
+}
+
+export function resetQueryParams<T extends IQueryParams>(queryExpr: string, params?: { [k in keyof T]?: T[k] | null }): string {
+    let s = new URLSearchParams(queryExpr);
+    const allParams: Record<string, string> = {};
+    for (const k of intrinsicParamNames) {
+        if (s.has(k)) allParams[k] = s.get(k)!;
+    }
+    Object.assign(allParams, params);
+    return String(new URLSearchParams(allParams));
 }
