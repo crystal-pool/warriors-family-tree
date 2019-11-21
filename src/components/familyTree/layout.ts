@@ -353,8 +353,8 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
         for (const n2 of mates) {
             if (n1 >= n2) continue;
             addDXVars(n1, n2);
-            addObjective(varNameDXP(n1, n2), 20);
-            addObjective(varNameDXN(n1, n2), 20);
+            addObjective(varNameDXP(n1, n2), 10);
+            addObjective(varNameDXN(n1, n2), 10);
         }
     }
     for (const [p, children] of childrenLookup) {
@@ -362,12 +362,12 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
         for (const c of children) {
             if (p2) {
                 addDMXVars(c, p1, p2);
-                addObjective(varNameDMXP(c, p1, p2), 40);
-                addObjective(varNameDMXN(c, p1, p2), 40);
+                addObjective(varNameDMXP(c, p1, p2), 50);
+                addObjective(varNameDMXN(c, p1, p2), 50);
             } else {
                 addDXVars(c, p1);
-                addObjective(varNameDXP(c, p1), 40);
-                addObjective(varNameDXN(c, p1), 40);
+                addObjective(varNameDXP(c, p1), 50);
+                addObjective(varNameDXN(c, p1), 50);
             }
         }
     }
