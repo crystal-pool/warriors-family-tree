@@ -251,27 +251,23 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
         }
     }
     // Then insert the mates.
-    for (const node of incomingNodes) {
+    const snapshot = [...arrangedRow];
+    for (const node of snapshot) {
         const mates = matesLookup.get(node);
-        let inserted = false;
-        if (mates) {
-            for (const mate of mates) {
-                if (!incomingNodes.has(mate)) {
-                    const mateIndex = arrangedRow.indexOf(mate);
-                    if (mateIndex >= 0) {
-                        arrangedRow.splice(mateIndex + 1, 0, node);
-                        inserted = true;
-                        break;
-                        // TODO when insert twice or more?
-                    }
-                }
-            }
-        }
-        if (!inserted) {
-            arrangedRow.push(node);
-        }
-        incomingNodes.delete(node);
+        if (!mates) continue;
+        let arrangedIndex = arrangedRow.indexOf(node);
+        console.assert(arrangedIndex >= 0);
+        const matesOnRow = wu(mates).filter(m => incomingNodes.has(m)).toArray();
+        for (const mate of matesOnRow) incomingNodes.delete(mate);
+        const leftMatesCount = Math.floor(matesOnRow.length / 2);
+        const leftMates = matesOnRow.slice(0, leftMatesCount);
+        const rightMates = matesOnRow.slice(leftMatesCount);
+        arrangedRow.splice(arrangedIndex, 0, ...leftMates);
+        arrangedIndex += leftMatesCount;
+        arrangedRow.splice(arrangedIndex + 1, 0, ...rightMates);
     }
+    // Rest of the nodes.
+    arrangedRow.push(...incomingNodes);
     return arrangedRow;
 }
 
