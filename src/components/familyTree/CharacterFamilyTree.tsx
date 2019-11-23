@@ -1,10 +1,8 @@
 import { Paper, Theme, Tooltip, withStyles } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
-import { useLocation } from "react-router";
 import wu from "wu";
 import { resourceManager } from "../../localization";
-import { routePathBuilders } from "../../pages";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
 import { isRegExUnicodeCategorySupported } from "../../utility/compatibility";
@@ -20,13 +18,16 @@ export interface ICharacterFamilyTreeProps {
     centerQName: string;
     walkMode?: CharacterFamilyTreeWalkMode;
     maxDistance: number;
+    /** Placeholder to show when the family tree is empty. */
     emptyPlaceholder?: React.ReactElement;
+    onNodeClick?: (qName: string) => void;
     debugInfo?: boolean;
 }
 
 export interface IFamilyTreeNodeProps {
     qName: string;
     isCurrent: boolean;
+    onClick?: (qName: string) => void;
 }
 
 function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, maxDistance?: number): IFamilyTreeData | null {
@@ -111,8 +112,8 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
         return null;
     }
     const renderNode: NodeRenderCallback = React.useCallback((id, brct) => {
-        return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} />);
-    }, [props.centerQName]);
+        return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} onClick={props.onNodeClick} />);
+    }, [props.centerQName, props.onNodeClick]);
     return (<Paper className={scss.familytreeContainer} data-is-scrollable>{familyTreeData
         ? <FamilyTree
             className={scss.characterFamilyTree} familyTree={familyTreeData}
@@ -136,20 +137,19 @@ const HoverTooltip = withStyles((theme: Theme) => ({
 }))(Tooltip);
 
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
-    const label = useLabelFor(dataService, props.qName);
-    const profile = dataService.getCharacterProfileFor(props.qName);
-    const loc = useLocation();
+    const { onClick, qName } = props;
+    const label = useLabelFor(dataService, qName);
+    const profile = dataService.getCharacterProfileFor(qName);
     return (<HoverTooltip
         style={{ fontSize: "unset" }}
-        title={<CharacterCard qName={props.qName} />}
+        title={<CharacterCard qName={qName} />}
         enterDelay={300} leaveDelay={300}
         interactive>
-        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])} onClick={() => {
-            location.href = routePathBuilders.familyTree({ character: props.qName }, loc.search);
-        }}>
+        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])}
+            onClick={onClick && (() => { onClick(qName); })}>
             {label && <div className="entityLabel">{label.label}</div>}
-            <div className={scss.entityId}>{props.qName}</div>
+            <div className={scss.entityId}>{qName}</div>
         </div>
-    </HoverTooltip>);
+    </HoverTooltip >);
 };
 FamilyTreeNode.displayName = "FamilyTreeNode";

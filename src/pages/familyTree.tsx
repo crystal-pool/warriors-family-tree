@@ -71,6 +71,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             )
         }
         <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth}
+            onNodeClick={(qName) => { location.href = routePathBuilders.familyTree({ character: qName }, props.location.search); }}
             emptyPlaceholder={<>
                 <h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>
                 <p>{resourceManager.renderPrompt("HoweverCheckout1", [

@@ -14,12 +14,18 @@ export interface ICharacterEntityDetailsProps {
 
 export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (props) => {
     const { qName } = props;
-    const location = useLocation();
+    const loc = useLocation();
     return (<>
         <CharacterInfobox qName={qName} />
         <h2>{resourceManager.getPrompt("FamilyTreeTitle")}<span className={entityPageScss.actionBadge}>
-            <Link href={routePathBuilders.familyTree({ character: qName }, resetQueryParams(location.search))}>{resourceManager.getPrompt("More")}</Link>
+            <Link href={routePathBuilders.familyTree({ character: qName }, resetQueryParams(loc.search))}>{resourceManager.getPrompt("More")}</Link>
         </span></h2>
-        <CharacterFamilyTree centerQName={qName} maxDistance={3} />
+        <CharacterFamilyTree
+            onNodeClick={(qName) => { location.href = routePathBuilders.entityProfile({ qName }, loc.search); }}
+            emptyPlaceholder={<>
+                <h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>
+            </>}
+            centerQName={qName} maxDistance={3}
+        />
     </>);
 };
