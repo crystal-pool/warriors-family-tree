@@ -327,6 +327,8 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
         constraints.push([{ [varNameDXP(n1, n2)]: 1, [varNameDXN(n1, n2)]: -1, [varNameX(n1)]: -1, [varNameX(n2)]: 1 }, "=", 0]);
     }
     function addDMXVars(n1: string, n21: string, n22: string): void {
+        // TODO We are making children nearer to the mid-point of parent connection.
+        // This may cause parent connection become longer only for this objective to be small.
         constraints.push([{ [varNameDMXP(n1, n21, n22)]: 2, [varNameDMXN(n1, n21, n22)]: -2, [varNameX(n1)]: -2, [varNameX(n21)]: 1, [varNameX(n22)]: 1 }, "=", 0]);
     }
     for (const row of layoutRows) {
@@ -344,8 +346,6 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
                     distance -= node1.width / 2;
                 }
             }
-            // Make coordinates as small as possible.
-            addObjective(varNameX(node.id), 1);
             currentX += node.width / 2;
         }
     }
