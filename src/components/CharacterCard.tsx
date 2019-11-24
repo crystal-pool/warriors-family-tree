@@ -7,7 +7,7 @@ import { dataService } from "../services";
 import { RdfQName } from "../services/dataService";
 import { characterTimelineBuilder } from "../timeline";
 import { ITimelineAffiliationEvent } from "../timeline/characterTimeline";
-import { TimelineTimeRangeLabel } from "../timeline/rendering";
+import { TimelineEventTimeRangeLabel } from "../timeline/rendering";
 import { Mars, Venus } from "../utility/muiIcons";
 import Scss from "./CharacterCard.scss";
 import { CharacterInfobox } from "./CharacterInfobox";
@@ -21,9 +21,7 @@ export interface ICharacterCardProps {
 function renderCharacterAffiliationTooltip(affiliation: ITimelineAffiliationEvent): React.ReactNode {
     return (<>
         <Typography variant="subtitle1"><RdfEntityLabel qName={affiliation.group} /></Typography>
-        {(affiliation.startTime || affiliation.endTime)
-            ? <TimelineTimeRangeLabel time1={affiliation.startTime} time2={affiliation.endTime} />
-            : resourceManager.getPrompt("MissingTimelineInformation")}
+        <TimelineEventTimeRangeLabel event={affiliation} />
     </>);
 }
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
-import { TimelineTime } from "./characterTimeline";
+import { TimelineEvent, TimelineTime } from "./characterTimeline";
 
 export interface ITimelineTimeLabelProps {
     time: TimelineTime;
@@ -30,4 +30,17 @@ export const TimelineTimeRangeLabel: React.FC<ITimelineTimeRangeLabelProps> = fu
         &mdash;
         {time2 ? <TimelineTimeLabel time={time2} /> : resourceManager.getPrompt("TimelineUntilNow")}
     </>);
+};
+
+export interface ITimelineEventTimeRangeLabelProps {
+    event: TimelineEvent;
+}
+
+export const TimelineEventTimeRangeLabel: React.FC<ITimelineEventTimeRangeLabelProps> = function TimelineEventTimeRangeLabel(props): React.ReactElement {
+    const { event } = props;
+    return <>{
+        (event.startTime || event.endTime)
+            ? <TimelineTimeRangeLabel time1={event.startTime} time2={event.endTime} />
+            : resourceManager.getPrompt("MissingTimelineInformation")
+    }</>;
 };

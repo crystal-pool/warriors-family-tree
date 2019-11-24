@@ -1,4 +1,4 @@
-import { DataService, RdfQName, TimelineName } from "../services/dataService";
+import { CharacterRelationType, DataService, RdfQName, TimelineName } from "../services/dataService";
 import { isBlankNodeUri } from "../utility/rdf";
 
 export interface ITimelineTimeValue {
@@ -17,12 +17,18 @@ export interface ITimelineEventBase {
     isCurrent?: boolean;
 }
 
+export interface ITimelineRelationEvent extends ITimelineEventBase {
+    type: "relation";
+    relation: CharacterRelationType;
+    target: RdfQName;
+}
+
 export interface ITimelineAffiliationEvent extends ITimelineEventBase {
     type: "affiliation";
     group: RdfQName;
 }
 
-export type TimelineEvent = ITimelineAffiliationEvent;
+export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent;
 
 const timelineOrdinal: Record<TimelineName, number> = {
     dotc: 0,
@@ -68,6 +74,20 @@ export class CharacterTimelineBuilder {
                 e.isCurrent = true;
             }
         }
+    }
+    public getRelations(entityId: RdfQName, relationType?: CharacterRelationType | Iterable<CharacterRelationType>, currentOnly?: boolean): ITimelineRelationEvent[] {
+        let rawRel = this._dataService.getRelationsFor(entityId, relationType);
+        if (!rawRel) return [];
+        if (currentOnly) rawRel = rawRel.filter(a => a.until == null);
+        const rel = rawRel.map<ITimelineRelationEvent>(a => ({
+            type: "relation",
+            startTime: a.since != null ? this.timelineTimeFromMarker(a.since) : undefined,
+            endTime: a.until != null ? this.timelineTimeFromMarker(a.until) : undefined,
+            relation: a.relation,
+            target: a.target
+        }));
+        this._sortAndFill(rel);
+        return rel;
     }
     public getAffiliations(entityId: RdfQName, currentOnly?: boolean): ITimelineAffiliationEvent[] {
         let rawAff = this._dataService.getCharacterProfileFor(entityId)?.affiliations;
