@@ -24,7 +24,10 @@ const useStyles = makeStyles(theme => createStyles<EmbedAppBarClassName, IEmbedA
         }
     },
     title: {
-        flexGrow: 1
+        flexGrow: 1,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center"
     },
     toolbar: {
     },
