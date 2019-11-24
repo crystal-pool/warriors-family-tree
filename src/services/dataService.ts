@@ -15,6 +15,7 @@ export interface ICharacterProfileEntry {
     gender?: CharacterGender;
     affiliations?: ICharacterAffiliationEntry[];
     positionsHeld?: ICharacterPositionEntry[];
+    names?: ICharacterNameEntry[];
 }
 
 export interface ICharacterAffiliationEntry {
@@ -26,6 +27,13 @@ export interface ICharacterAffiliationEntry {
 export interface ICharacterPositionEntry {
     position: RdfQName;
     of?: RdfQName;
+    since?: RdfQName;
+    until?: RdfQName;
+}
+
+export interface ICharacterNameEntry {
+    // [text, language][]
+    name: [string, string][];
     since?: RdfQName;
     until?: RdfQName;
 }

@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 export interface ILanguageInfo {
     autonym: string;
 }
@@ -40,6 +42,8 @@ export function fallbackLanguageTag(language: string): string {
 }
 
 export function evaluateLanguageSimilarity(baseline: string, target: string): number {
+    baseline = baseline.toLowerCase();
+    target = target.toLowerCase();
     if (baseline === target) return 1;
     // zh, zh-cn
     if (target.startsWith(baseline)) return 1;
@@ -52,19 +56,23 @@ export function evaluateLanguageSimilarity(baseline: string, target: string): nu
     return Math.min(1, commonParts / baselineParts.length);
 }
 
-function detectBrowserLanguage(): KnownLanguage {
-    const languages = navigator.languages || [navigator.language];
-    const languageCandidates = new Map<KnownLanguage, number>();
-    let priority = languages.length;
-    for (let lang of languages) {
-        lang = lang.toLowerCase();
-        for (const knownLang of knownLanguages) {
+export function choosePerferredLanguage<TBaseline extends string>(baselines: Iterable<TBaseline>, preferences: string | readonly string[]): TBaseline | undefined {
+    if (!preferences || preferences.length === 0) return undefined;
+    if (typeof preferences === "string") preferences = [preferences];
+    let priority = preferences.length;
+    const languageCandidates = new Map<TBaseline, number>();
+    for (let lang of preferences) {
+        for (const knownLang of baselines) {
             const similarity = evaluateLanguageSimilarity(knownLang, lang);
             languageCandidates.set(knownLang, Math.max(languageCandidates.get(knownLang) || 0, similarity * priority));
         }
         priority--;
     }
     return Array.from(languageCandidates).sort(([, p1], [, p2]) => p2 - p1)[0][0];
+}
+
+function detectBrowserLanguage(): KnownLanguage {
+    return choosePerferredLanguage(knownLanguages, _.uniq(navigator.languages || navigator.language || "en-us")) || "en-us";
 }
 
 export const browserLanguage = detectBrowserLanguage();

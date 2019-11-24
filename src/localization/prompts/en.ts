@@ -32,6 +32,7 @@ const prompts = {
     ListSeparator: ", ",
     MissingTimelineInformation: "Missing timeline information.",
     More: "More",
+    NamesTitle: "Names",
     NoFamilyTreeInformation: "No family tree information.",
     OpenInNewWindow: "Open in new window",
     PageNeedsEntityId: "This page needs an entity ID as parameter.",

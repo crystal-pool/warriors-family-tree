@@ -34,7 +34,13 @@ export interface ITimelinePositionHoldingEvent extends ITimelineEventBase {
     of?: RdfQName;
 }
 
-export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent | ITimelinePositionHoldingEvent;
+export interface ITimelineNamingEvent extends ITimelineEventBase {
+    type: "naming";
+    // [text, language][]
+    names: readonly [string, string][];
+}
+
+export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent | ITimelinePositionHoldingEvent | ITimelineNamingEvent;
 
 const timelineOrdinal: Record<TimelineName, number> = {
     dotc: 0,
@@ -118,6 +124,19 @@ export class CharacterTimelineBuilder {
             endTime: a.until != null ? this.timelineTimeFromMarker(a.until) : undefined,
             position: a.position,
             of: a.of
+        }));
+        this._sortAndFill(pos);
+        return pos;
+    }
+    public getNames(entityId: RdfQName, currentOnly?: boolean): ITimelineNamingEvent[] {
+        let rawNames = this._dataService.getCharacterProfileFor(entityId)?.names;
+        if (!rawNames) return [];
+        if (currentOnly) rawNames = rawNames.filter(a => a.until == null);
+        const pos = rawNames.map<ITimelineNamingEvent>(a => ({
+            type: "naming",
+            startTime: a.since != null ? this.timelineTimeFromMarker(a.since) : undefined,
+            endTime: a.until != null ? this.timelineTimeFromMarker(a.until) : undefined,
+            names: a.name
         }));
         this._sortAndFill(pos);
         return pos;

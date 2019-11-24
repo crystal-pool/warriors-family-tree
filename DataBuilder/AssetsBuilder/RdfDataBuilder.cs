@@ -241,12 +241,37 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
                 var posEntry = new CharacterPositionEntry
                 {
                     Position = SerializeUriNode(row["position"]),
-                    Of = row.TryGetBoundValue("of", out INode tempNode) ? SerializeUriNode(tempNode) : null,
+                    Of = row.TryGetBoundValue("of", out var tempNode) ? SerializeUriNode(tempNode) : null,
                     Since = row.TryGetBoundValue("startTime", out tempNode) ? SerializeUriNode(tempNode) : null,
                     Until = row.TryGetBoundValue("endTime", out tempNode) ? SerializeUriNode(tempNode) : null,
                 };
                 if (entry.PositionsHeld == null) entry.PositionsHeld = new List<CharacterPositionEntry>();
                 entry.PositionsHeld.Add(posEntry);
+            }
+            resultSet = ExecuteQueryFromResource("CharacterNames.rq");
+
+            CharacterLocalizedName CharacterLocalizedNameFromNode(ILiteralNode node)
+            {
+                return new CharacterLocalizedName { Text = node.Value, Language = node.Language };
+            }
+            foreach (var group in resultSet.GroupBy(r => (((IUriNode)r["character"]).Uri, r["claim"])))
+            {
+                var (character, _) = group.Key;
+                var entry = GetProfileEntry(character);
+                var firstRow = group.First();
+                var nameEntry = new CharacterNameEntry
+                {
+                    Name = { CharacterLocalizedNameFromNode((ILiteralNode)firstRow["name0"]) },
+                    Since = firstRow.TryGetBoundValue("startTime", out var tempNode) ? SerializeUriNode(tempNode) : null,
+                    Until = firstRow.TryGetBoundValue("endTime", out tempNode) ? SerializeUriNode(tempNode) : null,
+                };
+                foreach (var row in group)
+                {
+                    if (!row.HasBoundValue("name1")) continue;
+                    nameEntry.Name.Add(CharacterLocalizedNameFromNode((ILiteralNode)row["name1"]));
+                }
+                if (entry.Names == null) entry.Names = new List<CharacterNameEntry>();
+                entry.Names.Add(nameEntry);
             }
             return root;
         }
