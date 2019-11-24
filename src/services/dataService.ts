@@ -246,6 +246,7 @@ export function useLanguageAwareData<T>(dataService: DataService, selector: () =
         if (equalityComparator && !equalityComparator(data, newData) || !equalityComparator && data !== newData) {
             setData(newData);
         }
+        if (prevDeps) prevDeps.current = deps!;
     }
     React.useEffect(() => {
         const subscription = dataService.onLanguageChanged(() => {
