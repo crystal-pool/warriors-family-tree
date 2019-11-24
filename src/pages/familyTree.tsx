@@ -3,6 +3,7 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import { EmbedAppBar } from "../components/EmbedAppBar";
+import { CharacterActionLinks } from "../components/entities/actionLinks";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
 import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
@@ -10,6 +11,7 @@ import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
+import CommonScss from "./common.scss";
 import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
 export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
@@ -44,10 +46,12 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
         {queryParams.embed
             ? (<React.Fragment>
                 <EmbedAppBar title={resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])} />
+                <CharacterActionLinks className={CommonScss.titleLinks} qName={characterId} />
                 <Typography variant="subtitle2"><RdfEntityDescription qName={characterId} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
                 <h1>{resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])}</h1>
+                <CharacterActionLinks className={CommonScss.titleLinks} qName={characterId} />
                 <Typography variant="subtitle1"><RdfEntityDescription qName={characterId} /></Typography>
                 <Grid container spacing={1}>
                     <Grid item xs={12} md={6} lg={4}>

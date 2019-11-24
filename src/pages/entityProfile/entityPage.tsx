@@ -11,6 +11,7 @@ import { useLanguage } from "../../localization/react";
 import { dataService } from "../../services";
 import { parseQueryParams } from "../../utility/queryParams";
 import { useSetPageTitle } from "../../utility/react";
+import CommonScss from "../common.scss";
 import { IEntityRoutingParams } from "../routes";
 import { CharacterEntityDetails } from "./character";
 import Scss from "./entityPage.scss";
@@ -68,7 +69,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </span>} />
-                <div className={Scss.titleLinks}>{partials.titleLinks}</div>
+                <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                 <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
@@ -76,7 +77,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </h1>
-                <div className={Scss.titleLinks}>{partials.titleLinks}</div>
+                <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                 <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>
             )
