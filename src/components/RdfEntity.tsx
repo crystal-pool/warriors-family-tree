@@ -6,7 +6,7 @@ import { resourceManager } from "../localization";
 import { routePathBuilders } from "../pages";
 import { dataService } from "../services";
 import { tryGetFullUri } from "../services/dataConfig";
-import { RdfQName, useLabelFor } from "../services/dataService";
+import { RdfQName, useDataServiceLanguage, useLabelFor } from "../services/dataService";
 import { resetQueryParams } from "../utility/queryParams";
 import Scss from "./RdfEntity.scss";
 
@@ -40,6 +40,7 @@ export interface IRdfEntityLabelProps {
 
 export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
     const { qName, variant = "plain" } = props;
+    const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, qName)?.label;
     const loc = useLocation();
     function renderLabel() {
@@ -52,7 +53,7 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
         else
             return (<span className={className}>{displayLabel}</span>);
     }
-    return (<span className={Scss.entityLabelContainer}>
+    return (<span className={Scss.entityLabelContainer} lang={language}>
         {renderLabel()}
         {variant === "plain-with-id-link" && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} />])}</span>)}
     </span>);
@@ -66,7 +67,8 @@ export interface IRdfEntityDescriptionProps {
 }
 
 export const RdfEntityDescription: React.FC<IRdfEntityDescriptionProps> = (props) => {
+    const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, props.qName);
-    return <span>{label && label.description || props.fallbackContent}</span>;
+    return <span lang={language}>{label && label.description || props.fallbackContent}</span>;
 };
 RdfEntityDescription.displayName = "RdfEntityDescription";

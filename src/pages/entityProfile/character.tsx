@@ -1,4 +1,5 @@
 import { Grid, Link } from "@material-ui/core";
+import _ from "lodash";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import wu from "wu";
@@ -14,7 +15,6 @@ import { TimelineEventTimeRangeLabel } from "../../timeline/rendering";
 import { resetQueryParams } from "../../utility/queryParams";
 import { routePathBuilders } from "../routes";
 import entityPageScss from "./entityPage.scss";
-import _ from 'lodash';
 
 export interface ICharacterEntityDetailsProps {
     qName: string;
@@ -90,8 +90,8 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (p
     // const profile = dataService.getCharacterProfileFor(qName);
     // const { gender } = profile || {};
     return (<>
-        <Grid container>
-            <Grid item md={6}>
+        <Grid container spacing={3}>
+            <Grid item md={5}>
                 <h2>{resourceManager.getPrompt("NamesTitle")}</h2>
                 {renderNames(qName, languagePref)}
                 <h2>{resourceManager.getPrompt("AffiliationsTitle")}</h2>
@@ -99,7 +99,7 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (p
                 <h2>{resourceManager.getPrompt("PositionsHeldTitle")}</h2>
                 {renderPositionsHeld(qName)}
             </Grid>
-            <Grid item md={6}>
+            <Grid item md={7}>
                 <h2>{resourceManager.getPrompt("RelationsTitle")}</h2>
                 <CharacterRelationInfobox qName={qName} />
             </Grid>
