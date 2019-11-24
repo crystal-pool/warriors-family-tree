@@ -3,6 +3,7 @@ import * as React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { routePathBuilders } from "..";
 import { EmbedAppBar } from "../../components/EmbedAppBar";
+import { CharacterBadges } from "../../components/entities/CharacterBadges";
 import { RdfEntityDescription, RdfEntityLabel } from "../../components/RdfEntity";
 import { resourceManager } from "../../localization";
 import { useLanguage } from "../../localization/react";
@@ -11,13 +12,26 @@ import { parseQueryParams } from "../../utility/queryParams";
 import { useSetPageTitle } from "../../utility/react";
 import { IEntityRoutingParams } from "../routes";
 import { CharacterEntityDetails } from "./character";
+import Scss from "./entityPage.scss";
 
 export interface IEntityProfileProps extends RouteComponentProps<IEntityRoutingParams> {
 }
 
-function renderEntityDetails(qName: string): React.ReactNode {
-    if (dataService.getCharacterProfileFor(qName)) return <CharacterEntityDetails qName={qName} />;
-    return <p>{resourceManager.getPrompt("EntityNotFound1", [qName])}</p>;
+interface IEntityPartials {
+    badges?: React.ReactNode;
+    detail: React.ReactNode;
+}
+
+function renderEntityPartials(qName: string): IEntityPartials {
+    if (dataService.getCharacterProfileFor(qName)) {
+        return {
+            badges: <CharacterBadges qName={qName} />,
+            detail: <CharacterEntityDetails qName={qName} />
+        };
+    }
+    return {
+        detail: (<p>{resourceManager.getPrompt("EntityNotFound1", [qName])}</p>)
+    };
 }
 
 export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) => {
@@ -43,19 +57,26 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
     if (entityQName.indexOf(":") < 0) {
         location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + entityQName }, props.location.search));
     }
+    const partials = renderEntityPartials(entityQName);
     return (<React.Fragment>
         {queryParams.embed
             ? (<React.Fragment>
-                <EmbedAppBar title={<RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />} />
+                <EmbedAppBar title={<span>
+                    <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
+                    <span className={Scss.titleBadges}>{partials.badges}</span>
+                </span>} />
                 <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
-                <h1><RdfEntityLabel qName={entityQName} variant="plain-with-id-link" /></h1>
+                <h1>
+                    <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
+                    <span className={Scss.titleBadges}>{partials.badges}</span>
+                </h1>
                 <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>
             )
         }
-        {renderEntityDetails(entityQName)}
+        {partials.detail}
     </React.Fragment>);
 }, function propsComparer(prevProps, nextProps) {
     return prevProps.location === nextProps.location;

@@ -3,8 +3,8 @@ import _ from "lodash";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import wu from "wu";
-import { CharacterRelationInfobox } from "../../components/CharacterInfobox";
-import { RdfClanSymbol } from "../../components/ClanSymbol";
+import { CharacterRelationInfobox } from "../../components/entities/CharacterInfobox";
+import { RdfClanSymbol } from "../../components/entities/ClanSymbol";
 import { EntityHoverCard } from "../../components/entityHoverCard/EntityCard";
 import { CharacterFamilyTree } from "../../components/familyTree/CharacterFamilyTree";
 import { RdfEntityLabel } from "../../components/RdfEntity";
@@ -91,7 +91,7 @@ function renderPositionsHeld(qName: string): React.ReactNode {
     </ul>);
 }
 
-export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (props) => {
+export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = function CharacterEntityDetails(props) {
     const { qName } = props;
     const loc = useLocation();
     const appLanguage = useLanguage();

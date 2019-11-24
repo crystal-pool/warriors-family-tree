@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableRow } from "@material-ui/core";
 import * as React from "react";
-import { resourceManager } from "../localization";
-import { PromptKey } from "../localization/prompts";
-import { CharacterRelationType, RdfQName } from "../services/dataService";
-import { characterTimelineBuilder } from "../timeline";
-import { ITimelineRelationEvent } from "../timeline/characterTimeline";
-import { TimelineEventTimeRangeLabel } from "../timeline/rendering";
-import { RdfEntityLabel } from "./RdfEntity";
+import { resourceManager } from "../../localization";
+import { PromptKey } from "../../localization/prompts";
+import { CharacterRelationType, RdfQName } from "../../services/dataService";
+import { characterTimelineBuilder } from "../../timeline";
+import { ITimelineRelationEvent } from "../../timeline/characterTimeline";
+import { TimelineEventTimeRangeLabel } from "../../timeline/rendering";
+import { RdfEntityLabel } from "../RdfEntity";
 
 export interface ICharacterInfoboxProps {
     qName: RdfQName;

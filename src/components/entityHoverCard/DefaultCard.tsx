@@ -18,8 +18,7 @@ export const DefaultCard: React.FC<IDefaultCardProps> = React.memo((props) => {
                 <RdfEntityLabel qName={props.qName} variant="plain-with-id-link" />
             </h3>
             <p><RdfEntityDescription qName={props.qName} /></p>
-            <p>{resourceManager.getPrompt("EntityNotFound1", [props.qName])}</p>
-            <p>{resourceManager.renderPrompt("HoweverCheckout1", [<strong key={0}>{resourceManager.getPrompt("EntityProfileTitle")}</strong>])}</p>
+            <p>{resourceManager.getPrompt("EntityNotFound1", [props.qName])} {resourceManager.renderPrompt("HoweverCheckout1", [<strong key={0}>{resourceManager.getPrompt("EntityProfileTitle")}</strong>])}</p>
         </CardContent>
         <CardActions>
             <Button href={routePathBuilders.entityProfile({ qName: props.qName }, loc.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Button>

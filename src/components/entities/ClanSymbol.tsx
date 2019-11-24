@@ -1,10 +1,11 @@
 import { Tooltip } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
-import commonScss from "../common.scss";
-import { RdfQName } from "../services/dataService";
+import commonScss from "../../common.scss";
+import { RdfQName } from "../../services/dataService";
+import { RdfEntityLabel } from "../RdfEntity";
 import scss from "./ClanSymbol.scss";
-import { RdfEntityLabel } from "./RdfEntity";
+import { IEntityDrivenComponentProps } from "./types";
 
 export interface IClanSymbolProps {
     className?: string;
@@ -53,8 +54,7 @@ export const StarClan = makeClanSymbol("StarClan", 565, 620,
         d="M-0.000,-0.000 C57.333,50.333 114.667,100.667 172.000,151.000 C246.333,151.000 320.667,151.000 395.000,151.000 C451.667,101.000 508.333,51.000 565.000,1.000 C565.000,207.333 565.000,413.666 565.000,619.999 C540.667,620.000 516.333,620.000 492.000,620.000 C458.000,571.333 424.000,522.667 390.000,474.000 C429.667,439.667 469.333,405.333 509.000,371.000 C451.000,371.000 393.000,371.000 335.000,371.000 C319.000,339.000 303.000,307.000 287.000,275.000 C271.333,307.000 255.667,339.000 240.000,371.000 C181.333,371.000 122.667,371.000 64.000,371.000 C104.667,406.000 145.333,441.000 186.000,476.000 C151.667,523.667 117.333,571.333 83.000,619.000 C55.333,619.000 27.667,619.000 -0.000,619.000 C-0.000,412.667 -0.000,206.333 -0.000,-0.000 Z" />
 );
 
-export interface IRdfClanSymbolProps extends IClanSymbolProps {
-    qName: RdfQName;
+export interface IRdfClanSymbolProps extends IEntityDrivenComponentProps, IClanSymbolProps {
 }
 
 const clanLookup: Record<RdfQName, React.FC<IClanSymbolProps> | string> = {

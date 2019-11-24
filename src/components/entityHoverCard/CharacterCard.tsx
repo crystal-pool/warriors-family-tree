@@ -1,48 +1,24 @@
-import { Button, Card, CardActions, CardContent, Typography } from "@material-ui/core";
+import { Button, Card, CardActions, CardContent } from "@material-ui/core";
 import * as React from "react";
 import { useLocation } from "react-router";
 import { resourceManager } from "../../localization";
 import { routePathBuilders } from "../../pages";
-import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
-import { characterTimelineBuilder } from "../../timeline";
-import { ITimelineAffiliationEvent } from "../../timeline/characterTimeline";
-import { TimelineEventTimeRangeLabel } from "../../timeline/rendering";
-import { Mars, Venus } from "../../utility/muiIcons";
-import { CharacterRelationInfobox } from "../CharacterInfobox";
-import { RdfClanSymbol } from "../ClanSymbol";
+import { CharacterBadges } from "../entities/CharacterBadges";
+import { CharacterRelationInfobox } from "../entities/CharacterInfobox";
 import { RdfEntityDescription, RdfEntityLabel } from "../RdfEntity";
-import Scss from "./CharacterCard.scss";
 
 export interface ICharacterCardProps {
     qName: RdfQName;
 }
 
-function renderCharacterAffiliationTooltip(affiliation: ITimelineAffiliationEvent): React.ReactNode {
-    return (<>
-        <Typography variant="subtitle1"><RdfEntityLabel qName={affiliation.group} /></Typography>
-        <TimelineEventTimeRangeLabel event={affiliation} />
-    </>);
-}
-
 export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) => {
     const loc = useLocation();
-    const profile = dataService.getCharacterProfileFor(props.qName);
-    const gender = profile?.gender;
-    const currentAffiliations = characterTimelineBuilder.getAffiliations(props.qName, true);
-    return (<Card className={Scss.characterCard}>
+    return (<Card>
         <CardContent>
             <h3>
                 <RdfEntityLabel qName={props.qName} variant="plain-with-id-link" />
-                <span className={Scss.badges}>
-                    {gender === "male" && <Mars className={Scss.badge} />}
-                    {gender === "female" && <Venus className={Scss.badge} />}
-                    {currentAffiliations.map((a, i) => (<RdfClanSymbol
-                        key={i} className={Scss.badge}
-                        qName={a.group}
-                        title={renderCharacterAffiliationTooltip(a)}
-                    />))}
-                </span>
+                <CharacterBadges qName={props.qName} />
             </h3>
             <p><RdfEntityDescription qName={props.qName} /></p>
             <CharacterRelationInfobox qName={props.qName} compact />
