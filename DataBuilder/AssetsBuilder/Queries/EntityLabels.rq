@@ -1,4 +1,4 @@
-SELECT ?entity ?label
+SELECT DISTINCT ?entity ?label
 WHERE {
   VALUES ?typeEntity {
     wd:Q624     # fictional character

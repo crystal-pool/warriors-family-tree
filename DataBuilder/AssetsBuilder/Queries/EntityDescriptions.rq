@@ -1,4 +1,4 @@
-SELECT ?entity ?desc
+SELECT DISTINCT ?entity ?desc
 WHERE {
   VALUES ?typeEntity {
     wd:Q624     # fictional character
