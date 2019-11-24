@@ -1,0 +1,36 @@
+.action-links {
+    display: inline;
+    padding-inline-start: 0;
+
+    &.link {
+        li {
+            display: inline;
+
+            &.current {
+                .link {
+                    font-weight: bold;
+                }
+            }
+        }
+
+        li:before {
+            content: " | ";
+        }
+
+        li:first-child:before {
+            content: none;
+        }
+    }
+
+    &.button {
+        li {
+            display: inline;
+
+            &.current {
+                .link {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}

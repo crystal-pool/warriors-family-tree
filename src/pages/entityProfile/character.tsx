@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import wu from "wu";
 import { CharacterRelationInfobox } from "../../components/entities/CharacterInfobox";
 import { RdfClanSymbol } from "../../components/entities/ClanSymbol";
-import { EntityHoverCard } from "../../components/entityHoverCard/EntityCard";
+import { EntityHoverCard } from "../../components/entities/hoverCard/EntityCard";
 import { CharacterFamilyTree } from "../../components/familyTree/CharacterFamilyTree";
 import { RdfEntityLabel } from "../../components/RdfEntity";
 import { resourceManager } from "../../localization";

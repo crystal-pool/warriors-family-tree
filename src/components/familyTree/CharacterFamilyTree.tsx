@@ -7,7 +7,7 @@ import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
 import { isRegExUnicodeCategorySupported } from "../../utility/compatibility";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
-import { EntityHoverCard } from "../entityHoverCard/EntityCard";
+import { EntityHoverCard } from "../entities/hoverCard/EntityCard";
 import scss from "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
 import { ISize } from "./layout";

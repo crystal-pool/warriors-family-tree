@@ -3,6 +3,7 @@ import * as React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { routePathBuilders } from "..";
 import { EmbedAppBar } from "../../components/EmbedAppBar";
+import { CharacterActionLinks } from "../../components/entities/actionLinks";
 import { CharacterBadges } from "../../components/entities/CharacterBadges";
 import { RdfEntityDescription, RdfEntityLabel } from "../../components/RdfEntity";
 import { resourceManager } from "../../localization";
@@ -19,6 +20,7 @@ export interface IEntityProfileProps extends RouteComponentProps<IEntityRoutingP
 
 interface IEntityPartials {
     badges?: React.ReactNode;
+    titleLinks?: React.ReactNode;
     detail: React.ReactNode;
 }
 
@@ -26,6 +28,7 @@ function renderEntityPartials(qName: string): IEntityPartials {
     if (dataService.getCharacterProfileFor(qName)) {
         return {
             badges: <CharacterBadges qName={qName} />,
+            titleLinks: <CharacterActionLinks qName={qName} />,
             detail: <CharacterEntityDetails qName={qName} />
         };
     }
@@ -65,6 +68,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </span>} />
+                <div className={Scss.titleLinks}>{partials.titleLinks}</div>
                 <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
@@ -72,6 +76,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </h1>
+                <div className={Scss.titleLinks}>{partials.titleLinks}</div>
                 <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>
             )

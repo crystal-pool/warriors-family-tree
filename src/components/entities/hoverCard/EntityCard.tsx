@@ -1,7 +1,7 @@
 import { Theme, Tooltip, withStyles } from "@material-ui/core";
 import * as React from "react";
-import { dataService } from "../../services";
-import { RdfQName } from "../../services/dataService";
+import { dataService } from "../../../services";
+import { RdfQName } from "../../../services/dataService";
 import { CharacterCard } from "./CharacterCard";
 import { DefaultCard } from "./DefaultCard";
 

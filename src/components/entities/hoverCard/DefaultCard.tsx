@@ -1,10 +1,10 @@
 import { Button, Card, CardActions, CardContent } from "@material-ui/core";
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { resourceManager } from "../../localization";
-import { routePathBuilders } from "../../pages";
-import { RdfQName } from "../../services/dataService";
-import { RdfEntityDescription, RdfEntityLabel } from "../RdfEntity";
+import { resourceManager } from "../../../localization";
+import { routePathBuilders } from "../../../pages";
+import { RdfQName } from "../../../services/dataService";
+import { RdfEntityDescription, RdfEntityLabel } from "../../RdfEntity";
 
 export interface IDefaultCardProps {
     qName: RdfQName;
