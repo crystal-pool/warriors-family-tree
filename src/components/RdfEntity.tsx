@@ -1,10 +1,13 @@
 import { Link, Tooltip } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
+import { useLocation } from "react-router-dom";
 import { resourceManager } from "../localization";
+import { routePathBuilders } from "../pages";
 import { dataService } from "../services";
 import { tryGetFullUri } from "../services/dataConfig";
 import { RdfQName, useLabelFor } from "../services/dataService";
+import { resetQueryParams } from "../utility/queryParams";
 import Scss from "./RdfEntity.scss";
 
 export interface IRdfEntityLinkProps {
@@ -32,24 +35,30 @@ RdfEntityLink.displayName = "RdfEntityLink";
 export interface IRdfEntityLabelProps {
     qName: RdfQName;
     fallbackLabel?: React.ReactNode;
-    showEntityId?: boolean;
+    variant?: "plain" | "link" | "plain-with-id-link" | "link-with-id-link";
 }
 
 export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
-    const label = useLabelFor(dataService, props.qName)?.label;
-    if (!props.showEntityId && !label) {
-        // Missing label, and we need to show label only.
-        return (<span className={Scss.entityLabelContainer}>
-            <span className={Scss.entityLabelFallback}>{props.fallbackLabel ?? props.qName}</span>
-        </span>);
-    } else {
-        return (<span className={Scss.entityLabelContainer}>
-            <span className={classNames(!label && Scss.entityLabelFallback)}>{label || props.fallbackLabel}</span>
-            {props.showEntityId && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} />])}</span>)}
-        </span>);
+    const { qName, variant = "plain" } = props;
+    const label = useLabelFor(dataService, qName)?.label;
+    const loc = useLocation();
+    function renderLabel() {
+        const className = classNames(!label && Scss.entityLabelFallback);
+        // Use qName as fallback label if label is missing and we need to show label only.
+        const isIdVisible = variant === "plain-with-id-link" || variant === "link-with-id-link";
+        const displayLabel = label ?? props.fallbackLabel ?? (isIdVisible ? undefined : qName);
+        if (variant === "link" || variant === "link-with-id-link")
+            return (<Link className={className} href={routePathBuilders.entityProfile({ qName }, resetQueryParams(loc.search))}>{displayLabel}</Link>);
+        else
+            return (<span className={className}>{displayLabel}</span>);
     }
+    return (<span className={Scss.entityLabelContainer}>
+        {renderLabel()}
+        {variant === "plain-with-id-link" && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} />])}</span>)}
+    </span>);
 };
 RdfEntityLabel.displayName = "RdfEntityLabel";
+RdfEntityLabel.defaultProps = { variant: "plain" };
 
 export interface IRdfEntityDescriptionProps {
     qName: RdfQName;

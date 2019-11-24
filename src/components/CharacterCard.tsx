@@ -45,7 +45,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
     return (<Card className={Scss.characterCard}>
         <CardContent>
             <h3>
-                <RdfEntityLabel qName={props.qName} showEntityId={true} />
+                <RdfEntityLabel qName={props.qName} variant="plain-with-id-link" />
                 <span className={Scss.badges}>
                     {gender === "male" && <Mars className={Scss.badge} />}
                     {gender === "female" && <Venus className={Scss.badge} />}

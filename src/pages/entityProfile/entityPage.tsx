@@ -46,11 +46,11 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
     return (<React.Fragment>
         {queryParams.embed
             ? (<React.Fragment>
-                <EmbedAppBar title={<RdfEntityLabel qName={entityQName} showEntityId />} />
+                <EmbedAppBar title={<RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />} />
                 <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>)
             : (<React.Fragment>
-                <h1><RdfEntityLabel qName={entityQName} showEntityId /></h1>
+                <h1><RdfEntityLabel qName={entityQName} variant="plain-with-id-link" /></h1>
                 <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>
             )

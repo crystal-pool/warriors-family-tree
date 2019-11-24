@@ -15,7 +15,7 @@ function renderRelationEntries(entries: Iterable<ICharacterRelationEntry>): Reac
     if (items.length === 0) return undefined;
     return items.map((entry, i) => (<React.Fragment key={i}>
         {i > 0 && resourceManager.getPrompt("ListSeparator")}
-        <RdfEntityLabel qName={entry.target} />
+        <RdfEntityLabel qName={entry.target} variant="link" />
     </React.Fragment>));
 }
 
