@@ -35,6 +35,7 @@ const prompts = {
     NoFamilyTreeInformation: "No family tree information.",
     OpenInNewWindow: "Open in new window",
     PageNeedsEntityId: "This page needs an entity ID as parameter.",
+    PositionsHeldTitle: "Positions held",
     RelationsTitle: "Relations",
     StarTheRepo: "Star the repo ⭐",
     SwitchLanguage: "Switch language / 語言",

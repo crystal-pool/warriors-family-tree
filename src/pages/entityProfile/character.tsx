@@ -21,8 +21,27 @@ function renderAffiliations(qName: string): React.ReactNode {
     return (<ul>
         {aff.map((a, i) => (
             <li key={i}>
-                <RdfClanSymbol qName={a.group} />
+                <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.group} />
                 <RdfEntityLabel qName={a.group} variant="link" />
+                <ul>
+                    <li><TimelineEventTimeRangeLabel event={a} /></li>
+                </ul>
+            </li>
+        ))}
+    </ul>);
+}
+
+function renderPositionsHeld(qName: string): React.ReactNode {
+    const pos = characterTimelineBuilder.getPositionsHeld(qName);
+    return (<ul>
+        {pos.map((a, i) => (
+            <li key={i}>
+                {a.of && <>
+                    <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.of} />
+                    <RdfEntityLabel qName={a.of} variant="link" />
+                    &mdash;
+                </>}
+                <RdfEntityLabel qName={a.position} variant="link" />
                 <ul>
                     <li><TimelineEventTimeRangeLabel event={a} /></li>
                 </ul>
@@ -34,11 +53,15 @@ function renderAffiliations(qName: string): React.ReactNode {
 export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (props) => {
     const { qName } = props;
     const loc = useLocation();
+    // const profile = dataService.getCharacterProfileFor(qName);
+    // const { gender } = profile || {};
     return (<>
         <Grid container>
             <Grid item md={6}>
                 <h2>{resourceManager.getPrompt("AffiliationsTitle")}</h2>
                 {renderAffiliations(qName)}
+                <h2>{resourceManager.getPrompt("PositionsHeldTitle")}</h2>
+                {renderPositionsHeld(qName)}
             </Grid>
             <Grid item md={6}>
                 <h2>{resourceManager.getPrompt("RelationsTitle")}</h2>

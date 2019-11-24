@@ -5,6 +5,7 @@ WHERE {
     wd:Q109     # chapter
     wd:Q46      # book
     wd:Q633     # fictional group of cats
+    wd:Q669     # fictional office, position, or title
   }
   ?entity   wdt:P3/wdt:P4*      ?typeEntity.
   ?entity   schema:description  ?desc.

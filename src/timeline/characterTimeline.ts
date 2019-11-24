@@ -28,7 +28,13 @@ export interface ITimelineAffiliationEvent extends ITimelineEventBase {
     group: RdfQName;
 }
 
-export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent;
+export interface ITimelinePositionHoldingEvent extends ITimelineEventBase {
+    type: "position-holding";
+    position: RdfQName;
+    of?: RdfQName;
+}
+
+export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent | ITimelinePositionHoldingEvent;
 
 const timelineOrdinal: Record<TimelineName, number> = {
     dotc: 0,
@@ -101,5 +107,19 @@ export class CharacterTimelineBuilder {
         }));
         this._sortAndFill(aff);
         return aff;
+    }
+    public getPositionsHeld(entityId: RdfQName, currentOnly?: boolean): ITimelinePositionHoldingEvent[] {
+        let rawPos = this._dataService.getCharacterProfileFor(entityId)?.positionsHeld;
+        if (!rawPos) return [];
+        if (currentOnly) rawPos = rawPos.filter(a => a.until == null);
+        const pos = rawPos.map<ITimelinePositionHoldingEvent>(a => ({
+            type: "position-holding",
+            startTime: a.since != null ? this.timelineTimeFromMarker(a.since) : undefined,
+            endTime: a.until != null ? this.timelineTimeFromMarker(a.until) : undefined,
+            position: a.position,
+            of: a.of
+        }));
+        this._sortAndFill(pos);
+        return pos;
     }
 }

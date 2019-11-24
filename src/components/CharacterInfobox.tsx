@@ -11,34 +11,37 @@ import { RdfEntityLabel } from "./RdfEntity";
 export interface ICharacterInfoboxProps {
     qName: RdfQName;
     compact?: boolean;
+    valueClassName?: string;
 }
 
-function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, isCompact: boolean): React.ReactNode {
+function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, isCompact: boolean, className?: string): React.ReactNode {
     const items = Array.from(entries);
     if (items.length === 0) return undefined;
     if (isCompact) {
-        return items.map((entry, i) => (<React.Fragment key={i}>
-            {i > 0 && resourceManager.getPrompt("ListSeparator")}
-            <RdfEntityLabel qName={entry.target} variant="link" />
-        </React.Fragment>));
+        return (<span>{
+            items.map((entry, i) => (<React.Fragment key={i}>
+                {i > 0 && resourceManager.getPrompt("ListSeparator")}
+                <RdfEntityLabel qName={entry.target} variant="link" />
+            </React.Fragment>))
+        }</span>);
     } else {
-        return (<ul>
-            {items.map((entry, i) => (<li key={i}>
+        return (<ul className={className}>{
+            items.map((entry, i) => (<li key={i}>
                 <RdfEntityLabel qName={entry.target} variant="link" />
                 <ul>
                     <li><TimelineEventTimeRangeLabel event={entry} /></li>
                 </ul>
-            </li>))}
-        </ul>);
+            </li>))
+        }</ul>);
     }
 }
 
-function getInfoboxItems(qName: RdfQName, isCompact: boolean): [string, React.ReactNode][] {
+function getInfoboxItems(qName: RdfQName, isCompact: boolean, valueClassName?: string): [string, React.ReactNode][] {
     function getRelations(relationType: CharacterRelationType) {
         return characterTimelineBuilder.getRelations(qName, relationType);
     }
     function buildRow(prompt1: PromptKey, promptn: PromptKey, items: ITimelineRelationEvent[]): [string, React.ReactNode] {
-        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items, isCompact)];
+        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items, isCompact, valueClassName)];
     }
     return ([
         buildRow("CharacterParent", "CharacterParents", getRelations("parent")),
@@ -50,7 +53,7 @@ function getInfoboxItems(qName: RdfQName, isCompact: boolean): [string, React.Re
 }
 
 export const CharacterRelationInfobox: React.FC<ICharacterInfoboxProps> = function CharacterRelationInfobox(props) {
-    const items = getInfoboxItems(props.qName, props.compact || false);
+    const items = getInfoboxItems(props.qName, props.compact || false, props.valueClassName);
     if (items.length === 0) return null;
     return (<Table size="small" style={{ wordBreak: "keep-all" }}>
         <TableBody>

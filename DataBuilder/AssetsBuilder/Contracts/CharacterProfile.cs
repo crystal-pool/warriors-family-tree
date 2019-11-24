@@ -18,6 +18,8 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
 
         public IList<CharacterAffiliationEntry>? Affiliations { get; set; }
 
+        public IList<CharacterPositionEntry>? PositionsHeld { get; set; }
+
     }
 
     public class CharacterAffiliationEntry
@@ -25,6 +27,23 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
 
         // qName
         public string Group { get; set; } = "";
+
+        // qName
+        public string? Since { get; set; }
+
+        // qName
+        public string? Until { get; set; }
+
+    }
+
+    public class CharacterPositionEntry
+    {
+
+        // qName
+        public string Position { get; set; } = "";
+
+        // qName
+        public string? Of { get; set; }
 
         // qName
         public string? Since { get; set; }

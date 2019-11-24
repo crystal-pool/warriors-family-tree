@@ -14,10 +14,18 @@ export type CharacterGender = "male" | "female";
 export interface ICharacterProfileEntry {
     gender?: CharacterGender;
     affiliations?: ICharacterAffiliationEntry[];
+    positionsHeld?: ICharacterPositionEntry[];
 }
 
 export interface ICharacterAffiliationEntry {
     group: RdfQName;
+    since?: RdfQName;
+    until?: RdfQName;
+}
+
+export interface ICharacterPositionEntry {
+    position: RdfQName;
+    of?: RdfQName;
     since?: RdfQName;
     until?: RdfQName;
 }

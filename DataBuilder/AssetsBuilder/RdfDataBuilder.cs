@@ -234,6 +234,20 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
                 if (entry.Affiliations == null) entry.Affiliations = new List<CharacterAffiliationEntry>();
                 entry.Affiliations.Add(affEntry);
             }
+            resultSet = ExecuteQueryFromResource("CharacterPositionsHeld.rq");
+            foreach (var row in resultSet)
+            {
+                var entry = GetProfileEntryFromNode(row["character"]);
+                var posEntry = new CharacterPositionEntry
+                {
+                    Position = SerializeUriNode(row["position"]),
+                    Of = row.TryGetBoundValue("of", out INode tempNode) ? SerializeUriNode(tempNode) : null,
+                    Since = row.TryGetBoundValue("startTime", out tempNode) ? SerializeUriNode(tempNode) : null,
+                    Until = row.TryGetBoundValue("endTime", out tempNode) ? SerializeUriNode(tempNode) : null,
+                };
+                if (entry.PositionsHeld == null) entry.PositionsHeld = new List<CharacterPositionEntry>();
+                entry.PositionsHeld.Add(posEntry);
+            }
             return root;
         }
 
@@ -252,7 +266,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
                         {
                             if (r.HasBoundValue("serial"))
                             {
-                                var serial = ((ILiteralNode) r["serial"]).Value;
+                                var serial = ((ILiteralNode)r["serial"]).Value;
                                 segment = book.TryMatchSegment(serial);
                             }
                             else
