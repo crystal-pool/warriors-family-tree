@@ -1,6 +1,7 @@
 const prompts = {
     AboutThisApp: "About this app",
     AboutThisAppDescription: "Or provide feedback to us",
+    AffiliationsTitle: "Affiliations",
     Brackets: "({0})",
     CharacterApprentice: "Apprentice",
     CharacterApprentices: "Apprentices",
@@ -13,7 +14,7 @@ const prompts = {
     CharacterParent: "Parent",
     CharacterParents: "Parents",
     ContributeToTheDataSource: "Contribute to the data source",
-    DurationMoon: "moon",
+    DurationMoon: "moon",       // Clan cats' concept of "month"
     DurationMoons: "moons",
     DurationYear: "year",
     DurationYears: "years",
@@ -34,6 +35,7 @@ const prompts = {
     NoFamilyTreeInformation: "No family tree information.",
     OpenInNewWindow: "Open in new window",
     PageNeedsEntityId: "This page needs an entity ID as parameter.",
+    RelationsTitle: "Relations",
     StarTheRepo: "Star the repo ⭐",
     SwitchLanguage: "Switch language / 語言",
     TimelineUntilNow: "Now",

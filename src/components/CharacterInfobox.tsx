@@ -49,7 +49,7 @@ function getInfoboxItems(qName: RdfQName, isCompact: boolean): [string, React.Re
     ]).filter(([label, value]) => value);
 }
 
-export const CharacterInfobox: React.FC<ICharacterInfoboxProps> = (props) => {
+export const CharacterRelationInfobox: React.FC<ICharacterInfoboxProps> = function CharacterRelationInfobox(props) {
     const items = getInfoboxItems(props.qName, props.compact || false);
     if (items.length === 0) return null;
     return (<Table size="small" style={{ wordBreak: "keep-all" }}>

@@ -10,7 +10,7 @@ import { ITimelineAffiliationEvent } from "../timeline/characterTimeline";
 import { TimelineEventTimeRangeLabel } from "../timeline/rendering";
 import { Mars, Venus } from "../utility/muiIcons";
 import Scss from "./CharacterCard.scss";
-import { CharacterInfobox } from "./CharacterInfobox";
+import { CharacterRelationInfobox } from "./CharacterInfobox";
 import { RdfClanSymbol } from "./ClanSymbol";
 import { RdfEntityDescription, RdfEntityLabel } from "./RdfEntity";
 
@@ -45,7 +45,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
                 </span>
             </h3>
             <p><RdfEntityDescription qName={props.qName} /></p>
-            <CharacterInfobox qName={props.qName} compact />
+            <CharacterRelationInfobox qName={props.qName} compact />
         </CardContent>
         <CardActions>
             <Button href={routePathBuilders.familyTree({ character: props.qName }, loc.search)}>{resourceManager.getPrompt("FamilyTreeTitle")}</Button>
