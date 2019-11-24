@@ -6,7 +6,8 @@ import { routePathBuilders } from "../pages/routes";
 import { dataService } from "../services";
 import { RdfQName } from "../services/dataService";
 import { characterTimelineBuilder } from "../timeline";
-import { ITimelineAffiliationEvent, TimelineTime } from "../timeline/characterTimeline";
+import { ITimelineAffiliationEvent } from "../timeline/characterTimeline";
+import { TimelineTimeRangeLabel } from "../timeline/rendering";
 import { Mars, Venus } from "../utility/muiIcons";
 import Scss from "./CharacterCard.scss";
 import { CharacterInfobox } from "./CharacterInfobox";
@@ -18,21 +19,10 @@ export interface ICharacterCardProps {
 }
 
 function renderCharacterAffiliationTooltip(affiliation: ITimelineAffiliationEvent): React.ReactNode {
-    function renderTimelineTime(time: TimelineTime): React.ReactNode {
-        if (time === "unknown") return "??";
-        if (time.offsetMonths) {
-            return (<><RdfEntityLabel qName={time.marker} />(+{time.offsetMonths}moons)</>);
-        }
-        return <RdfEntityLabel qName={time.marker} />;
-    }
     return (<>
         <Typography variant="subtitle1"><RdfEntityLabel qName={affiliation.group} /></Typography>
         {(affiliation.startTime || affiliation.endTime)
-            ? <>
-                {affiliation.startTime && renderTimelineTime(affiliation.startTime)}
-                &mdash;
-            {affiliation.endTime ? renderTimelineTime(affiliation.endTime) : resourceManager.getPrompt("TimelineUntilNow")}
-            </>
+            ? <TimelineTimeRangeLabel time1={affiliation.startTime} time2={affiliation.endTime} />
             : resourceManager.getPrompt("MissingTimelineInformation")}
     </>);
 }
@@ -57,7 +47,7 @@ export const CharacterCard: React.FC<ICharacterCardProps> = React.memo((props) =
                 </span>
             </h3>
             <p><RdfEntityDescription qName={props.qName} /></p>
-            <CharacterInfobox qName={props.qName} />
+            <CharacterInfobox qName={props.qName} compact />
         </CardContent>
         <CardActions>
             <Button href={routePathBuilders.familyTree({ character: props.qName }, loc.search)}>{resourceManager.getPrompt("FamilyTreeTitle")}</Button>

@@ -26,7 +26,7 @@ export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
     }
     return (<Tooltip title={title}>
         {uri
-            ? <Link className="entity-id entity-uri-link" href={uri}>{props.qName}</Link>
+            ? <Link className="entity-id entity-uri-link" href={uri} target="_blank">{props.qName}</Link>
             : <span className="entity-id entity-not-expandable">{props.qName}</span>}
     </Tooltip>);
 };

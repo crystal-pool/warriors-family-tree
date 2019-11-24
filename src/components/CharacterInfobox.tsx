@@ -8,22 +8,31 @@ import { RdfEntityLabel } from "./RdfEntity";
 
 export interface ICharacterInfoboxProps {
     qName: RdfQName;
+    compact?: boolean;
 }
 
-function renderRelationEntries(entries: Iterable<ICharacterRelationEntry>): React.ReactNode {
+function renderRelationEntries(entries: Iterable<ICharacterRelationEntry>, isCompact: boolean): React.ReactNode {
     const items = Array.from(entries);
     if (items.length === 0) return undefined;
-    return items.map((entry, i) => (<React.Fragment key={i}>
-        {i > 0 && resourceManager.getPrompt("ListSeparator")}
-        <RdfEntityLabel qName={entry.target} variant="link" />
-    </React.Fragment>));
+    if (isCompact) {
+        return items.map((entry, i) => (<React.Fragment key={i}>
+            {i > 0 && resourceManager.getPrompt("ListSeparator")}
+            <RdfEntityLabel qName={entry.target} variant="link" />
+        </React.Fragment>));
+    } else {
+        return (<ul>
+            {items.map((entry, i) => (<li key={i}>
+                <RdfEntityLabel qName={entry.target} variant="link" />
+            </li>))}
+        </ul>);
+    }
 }
 
-function getInfoboxItems(qName: RdfQName): [string, React.ReactNode][] {
+function getInfoboxItems(qName: RdfQName, isCompact: boolean): [string, React.ReactNode][] {
     const relations = dataService.getRelationsFor(qName);
     if (!relations) return [];
     function buildRow(prompt1: PromptKey, promptn: PromptKey, items: ICharacterRelationEntry[]): [string, React.ReactNode] {
-        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items)];
+        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items, isCompact)];
     }
     return ([
         buildRow("CharacterParent", "CharacterParents", relations.filter(r => r.relation === "parent")),
@@ -35,9 +44,9 @@ function getInfoboxItems(qName: RdfQName): [string, React.ReactNode][] {
 }
 
 export const CharacterInfobox: React.FC<ICharacterInfoboxProps> = (props) => {
-    const items = getInfoboxItems(props.qName);
+    const items = getInfoboxItems(props.qName, props.compact || false);
     if (items.length === 0) return null;
-    return (<Table size="small" style={{wordBreak: "keep-all"}}>
+    return (<Table size="small" style={{ wordBreak: "keep-all" }}>
         <TableBody>
             {items.map(([label, value]) => (<TableRow key={label}>
                 <TableCell variant="head">{label}</TableCell>
