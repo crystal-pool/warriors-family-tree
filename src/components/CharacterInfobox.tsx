@@ -12,12 +12,14 @@ export interface ICharacterInfoboxProps {
     qName: RdfQName;
     compact?: boolean;
     valueClassName?: string;
+    onRenderEntityTooltip?: (children: React.ReactElement, qName: string) => React.ReactNode;
 }
 
-function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, isCompact: boolean, className?: string): React.ReactNode {
+function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, props: ICharacterInfoboxProps): React.ReactNode {
+    const { compact, valueClassName, onRenderEntityTooltip } = props;
     const items = Array.from(entries);
     if (items.length === 0) return undefined;
-    if (isCompact) {
+    if (compact) {
         return (<span>{
             items.map((entry, i) => (<React.Fragment key={i}>
                 {i > 0 && resourceManager.getPrompt("ListSeparator")}
@@ -25,9 +27,13 @@ function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, isComp
             </React.Fragment>))
         }</span>);
     } else {
-        return (<ul className={className}>{
+        return (<ul className={valueClassName}>{
             items.map((entry, i) => (<li key={i}>
-                <RdfEntityLabel qName={entry.target} variant="link" />
+                {
+                    onRenderEntityTooltip
+                        ? onRenderEntityTooltip(<RdfEntityLabel qName={entry.target} variant="link" />, entry.target)
+                        : <RdfEntityLabel qName={entry.target} variant="link" />
+                }
                 <ul>
                     <li><TimelineEventTimeRangeLabel event={entry} /></li>
                 </ul>
@@ -36,12 +42,12 @@ function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, isComp
     }
 }
 
-function getInfoboxItems(qName: RdfQName, isCompact: boolean, valueClassName?: string): [string, React.ReactNode][] {
+function getInfoboxItems(qName: RdfQName, props: ICharacterInfoboxProps): [string, React.ReactNode][] {
     function getRelations(relationType: CharacterRelationType) {
         return characterTimelineBuilder.getRelations(qName, relationType);
     }
     function buildRow(prompt1: PromptKey, promptn: PromptKey, items: ITimelineRelationEvent[]): [string, React.ReactNode] {
-        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items, isCompact, valueClassName)];
+        return [resourceManager.getPrompt(items.length > 1 ? promptn : prompt1), renderRelationEntries(items, props)];
     }
     return ([
         buildRow("CharacterParent", "CharacterParents", getRelations("parent")),
@@ -53,7 +59,7 @@ function getInfoboxItems(qName: RdfQName, isCompact: boolean, valueClassName?: s
 }
 
 export const CharacterRelationInfobox: React.FC<ICharacterInfoboxProps> = function CharacterRelationInfobox(props) {
-    const items = getInfoboxItems(props.qName, props.compact || false, props.valueClassName);
+    const items = getInfoboxItems(props.qName, props);
     if (items.length === 0) return null;
     return (<Table size="small" style={{ wordBreak: "keep-all" }}>
         <TableBody>

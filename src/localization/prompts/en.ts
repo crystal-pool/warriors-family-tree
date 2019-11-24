@@ -20,7 +20,7 @@ const prompts = {
     DurationYears: "years",
     EmbedAppMenu: "Click to see more actions",
     EmbedPoweredBy1: "Powered by {0}",
-    EntityNotFound1: "No information available for the specified entity: {0}.",
+    EntityNotFound1: "No more information available for the entity: {0}.",
     EntityProfileTitle: "Entity profile",
     EntitySearchBoxPlaceholder: "Search for a cat…",
     FamilyTreeTitle: "Family tree",

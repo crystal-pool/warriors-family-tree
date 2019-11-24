@@ -1,18 +1,18 @@
 import { Button, Card, CardActions, CardContent, Typography } from "@material-ui/core";
 import * as React from "react";
 import { useLocation } from "react-router";
-import { resourceManager } from "../localization";
-import { routePathBuilders } from "../pages/routes";
-import { dataService } from "../services";
-import { RdfQName } from "../services/dataService";
-import { characterTimelineBuilder } from "../timeline";
-import { ITimelineAffiliationEvent } from "../timeline/characterTimeline";
-import { TimelineEventTimeRangeLabel } from "../timeline/rendering";
-import { Mars, Venus } from "../utility/muiIcons";
+import { resourceManager } from "../../localization";
+import { routePathBuilders } from "../../pages";
+import { dataService } from "../../services";
+import { RdfQName } from "../../services/dataService";
+import { characterTimelineBuilder } from "../../timeline";
+import { ITimelineAffiliationEvent } from "../../timeline/characterTimeline";
+import { TimelineEventTimeRangeLabel } from "../../timeline/rendering";
+import { Mars, Venus } from "../../utility/muiIcons";
+import { CharacterRelationInfobox } from "../CharacterInfobox";
+import { RdfClanSymbol } from "../ClanSymbol";
+import { RdfEntityDescription, RdfEntityLabel } from "../RdfEntity";
 import Scss from "./CharacterCard.scss";
-import { CharacterRelationInfobox } from "./CharacterInfobox";
-import { RdfClanSymbol } from "./ClanSymbol";
-import { RdfEntityDescription, RdfEntityLabel } from "./RdfEntity";
 
 export interface ICharacterCardProps {
     qName: RdfQName;

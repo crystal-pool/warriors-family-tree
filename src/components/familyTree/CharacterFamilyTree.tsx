@@ -1,4 +1,4 @@
-import { Paper, Theme, Tooltip, withStyles } from "@material-ui/core";
+import { Paper } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
 import wu from "wu";
@@ -7,7 +7,7 @@ import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
 import { isRegExUnicodeCategorySupported } from "../../utility/compatibility";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
-import { CharacterCard } from "../CharacterCard";
+import { EntityHoverCard } from "../entityHoverCard/EntityCard";
 import scss from "./CharacterFamilyTree.scss";
 import { FamilyTree, IFamilyTreeData, NodeRenderCallback } from "./FamilyTree";
 import { ISize } from "./layout";
@@ -126,30 +126,16 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
 });
 CharacterFamilyTree.displayName = "CharacterFamilyTree";
 
-const HoverTooltip = withStyles((theme: Theme) => ({
-    tooltip: {
-        padding: "0",
-        backgroundColor: "unset",
-        boxShadow: theme.shadows[1],
-        fontSize: "unset",
-        fontWeight: "unset"
-    },
-}))(Tooltip);
-
 export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     const { onClick, qName } = props;
     const label = useLabelFor(dataService, qName);
     const profile = dataService.getCharacterProfileFor(qName);
-    return (<HoverTooltip
-        style={{ fontSize: "unset" }}
-        title={<CharacterCard qName={qName} />}
-        enterDelay={300} leaveDelay={300}
-        interactive>
+    return (<EntityHoverCard qName={qName}>
         <div className={classNames(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])}
             onClick={onClick && (() => { onClick(qName); })}>
             {label && <div className="entityLabel">{label.label}</div>}
             <div className={scss.entityId}>{qName}</div>
         </div>
-    </HoverTooltip >);
+    </EntityHoverCard >);
 };
 FamilyTreeNode.displayName = "FamilyTreeNode";

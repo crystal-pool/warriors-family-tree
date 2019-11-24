@@ -38,7 +38,7 @@ export interface IRdfEntityLabelProps {
     variant?: "plain" | "link" | "plain-with-id-link" | "link-with-id-link";
 }
 
-export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
+export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((props, ref: React.Ref<HTMLElement>) => {
     const { qName, variant = "plain" } = props;
     const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, qName)?.label;
@@ -53,11 +53,15 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = (props) => {
         else
             return (<span className={className}>{displayLabel}</span>);
     }
-    return (<span className={Scss.entityLabelContainer} lang={language}>
+    const extraProps = { ...props };
+    delete extraProps.qName;
+    delete extraProps.fallbackLabel;
+    delete extraProps.variant;
+    return (<span ref={ref} className={Scss.entityLabelContainer} lang={language} {...extraProps}>
         {renderLabel()}
         {variant === "plain-with-id-link" && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} />])}</span>)}
     </span>);
-};
+});
 RdfEntityLabel.displayName = "RdfEntityLabel";
 RdfEntityLabel.defaultProps = { variant: "plain" };
 

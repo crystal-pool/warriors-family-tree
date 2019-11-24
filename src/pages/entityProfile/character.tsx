@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import wu from "wu";
 import { CharacterRelationInfobox } from "../../components/CharacterInfobox";
 import { RdfClanSymbol } from "../../components/ClanSymbol";
+import { EntityHoverCard } from "../../components/entityHoverCard/EntityCard";
 import { CharacterFamilyTree } from "../../components/familyTree/CharacterFamilyTree";
 import { RdfEntityLabel } from "../../components/RdfEntity";
 import { resourceManager } from "../../localization";
@@ -51,8 +52,12 @@ function renderAffiliations(qName: string): React.ReactNode {
     return (<ul>
         {aff.map((a, i) => (
             <li key={i}>
-                <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.group} />
-                <RdfEntityLabel qName={a.group} variant="link" />
+                <EntityHoverCard qName={a.group}>
+                    <span>
+                        <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.group} title={null} />
+                        <RdfEntityLabel qName={a.group} variant="link" />
+                    </span>
+                </EntityHoverCard>
                 <ul>
                     <li><TimelineEventTimeRangeLabel event={a} /></li>
                 </ul>
@@ -67,11 +72,17 @@ function renderPositionsHeld(qName: string): React.ReactNode {
         {pos.map((a, i) => (
             <li key={i}>
                 {a.of && <>
-                    <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.of} />
-                    <RdfEntityLabel qName={a.of} variant="link" />
+                    <EntityHoverCard qName={a.of}>
+                        <span>
+                            <RdfClanSymbol className={entityPageScss.clanIconDecorator} qName={a.of} title={null} />
+                            <RdfEntityLabel qName={a.of} variant="link" />
+                        </span>
+                    </EntityHoverCard>
                     &mdash;
                 </>}
-                <RdfEntityLabel qName={a.position} variant="link" />
+                <EntityHoverCard qName={a.position}>
+                    <RdfEntityLabel qName={a.position} variant="link" />
+                </EntityHoverCard>
                 <ul>
                     <li><TimelineEventTimeRangeLabel event={a} /></li>
                 </ul>
@@ -101,7 +112,10 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = (p
             </Grid>
             <Grid item md={7}>
                 <h2>{resourceManager.getPrompt("RelationsTitle")}</h2>
-                <CharacterRelationInfobox qName={qName} />
+                <CharacterRelationInfobox
+                    qName={qName}
+                    onRenderEntityTooltip={(children, q) => <EntityHoverCard qName={q}>{children}</EntityHoverCard>}
+                />
             </Grid>
         </Grid>
         <h2>{resourceManager.getPrompt("FamilyTreeTitle")}<span className={entityPageScss.actionBadge}>
