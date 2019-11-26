@@ -1,10 +1,11 @@
-import { Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import * as React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { routePathBuilders } from "..";
 import { EmbedAppBar } from "../../components/EmbedAppBar";
 import { CharacterActionLinks } from "../../components/entities/actionLinks";
 import { CharacterBadges } from "../../components/entities/CharacterBadges";
+import { EntityExternalLinks } from "../../components/entities/EntityExternalLinks";
 import { RdfEntityDescription, RdfEntityLabel } from "../../components/RdfEntity";
 import { resourceManager } from "../../localization";
 import { useLanguage } from "../../localization/react";
@@ -72,15 +73,19 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                 <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                 <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
             </React.Fragment>)
-            : (<React.Fragment>
-                <h1>
-                    <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
-                    <span className={Scss.titleBadges}>{partials.badges}</span>
-                </h1>
-                <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
-                <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
-            </React.Fragment>
-            )
+            : (<div className={Scss.header}>
+                <div className={Scss.titleContainer}>
+                    <h1>
+                        <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
+                        <span className={Scss.titleBadges}>{partials.badges}</span>
+                    </h1>
+                    <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
+                    <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
+                </div>
+                <div className={Scss.externalLinksContainer}>
+                    <EntityExternalLinks qName={entityQName} />
+                </div>
+            </div>)
         }
         {partials.detail}
     </React.Fragment>);

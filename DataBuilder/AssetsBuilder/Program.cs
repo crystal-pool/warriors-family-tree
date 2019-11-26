@@ -48,6 +48,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
             ExportJson("characters.json", builder.BuildCharacterProfile());
             ExportJson("relations.json", builder.BuildRelationGraph());
             ExportJson("timeline.json", builder.BuildTimelineMarkers());
+            ExportJson("links.json", builder.BuildEntityLinks());
             foreach (var (language, root) in builder.BuildEntityLabels())
             {
                 ExportJson($"labels.{language}.json", root);

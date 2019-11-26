@@ -146,6 +146,23 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
             return rootsByLanguage;
         }
 
+        public EntityLinksRoot BuildEntityLinks()
+        {
+            var resultSet = ExecuteQueryFromResource("EntityLinks.rq");
+            var root = new EntityLinksRoot
+            {
+                Links = resultSet
+                    .Select(row => (entity: SerializeUriNode(row["entity"]),
+                        link: new EntityLink
+                        {
+                            Link = row["link"].AsValuedNode().AsString(),
+                            Site = row["site"].AsValuedNode().AsString(),
+                            Name = row["name"].AsValuedNode().AsString()
+                        })).GroupBy(r => r.entity).ToDictionary(g => g.Key, g => (IList<EntityLink>)g.Select(r => r.link).ToList())
+            };
+            return root;
+        }
+
         public RelationGraphRoot BuildRelationGraph()
         {
             var resultSet = ExecuteQueryFromResource("CharacterRelation.rq");

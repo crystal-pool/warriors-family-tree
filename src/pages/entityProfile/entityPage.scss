@@ -11,11 +11,39 @@
 }
 
 .clan-icon-decorator {
+    margin-right: 0.5em;
     margin-inline-end: 0.5em;
 }
 
 .fallback-label-language-badge {
+    margin-left: 0.5em;
     margin-inline-start: 0.5em;
     font-size: small;
     vertical-align: bottom;
+}
+
+.header {
+    display: block;
+
+    .title-container {
+        flex-shrink: 0.2;
+    }
+
+    .external-links-container {
+        column-width: 18em;
+    }
+}
+
+@media (min-width:1024px) {
+    .header {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .external-links-container {
+        flex-grow: 1;
+        flex-shrink: 0;
+        margin-left: 4em;
+        margin-inline-start: 4em;
+    }
 }

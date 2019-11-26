@@ -57,6 +57,12 @@ export interface IEntityLabel {
     description?: string;
 }
 
+export interface IEntityLink {
+    href: string;
+    site: string;
+    name?: string;
+}
+
 export interface ITimelineMarker {
     timeline: TimelineName;
     totalMonths: number;
@@ -76,6 +82,11 @@ interface ITimelineRoot {
 
 interface ILabelsRoot {
     labels: { [entity: string]: [string?, string?] };
+}
+
+interface IEntityLinksRoot {
+    // [link, site, name?]
+    links: { [entity: string]: [string, string, string?] };
 }
 
 interface IEntityLookupRoot {
@@ -100,6 +111,7 @@ export class DataService {
     private timeline: ITimelineRoot | undefined;
     private entityLookup: IEntityLookupRoot | undefined;
     private labels: ILabelsRoot | undefined;
+    private links: IEntityLinksRoot | undefined;
     private _language: string;
     private _switchLanguageCts: CancellationTokenSource | undefined;
     private _languageChanged = new EventEmitter();
@@ -155,6 +167,12 @@ export class DataService {
         if (!rawLabel) { return undefined; }
         const [label, description] = rawLabel;
         return { label, description };
+    }
+    public getLinksFor(entityId: RdfQName): Readonly<IEntityLink>[] {
+        if (!this.links) return [];
+        const rawLinks = this.links.links[entityId];
+        if (!rawLinks) return [];
+        return wu(rawLinks).map(([href, site, name]) => ({ href, site, name })).toArray();
     }
     public lookupEntity(keyword: string, limit: number): IEntityLookupResultItem[] {
         if (limit < 0) throw new RangeError("Invalid limit value.");
@@ -229,11 +247,13 @@ export class DataService {
         const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
         const timeline = this._fetchJsonData<ITimelineRoot>("timeline.json");
         const entityLookup = this._fetchJsonData<IEntityLookupRoot>("entityLookup.json");
+        const links = this._fetchJsonData<IEntityLinksRoot>("links.json");
         appInsights.trackTrace({ message: "dataService.initialize: Waiting response." });
         this.characters = await characters;
         this.relations = await relations;
         this.timeline = await timeline;
         this.entityLookup = await entityLookup;
+        this.links = await links;
         await slPromise;
         this._isInitialized = true;
         sw.stop();
