@@ -38,6 +38,7 @@ const prompts = {
     PageNeedsEntityId: "This page needs an entity ID as parameter.",
     PositionsHeldTitle: "Positions held",
     RelationsTitle: "Relations",
+    SiteLinksTitle: "Site links",
     StarTheRepo: "Star the repo ⭐",
     SwitchLanguage: "Switch language / 語言",
     TimelineUntilNow: "Now",

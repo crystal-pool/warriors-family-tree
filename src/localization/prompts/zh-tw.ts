@@ -40,6 +40,7 @@ const prompts: Partial<PromptsTable> = {
     PageNeedsEntityId: "此頁面需要實體ID作為引數。",
     PositionsHeldTitle: "職位",
     RelationsTitle: "親屬關係",
+    SiteLinksTitle: "網站連結",
     StarTheRepo: "為我們點贊⭐",
     SwitchLanguage: "切換語言",
     TimelineUntilNow: "至今",

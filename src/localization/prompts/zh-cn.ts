@@ -40,6 +40,7 @@ const prompts: Partial<PromptsTable> = {
     PageNeedsEntityId: "此页面需要实体ID作为参数。",
     PositionsHeldTitle: "职位",
     RelationsTitle: "亲属关系",
+    SiteLinksTitle: "网站链接",
     StarTheRepo: "为我们点赞⭐",
     SwitchLanguage: "切换语言",
     TimelineUntilNow: "至今",

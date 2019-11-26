@@ -1,4 +1,5 @@
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Paper, Typography } from "@material-ui/core";
+import classNames from "classnames";
 import * as React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { routePathBuilders } from "..";
@@ -70,22 +71,36 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </span>} />
-                <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
-                <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
+                <Grid container>
+                    <Grid item sm={12} md={5}>
+                        <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
+                        <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
+                    </Grid>
+                    <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor}>
+                        <Paper className={classNames(Scss.expandablePanelContainer, Scss.compact)}>
+                            <h4>{resourceManager.getPrompt("SiteLinksTitle")}</h4>
+                            <EntityExternalLinks qName={entityQName} />
+                        </Paper>
+                    </Grid>
+                </Grid>
+
             </React.Fragment>)
-            : (<div className={Scss.header}>
-                <div className={Scss.titleContainer}>
+            : (<Grid container spacing={4}>
+                <Grid item sm={12} md={5}>
                     <h1>
                         <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                         <span className={Scss.titleBadges}>{partials.badges}</span>
                     </h1>
                     <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                     <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
-                </div>
-                <div className={Scss.externalLinksContainer}>
-                    <EntityExternalLinks qName={entityQName} />
-                </div>
-            </div>)
+                </Grid>
+                <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor}>
+                    <Paper className={Scss.expandablePanelContainer}>
+                        <h2>{resourceManager.getPrompt("SiteLinksTitle")}</h2>
+                        <EntityExternalLinks qName={entityQName} />
+                    </Paper>
+                </Grid>
+            </Grid>)
         }
         {partials.detail}
     </React.Fragment>);
