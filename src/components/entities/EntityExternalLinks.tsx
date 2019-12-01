@@ -9,20 +9,20 @@ interface KnownSiteInfo {
 }
 
 const knownSites: Record<string, KnownSiteInfo> = {
-    "crystalpool": { href: "https://crystalpool.cxuesong.com/" },
-    "zhwarriorswiki": { href: "https://warriors.huijiwiki.com/" },
-    "fiwarriorswiki": { href: "https://soturikissat.fandom.com/fi/" },
-    "ukwarriorswiki": { href: "https://uawarriors.fandom.com/uk/" },
-    "nlwarriorswiki": { href: "https://warriorcats.fandom.com/nl/" },
-    "ltwarriorswiki": { href: "https://klanukariailt.fandom.com/lt/" },
-    "frwarriorswiki": { href: "https://lgdc.fandom.com/fr/" },
-    "eswarriorswiki": { href: "https://gatosguerreros.fandom.com/es/" },
-    "itwarriorswiki": { href: "https://warriors.fandom.com/it/" },
-    "ruwarriorswiki": { href: "https://warriors-cats.fandom.com/ru/" },
-    "enwarriorswiki": { href: "https://warriors.fandom.com/" },
-    "dewarriorswiki": { href: "https://warrior-cats.fandom.com/de/" },
-    "cswarriorswiki": { href: "https://valecnici.fandom.com/cs/" },
-    "plwarriorswiki": { href: "https://wojownicy.fandom.com/pl/" }
+    crystalpool: { href: "https://crystalpool.cxuesong.com/" },
+    zhwarriorswiki: { href: "https://warriors.huijiwiki.com/" },
+    fiwarriorswiki: { href: "https://soturikissat.fandom.com/fi/" },
+    ukwarriorswiki: { href: "https://uawarriors.fandom.com/uk/" },
+    nlwarriorswiki: { href: "https://warriorcats.fandom.com/nl/" },
+    ltwarriorswiki: { href: "https://klanukariailt.fandom.com/lt/" },
+    frwarriorswiki: { href: "https://lgdc.fandom.com/fr/" },
+    eswarriorswiki: { href: "https://gatosguerreros.fandom.com/es/" },
+    itwarriorswiki: { href: "https://warriors.fandom.com/it/" },
+    ruwarriorswiki: { href: "https://warriors-cats.fandom.com/ru/" },
+    enwarriorswiki: { href: "https://warriors.fandom.com/" },
+    dewarriorswiki: { href: "https://warrior-cats.fandom.com/de/" },
+    cswarriorswiki: { href: "https://valecnici.fandom.com/cs/" },
+    plwarriorswiki: { href: "https://wojownicy.fandom.com/pl/" }
 };
 
 function matchSiteKey(pageHref: string): string | undefined {

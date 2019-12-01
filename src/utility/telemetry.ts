@@ -21,9 +21,9 @@ export function initializeTracking() {
             ...item.baseData,
             properties: {
                 environment: {
-                    "isDevelopment": !environment.isProduction || undefined,
-                    "buildCommit": environment.commitId,
-                    "buildTimestamp": environment.buildTimestamp,
+                    isDevelopment: !environment.isProduction || undefined,
+                    buildCommit: environment.commitId,
+                    buildTimestamp: environment.buildTimestamp,
                 },
                 ...(item.baseData && item.baseData.properties || {})
             }

@@ -26,6 +26,10 @@
             true,
             "fields-first"
         ],
-        "no-floating-promises": true
+        "no-floating-promises": true,
+        "object-literal-key-quotes": [
+            true,
+            "as-needed"
+        ]
     }
 }
