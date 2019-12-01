@@ -1,5 +1,7 @@
+import { LocalizationProgress } from "../common";
+
 const prompts = {
-    __STATUS: "complete" as "complete" | "machine-translation" | "with-machine-translation",
+    __STATUS: "complete" as LocalizationProgress,
     AboutThisApp: "About this app",
     AboutThisAppDescription: "Or provide feedback to us",
     AffiliationsTitle: "Affiliations",

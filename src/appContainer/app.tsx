@@ -8,6 +8,7 @@ import { HashRouter } from "react-router-dom";
 import { generateRandomId8 } from "../../shared/utility";
 import { contactUrl, issueTrackerUrl } from "../constants";
 import { resourceManager } from "../localization";
+import { LocalizationProgress } from "../localization/common";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
 import { dataService } from "../services";
@@ -143,7 +144,9 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         resourceManager.language = language;
         dataService.language = language;
         // Then trigger render.
-        this.setState({ languageContext: { language, setLanguage: this.setLanguage } });
+        this.setState({
+            languageContext: { language, setLanguage: this.setLanguage }
+        });
     }
     public setTitle = (title: string, withAppName: boolean) => {
         const context = this.state.titleContext;
@@ -165,7 +168,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
             document.title = title || "";
         }
     }
-    private onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
+    private _onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
         const merged = e as (ErrorEvent & PromiseRejectionEvent);
         this.setState({ error: merged.error || merged.reason || "<Error>" });
     }
@@ -185,18 +188,20 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
                             }
                             action={<IconButton
                                 aria-label="close"
+                                color="inherit"
                                 onClick={this.clearError}
                             >
                                 <Icons.Close />
                             </IconButton>} />
+                        <LocalizationProgressSnakbar language={this.state.languageContext.language} progress={resourceManager.getPromptRaw("__STATUS")} />
                     </LanguageContext.Provider>
                 </PageTitleContext.Provider>
             </HashRouter>
         );
     }
     public componentDidMount() {
-        window.addEventListener("error", this.onGlobalError);
-        window.addEventListener("unhandledrejection", this.onGlobalError);
+        window.addEventListener("error", this._onGlobalError);
+        window.addEventListener("unhandledrejection", this._onGlobalError);
         this._applyLanguage(this.state.languageContext.language);
     }
     public componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
@@ -208,7 +213,54 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         }
     }
     public componentWillUnmount() {
-        window.removeEventListener("error", this.onGlobalError);
-        window.removeEventListener("unhandledrejection", this.onGlobalError);
+        window.removeEventListener("error", this._onGlobalError);
+        window.removeEventListener("unhandledrejection", this._onGlobalError);
     }
 }
+
+
+interface ILocalizationProgressSnakbarProps {
+    language: string;
+    progress?: LocalizationProgress;
+}
+
+const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> = (props) => {
+    const { language, progress } = props;
+    const [dismissedLanguage, setDismissedLanguage] = React.useState<string | undefined>();
+    let message: React.ReactNode;
+    if (dismissedLanguage !== language) {
+        switch (progress) {
+            case "none":
+                message = "Sorry. No translation available for the user interface (UI).";
+                break;
+            case "machine-translation":
+                message = <>
+                    To make this app accessible to as more readers as possible, user interface (UI) for language <strong>{language}
+                    </strong> has been translated with machine translation (MT).
+            </>;
+                break;
+            case "partial-machine-translation":
+                message = <>
+                    To make this app accessible to as more readers as possible, some part of the user interface (UI) for language <strong>{language}
+                    </strong> has been translated with machine translation (MT).
+            </>;
+                break;
+        }
+    }
+    return <Snackbar open={!!message} message={message} action={<>
+        <Button
+            color="inherit"
+            size="small"
+            href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts"
+            target="_blank"
+        >Help with the translations!</Button>
+        <IconButton
+            aria-label="close"
+            color="inherit"
+            onClick={() => setDismissedLanguage(props.language)}
+        >
+            <Icons.Close />
+        </IconButton>
+    </>
+    } />;
+};

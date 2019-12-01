@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { browserLanguage, KnownLanguage, KnownLanguageWithFallback, selectLocalizedResource } from "./languages";
 import prompts from "./prompts";
-import { PromptKey } from "./prompts/en";
+import { PromptKey, PromptsTable } from "./prompts/en";
 import { formatTemplate, renderTemplate, TemplateArguments } from "./render";
 
 export class ResourceManager {
@@ -14,6 +14,9 @@ export class ResourceManager {
     }
     public set language(language: KnownLanguage) {
         this._language = language;
+    }
+    public getPromptRaw<T extends PromptKey>(key: T): Partial<PromptsTable>[T] {
+        return (prompts[this._language] || {})[key];
     }
     public getPrompt(key: PromptKey, args?: TemplateArguments<string>): string {
         let value = selectLocalizedResource(lang => prompts[lang as KnownLanguageWithFallback] && prompts[lang as KnownLanguageWithFallback]![key], this._language, key);
