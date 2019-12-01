@@ -35,11 +35,13 @@
 @media (min-width: 960px) {
     .expandable-panel-anchor {
         position: relative;
+        min-height: 6em;
 
         .expandable-panel-container {
             position: absolute;
             left: 0;
             top: 0;
+            right: 0;
             padding: 1em 2em 2em 2em;
 
             &.compact {
@@ -47,9 +49,8 @@
             }
 
             &:not(:hover) {
-                overflow-y: auto;
+                overflow-y: hidden;
                 bottom: 0;
-                box-shadow: none;
                 background: transparent;
             }
         }
