@@ -30,6 +30,41 @@ While Warriors Family Tree is a standalone Web app, it can also be embedded into
 
 See https://codepen.io/cxuesong/pen/gOORBBJ for an example of this.
 
+### For FANDOM / Wikia sites
+
+Note: The following approach is not applicable to general MediaWiki builds. Instead, see **General approach** below.
+
+Add the following code to `MediaWiki:Common.js` or `Special:MyPage/common.js`. The latter one only applies the changes for your own account, while the first changes the behavior of a whole Wikia site.
+
+```javascript
+(function () {
+    var script = importScriptURI("https://crystal-pool.github.io/warriors-family-tree/embed/wft-embed-umd.js");
+    script.addEventListener("load", function () {
+        require(["WarriorsFamilyTreeEmbed"], function (WarriorsFamilyTreeEmbed) {
+            // Specify the container element below.
+            var container = document.getElementById("family-tree-container");
+            // Specify the entity ID of the cat (Q621 is Firestar)
+            WarriorsFamilyTreeEmbed.mountFamilyTree(container, { qName: "wd:Q621" })
+        });
+    });
+})();
+```
+
+Note: You need to ensure there is an HTML element on the page to host the embedded family tree. For example, to let the code above work without changing anything, you must add the following content to your wiki page
+
+```html
+<div id="family-tree-container"><!-- Family tree will be placed here. --></div>
+```
+
+Or you must replace `var container = ` line with the appropriate content.
+
+#### See also
+
+* [wikia:c:Help:Community CSS and JS](https://community.fandom.com/wiki/Help:Community_CSS_and_JS)
+* [wikia:c:Help:Personal CSS and JS](https://community.fandom.com/wiki/Help:Personal_CSS_and_JS)
+
+### General approach
+
 To embed Warriors Family Tree on a HTML page, you will need to load a script for bootstrapping first
 
 ```html
