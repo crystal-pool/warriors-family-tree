@@ -43,28 +43,33 @@ function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, max
         const [distance, charId, tokensLeft, /*reachedFrom*/] = q.shift()!;
         if (visited.has(charId)) continue;
         visited.add(charId);
-        if (tokensLeft === 0) continue;
+        console.assert(tokensLeft >= 0);
+        if (tokensLeft <= 0) continue;
         const relations = dataService.getRelationsFor(charId, edgeTypes);
         let parentId1: RdfQName | undefined;
         let parentId2: RdfQName | undefined;
-        if (!relations || tokensLeft === 0) continue;
+        if (!relations) continue;
+        const nextTokensLeft = tokensLeft - 1;
         for (const relation of relations) {
+            if (!visited.has(relation.target)) {
+                let tokens1 = nextTokensLeft;
+                if (tokens1 > 0) {
+                    if (walkMode === "bloodline") {
+                        if (relation.relation === "mate") {
+                            tokens1 = 1;
+                        }
+                    }
+                }
+                // Trim the connection if the tokens used up.
+                if (tokens1 <= 0) continue;
+                q.push([distance + 1, relation.target, tokens1, charId]);
+            }
             if (relation.relation === "parent") {
                 if (parentId1 == null) parentId1 = relation.target;
                 else if (parentId2 == null) parentId2 = relation.target;
                 else console.warn(`${charId} has more than 2 parents.`);
             } else if (relation.relation === "mate") {
                 mates.add(buildUnorderedIdPair(charId, relation.target));
-            }
-            if (!visited.has(relation.target)) {
-                const tokens0 = Math.max(tokensLeft - 1, -1);
-                let tokens1 = tokens0;
-                if (walkMode === "bloodline") {
-                    if (relation.relation === "mate") {
-                        tokens1 = 1;
-                    }
-                }
-                q.push([distance + 1, relation.target, tokens0 < 0 ? tokens1 : Math.min(tokens0, tokens1), charId]);
             }
         }
         if (parentId1 == null && parentId2 == null) {
