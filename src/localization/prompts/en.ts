@@ -1,4 +1,5 @@
 const prompts = {
+    __STATUS: "complete" as "complete" | "machine-translation" | "with-machine-translation",
     AboutThisApp: "About this app",
     AboutThisAppDescription: "Or provide feedback to us",
     AffiliationsTitle: "Affiliations",
@@ -43,7 +44,7 @@ const prompts = {
     SwitchLanguage: "Switch language / 語言",
     TimelineUntilNow: "Now",
     UnknownValue: "Unknown",
-    WelcomeDescription: "This is a still work-in-progress automatic family tree for <i>Warriors</i> series. Type something to in the search box below to continue.<br />E.g. type <b>Firestar</b> and press enter.",
+    WelcomeDescription: "This is a still work-in-progress automatic family tree for <i>Warriors</i> series. Type something in the search box below to continue.<br />E.g. type <b>Firestar</b> and press enter.",
     WelcomeTitle: "Welcome",
 };
 
