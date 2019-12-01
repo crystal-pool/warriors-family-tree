@@ -102,7 +102,8 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       path: outputPath,
       filename: "wft-embed-umd.js",
       library: exportModuleName,
-      libraryTarget: "umd"
+      libraryTarget: "umd",
+      umdNamedDefine: true
     }
   };
 }
