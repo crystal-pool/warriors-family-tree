@@ -276,12 +276,14 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder
                 var (character, _) = group.Key;
                 var entry = GetProfileEntry(character);
                 var firstRow = group.First();
+                // We allow "unknown value" for name.
+                var name0 = firstRow["name0"] is ILiteralNode literal ? CharacterLocalizedNameFromNode(literal) : null;
                 var nameEntry = new CharacterNameEntry
                 {
-                    Name = { CharacterLocalizedNameFromNode((ILiteralNode)firstRow["name0"]) },
                     Since = firstRow.TryGetBoundValue("startTime", out var tempNode) ? SerializeUriNode(tempNode) : null,
                     Until = firstRow.TryGetBoundValue("endTime", out tempNode) ? SerializeUriNode(tempNode) : null,
                 };
+                if (name0 != null) nameEntry.Name.Add(name0);
                 foreach (var row in group)
                 {
                     if (!row.HasBoundValue("name1")) continue;

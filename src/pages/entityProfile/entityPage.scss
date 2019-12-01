@@ -22,6 +22,10 @@
     vertical-align: bottom;
 }
 
+.unknown-value {
+    font-style: italic;
+}
+
 .expandable-panel-anchor {
     .expandable-panel-container {
         transition: 200ms;

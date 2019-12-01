@@ -22,17 +22,20 @@ export interface ICharacterEntityDetailsProps {
 }
 
 function renderCharacterName(names: readonly [string, string][], languagePreferrence: string[]): React.ReactNode {
-    if (names.length === 0 || languagePreferrence.length === 0) return "??";
-    const knownLanguages = new Set(wu(names).map(([t, l]) => l));
-    const language = choosePerferredLanguage(knownLanguages, languagePreferrence);
-    if (!language) return "??";
-    return <>
-        <span lang={language}>{names.filter(([t, l]) => l === language).map(([t, l]) => t).join(resourceManager.getPrompt("ListSeparator"))}
-            {language !== languagePreferrence[0] &&
-                <span className={entityPageScss.fallbackLabelLanguageBadge}>{resourceManager.getPrompt("Brackets", [languageInfo[language as KnownLanguage]?.autonym || language])}</span>
-            }
-        </span>
-    </>;
+    if (names.length > 0 && languagePreferrence.length > 0) {
+        const knownLanguages = new Set(wu(names).map(([t, l]) => l));
+        const language = choosePerferredLanguage(knownLanguages, languagePreferrence);
+        if (language) {
+            return <>
+                <span lang={language}>{names.filter(([t, l]) => l === language).map(([t, l]) => t).join(resourceManager.getPrompt("ListSeparator"))}
+                    {language !== languagePreferrence[0] &&
+                        <span className={entityPageScss.fallbackLabelLanguageBadge}>{resourceManager.getPrompt("Brackets", [languageInfo[language as KnownLanguage]?.autonym || language])}</span>
+                    }
+                </span>
+            </>;
+        }
+    }
+    return (<span className={entityPageScss.unknownValue}>{resourceManager.getPrompt("UnknownValue")}</span>);
 }
 
 function renderNames(qName: string, languagePreferrence: string[]): React.ReactNode {

@@ -44,6 +44,7 @@ const prompts: Partial<PromptsTable> = {
     StarTheRepo: "為我們點贊⭐",
     SwitchLanguage: "切換語言",
     TimelineUntilNow: "至今",
+    UnknownValue: "未知",
     WelcomeDescription: "這是仍在施工中的《貓戰士》自動家譜檢視工具，請在下面的搜尋框中輸入一個角色名以繼續。<br />例如：鍵入<b>火星</b>，然後按下回車鍵。",
     WelcomeTitle: "歡迎",
 };
