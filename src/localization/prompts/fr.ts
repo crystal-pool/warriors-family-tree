@@ -32,7 +32,7 @@ const prompts: Partial<PromptsTable> = {
     HoweverCheckout1: "Cependant, vous pouvez vérifier s'il y a quelque chose sur {0}.",
     InitializationDescription: "Tiens toi bien. Nous sommes toujours en train de charger des données.",
     InitializationTitle: "Initialisation…",
-    ListSeparator: ",",
+    ListSeparator: ", ",
     MissingTimelineInformation: "Informations manquantes sur la chronologie.",
     More: "Plus",
     NamesTitle: "Noms",
@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Changer de langue",
     TimelineUntilNow: "À présent",
     UnknownValue: "Inconnu",
-    WelcomeDescription: "Il s'agit d'un arbre généalogique automatique en cours de création pour la série <i> Warriors </ i>. Tapez quelque chose dans la case de recherche ci-dessous pour continuer. <br /> E.g. tapez <b> Firestar </ b> et appuyez sur Entrée.",
+    WelcomeDescription: "Il s'agit d'un arbre généalogique automatique en cours de création pour la série <i>Warriors</i>. Tapez quelque chose dans la case de recherche ci-dessous pour continuer. <br /> E.g. tapez <b>Firestar</b> et appuyez sur Entrée.",
     WelcomeTitle: "Bienvenue",
 };
 

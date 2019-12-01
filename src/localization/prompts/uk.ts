@@ -31,8 +31,8 @@ const prompts: Partial<PromptsTable> = {
     GoToEntityDataSource: "Перейдіть до джерела даних цього об'єкта.",
     HoweverCheckout1: "Однак ви можете перевірити, чи є щось на {0}.",
     InitializationDescription: "Тримайся міцно. Ми все ще завантажуємо деякі дані.",
-    InitializationTitle: "Ініціалізація ...",
-    ListSeparator: ",",
+    InitializationTitle: "Ініціалізація…",
+    ListSeparator: ", ",
     MissingTimelineInformation: "Інформація про часову шкалу відсутня",
     More: "Більше",
     NamesTitle: "Імена",
@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Мова переключення",
     TimelineUntilNow: "Тепер",
     UnknownValue: "Невідомо",
-    WelcomeDescription: "Це все ще незавершене автоматичне сімейне дерево для серії <i> Warriors </i>. Введіть щось у поле пошуку нижче, щоб продовжити. <br /> Наприклад наберіть <b> Firestar </b> і натисніть клавішу Enter.",
+    WelcomeDescription: "Це все ще незавершене автоматичне сімейне дерево для серії «Котів-Вояків». Введіть щось у поле пошуку нижче, щоб продовжити.<br />Наприклад наберіть <b>Вогнезір</b> і натисніть клавішу Enter.",
     WelcomeTitle: "Ласкаво просимо",
 };
 

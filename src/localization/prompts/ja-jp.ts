@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "言語を切り替える",
     TimelineUntilNow: "いま",
     UnknownValue: "未知の",
-    WelcomeDescription: "これは、<i> Warriors </ i>シリーズのまだ進行中の自動ファミリーツリーです。 続行するには、下の検索ボックスに何かを入力してください。<br />例 「<b> Firestar </ b>」と入力してEnterキーを押します。",
+    WelcomeDescription: "これは、『ウォーリアーズ』（<i>Warriors</i>）シリーズのまだ進行中の自動ファミリーツリーです。 続行するには、下の検索ボックスに何かを入力してください。<br />例 「<b>Firestar</b>」と入力してEnterキーを押します。",
     WelcomeTitle: "ようこそ",
 };
 

@@ -32,7 +32,7 @@ const prompts: Partial<PromptsTable> = {
     HoweverCheckout1: "Możesz jednak sprawdzić, czy coś jest na {0}.",
     InitializationDescription: "Trzymaj się. Wciąż ładujemy niektóre dane.",
     InitializationTitle: "Inicjowanie…",
-    ListSeparator: ",",
+    ListSeparator: ", ",
     MissingTimelineInformation: "Brakuje informacji o osi czasu.",
     More: "Więcej",
     NamesTitle: "Nazwy",
@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Zmień język",
     TimelineUntilNow: "Teraz",
     UnknownValue: "Nieznany",
-    WelcomeDescription: "Jest to wciąż automatyczne drzewo genealogiczne pracujące w toku dla serii <i> Warriors </i>. Wpisz coś w polu wyszukiwania poniżej, aby kontynuować. <br /> Np. wpisz <b> Firestar </b> i naciśnij enter.",
+    WelcomeDescription: "Jest to wciąż automatyczne drzewo genealogiczne pracujące w toku dla serii <i>Warriors</i>. Wpisz coś w polu wyszukiwania poniżej, aby kontynuować. <br /> Np. wpisz <b>Firestar </b> i naciśnij enter.",
     WelcomeTitle: "Witamy",
 };
 

@@ -32,7 +32,7 @@ const prompts: Partial<PromptsTable> = {
     HoweverCheckout1: "그러나 {0}에 무언가가 있는지 확인할 수 있습니다.",
     InitializationDescription: "꽉 잡아. 아직 일부 데이터를로드 중입니다.",
     InitializationTitle: "초기화 중…",
-    ListSeparator: ",",
+    ListSeparator: ", ",
     MissingTimelineInformation: "타임 라인 정보가 누락되었습니다.",
     More: "더",
     NamesTitle: "이름",
@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "언어 전환",
     TimelineUntilNow: "지금",
     UnknownValue: "알 수 없는",
-    WelcomeDescription: "이것은 여전히 <i> 워리어 </ i> 시리즈의 진행중인 자동 패밀리 트리입니다. 계속하려면 아래 검색 창에 무언가를 입력하십시오. <br /> 예 : <b> Firestar </ b>를 입력하고 Enter를 누르십시오.",
+    WelcomeDescription: "이것은 여전히 <b>고양이 전사들</b> 시리즈의 진행중인 자동 패밀리 트리입니다. 계속하려면 아래 검색 창에 무언가를 입력하십시오.<br />예 : <b>Firestar</b>를 입력하고 Enter를 누르십시오.",
     WelcomeTitle: "환영",
 };
 

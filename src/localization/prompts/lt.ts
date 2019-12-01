@@ -32,7 +32,7 @@ const prompts: Partial<PromptsTable> = {
     HoweverCheckout1: "Tačiau galite patikrinti, ar {0} yra kažkas.",
     InitializationDescription: "Laikykite tvirtai. Mes vis dar įkeliame kai kuriuos duomenis.",
     InitializationTitle: "Inicijuojama…",
-    ListSeparator: ",",
+    ListSeparator: ", ",
     MissingTimelineInformation: "Trūksta laiko juostos informacijos.",
     More: "Daugiau",
     NamesTitle: "Vardai",
@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Perjungti kalbą",
     TimelineUntilNow: "Dabar",
     UnknownValue: "Nežinoma",
-    WelcomeDescription: "Tai <i> Warriors </i> serijos automatinis šeimos medis, dar nebaigtas gaminti. Toliau esančiame paieškos laukelyje įveskite ką nors. <br /> Pvz. įveskite <b> Firestar </b> ir paspauskite enter.",
+    WelcomeDescription: "Tai <i>Warriors</i> serijos automatinis šeimos medis, dar nebaigtas gaminti. Toliau esančiame paieškos laukelyje įveskite ką nors. <br /> Pvz. įveskite <b>Firestar </b> ir paspauskite enter.",
     WelcomeTitle: "Sveiki",
 };
 
