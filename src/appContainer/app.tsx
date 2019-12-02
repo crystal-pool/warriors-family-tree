@@ -235,13 +235,13 @@ const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> =
                 break;
             case "machine-translation":
                 message = <>
-                    To make this app accessible to as more readers as possible, user interface (UI) for language <strong>{language}
+                    To make this app accessible to as many readers as possible, user interface (UI) for language <strong>{language}
                     </strong> has been translated with machine translation (MT).
             </>;
                 break;
             case "partial-machine-translation":
                 message = <>
-                    To make this app accessible to as more readers as possible, some part of the user interface (UI) for language <strong>{language}
+                    To make this app accessible to as many readers as possible, some part of the user interface (UI) for language <strong>{language}
                     </strong> has been translated with machine translation (MT).
             </>;
                 break;
@@ -251,7 +251,7 @@ const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> =
         <Button
             color="inherit"
             size="small"
-            href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts"
+            href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts#readme"
             target="_blank"
         >Help with the translations!</Button>
         <IconButton
