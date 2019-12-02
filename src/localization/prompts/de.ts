@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Sprache wechseln",
     TimelineUntilNow: "Jetzt",
     UnknownValue: "Unbekannt",
-    WelcomeDescription: "Dies ist ein noch laufender automatischer Stammbaum für die <i>Warrior Cats</i> serie. Geben Sie etwas in das Suchfeld unten ein, um fortzufahren. <br /> Geben Sie beispielsweise <b>Feuerstern</ b> ein und drücken Sie die Eingabetaste .",
+    WelcomeDescription: "Dies ist ein noch laufender automatischer Stammbaum für die <i>Warrior Cats</i> serie. Geben Sie etwas in das Suchfeld unten ein, um fortzufahren. <br /> Geben Sie beispielsweise <b>Feuerstern</b> ein und drücken Sie die Eingabetaste .",
     WelcomeTitle: "Herzlich willkommen",
 };
 
