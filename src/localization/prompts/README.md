@@ -2,13 +2,13 @@
 
 If you are brought here by the "Machine Translation" tip in the **warriors-family-tree** app. Thank you for your time and patience!
 
-This folder contains the translation for the *user interface* of **warriors-family-tree**. If you are going to add translations for the entities (e.g. cats, books, etc.), please refer to [Crystal Pool:Warriors Family Tree#Contributing to the data source](https://crystalpool.cxuesong.com/wiki/Crystal_Pool:Warriors_Family_Tree#Contributing_to_the_data_source).
+This folder contains the translation for the *user interface* of **warriors-family-tree**. (If you are still wondering where are the files, scroll up this page!) If you are going to add translations for the entities (e.g. cats, books, etc.), please refer to [Crystal Pool:Warriors Family Tree#Contributing to the data source](https://crystalpool.cxuesong.com/wiki/Crystal_Pool:Warriors_Family_Tree#Contributing_to_the_data_source).
 
 Files in this folder use ISO 639-1 two-letter language codes as file names. See [List of ISO 639-1 codes](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) for a table of all the available language codes and their corresponding language names.
 
 ## How to edit the files
 
-Usually, you need to submit a [Pull Request](https://github.com/crystal-pool/warriors-family-tree/pulls) for any changes to this repository. If you are already familiar with this, excellent! You may well skip this section and get started. Make sure to read [#Propose a Pull Request](#propose-a-pull-prequest) before opening a PR.
+Usually, you need to submit a [Pull Request](https://github.com/crystal-pool/warriors-family-tree/pulls) for any changes to this repository. If you are already familiar with this, excellent! You may well skip this section and get started. Make sure to read [#Propose a Pull Request](#propose-a-pull-request) before opening a PR.
 
 If not, well, don't panic. Join the discord channel if necessary. You can find one [on the homepage of this repository](https://github.com/crystal-pool/warriors-family-tree#readme).
 
