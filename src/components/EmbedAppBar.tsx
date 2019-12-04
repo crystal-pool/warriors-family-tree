@@ -5,6 +5,7 @@ import { useLocation } from "react-router";
 import { resourceManager } from "../localization";
 import { LanguageContext } from "../localization/react";
 import { buildRoutePath } from "../pages";
+import { buildUiScopeProps } from "../utility/featureUsage";
 import { setQueryParams } from "../utility/queryParams";
 import { AppActionsList, EnvironmentInfoList } from "./DrawerActions";
 import { LanguageSwitch } from "./LanguageSwitch";
@@ -50,8 +51,8 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
         openUrl(newUrl);
     }, [loc.pathname, loc.search]);
     const onCloseMenu = React.useCallback(() => setMenuAnchor(undefined), []);
-    return (<div className={classes.root}>
-        <div className={classes.title}>{props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>): props.children}</div>
+    return (<div className={classes.root} {...buildUiScopeProps("app-embed")}>
+        <div className={classes.title}>{props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>) : props.children}</div>
         <div className={classes.toolbar}>
             <Tooltip title={resourceManager.getPrompt("OpenInNewWindow")}>
                 <IconButton onClick={onOpenInNewWindowClicked}><Icons.OpenInNew /></IconButton>
@@ -70,6 +71,7 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
             keepMounted
             open={!!menuAnchor}
             onClose={onCloseMenu}
+            {...buildUiScopeProps("drawer")}
         >
             <AppActionsList asMenuItem onItemClick={onCloseMenu} />
             <Divider />

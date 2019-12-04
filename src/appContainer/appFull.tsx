@@ -7,6 +7,7 @@ import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { LanguageContext } from "../localization/react";
 import { InitializationScreen, routePathBuilders } from "../pages";
+import { buildUiScopeProps } from "../utility/featureUsage";
 import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
@@ -120,7 +121,7 @@ export const AppFull: React.FC = (props) => {
     }
 
     const drawer = (
-        <div className={classes.drawerContent}>
+        <div className={classes.drawerContent} {...buildUiScopeProps("drawer")}>
             <div className={classes.toolbar} />
             <Divider />
             <AppActionsList />
@@ -131,7 +132,7 @@ export const AppFull: React.FC = (props) => {
     );
 
     return (
-        <div className={classes.root}>
+        <div className={classes.root} {...buildUiScopeProps("app")}>
             <CssBaseline />
             <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar>

@@ -7,6 +7,10 @@ export const appInsights = new ApplicationInsights({
     }
 });
 
+export const telemetryEnvironment = {
+    language: ""
+};
+
 export function initializeTracking() {
     function processTelemetry(item: ITelemetryItem): boolean {
         if (item.baseType === "PageviewData" && item.baseData) {
@@ -24,6 +28,7 @@ export function initializeTracking() {
                     isDevelopment: !environment.isProduction || undefined,
                     buildCommit: environment.commitId,
                     buildTimestamp: environment.buildTimestamp,
+                    language: telemetryEnvironment.language
                 },
                 ...(item.baseData && item.baseData.properties || {})
             }

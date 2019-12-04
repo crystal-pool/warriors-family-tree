@@ -12,9 +12,10 @@ import { LocalizationProgress } from "../localization/common";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
 import { dataService } from "../services";
+import { trackFeatureUsageFromElement } from "../utility/featureUsage";
 import { parseQueryParams } from "../utility/queryParams";
 import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
-import { appInsights } from "../utility/telemetry";
+import { appInsights, telemetryEnvironment } from "../utility/telemetry";
 import { AppEmbed } from "./appEmbed";
 import { AppFull } from "./appFull";
 
@@ -141,6 +142,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
     public setLanguage = (language: KnownLanguage) => {
         if (language === this.state.languageContext.language) return;
         // Change the languages of external objects first.
+        telemetryEnvironment.language = language;
         resourceManager.language = language;
         dataService.language = language;
         // Then trigger render.
@@ -172,10 +174,15 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         const merged = e as (ErrorEvent & PromiseRejectionEvent);
         this.setState({ error: merged.error || merged.reason || "<Error>" });
     }
+    private _onRootContainerClick(e: React.MouseEvent) {
+        if (!(e.target instanceof Element)) return;
+        trackFeatureUsageFromElement(e.target);
+    }
     public render() {
         const errorMessage = this.state.error != null && formatError(this.state.error);
         return (
             <HashRouter>
+                <main onClickCapture={this._onRootContainerClick}>
                 <PageTitleContext.Provider value={this.state.titleContext}>
                     <LanguageContext.Provider value={this.state.languageContext}>
                         <AppErrorBoundary>
@@ -196,6 +203,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
                         <LocalizationProgressSnakbar language={this.state.languageContext.language} progress={resourceManager.getPromptRaw("__STATUS")} />
                     </LanguageContext.Provider>
                 </PageTitleContext.Provider>
+                </main>
             </HashRouter>
         );
     }

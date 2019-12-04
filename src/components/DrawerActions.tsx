@@ -3,6 +3,7 @@ import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
 import React from "react";
 import { resourceManager } from "../localization";
+import { buildFeatureAnchorProps } from "../utility/featureUsage";
 import * as LocalIcons from "../utility/muiIcons";
 
 const environmentInfoListTheme = createMuiTheme({
@@ -44,21 +45,21 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((p
             <ItemComponent onClick={() => {
                 openUrl("https://github.com/crystal-pool/warriors-family-tree");
                 props.onItemClick && props.onItemClick();
-            }}>
+            }} {...buildFeatureAnchorProps("navigation.external.github")}>
                 <ListItemIcon><LocalIcons.GitHub /></ListItemIcon>
                 <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
             </ItemComponent>
             <ItemComponent onClick={() => {
                 openUrl("https://crystalpool.cxuesong.com/");
                 props.onItemClick && props.onItemClick();
-            }}>
+            }} {...buildFeatureAnchorProps("navigation.external.crystalpool.main")}>
                 <ListItemIcon><Icons.Storage /></ListItemIcon>
                 <ListItemText primary="Crystal Pool" secondary={resourceManager.getPrompt("ContributeToTheDataSource")} />
             </ItemComponent>
             <ItemComponent onClick={() => {
                 openUrl("https://crystalpool.cxuesong.com/wiki/Crystal_Pool:Warriors_Family_Tree");
                 props.onItemClick && props.onItemClick();
-            }}>
+            }} {...buildFeatureAnchorProps("navigation.external.crystalpool.about")}>
                 <ListItemIcon><LocalIcons.Cat /></ListItemIcon>
                 <ListItemText primary={resourceManager.getPrompt("AboutThisApp")} secondary={resourceManager.getPrompt("AboutThisAppDescription")} />
             </ItemComponent>
@@ -74,7 +75,7 @@ export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardR
                     onClick={() => {
                         openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId);
                         props.onItemClick && props.onItemClick();
-                    }} >
+                    }} {...buildFeatureAnchorProps("navigation.external.github.revisionTree")}>
                     <ListItemText primary="Revision" secondary={environment.commitId.substr(0, 8)} />
                 </ItemComponent>
             </Tooltip>
