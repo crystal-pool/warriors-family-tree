@@ -1,11 +1,11 @@
-import { Grid, Link, Slider, Typography } from "@material-ui/core";
+import { Grid, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import { EmbedAppBar } from "../components/EmbedAppBar";
 import { CharacterActionLinks } from "../components/entities/actionLinks";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
-import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
+import { RdfEntityDescription, RdfEntityLabel, RdfEntityLink } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
 import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
@@ -80,7 +80,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             emptyPlaceholder={<>
                 <h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>
                 <p>{resourceManager.renderPrompt("HoweverCheckout1", [
-                    <Link key={0} href={routePathBuilders.entityProfile({ qName: characterId }, props.location.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Link>
+                    <RdfEntityLink key={0} qName={characterId}>{resourceManager.getPrompt("EntityProfileTitle")}</RdfEntityLink>
                 ])}</p>
             </>}
         />

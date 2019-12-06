@@ -13,6 +13,7 @@ import { choosePerferredLanguage, KnownLanguage, languageInfo } from "../../loca
 import { useLanguage } from "../../localization/react";
 import { characterTimelineBuilder } from "../../timeline";
 import { TimelineEventTimeRangeLabel } from "../../timeline/rendering";
+import { buildFeatureAnchorProps, buildUiScopeProps } from "../../utility/featureUsage";
 import { resetQueryParams } from "../../utility/queryParams";
 import { routePathBuilders } from "../routes";
 import entityPageScss from "./entityPage.scss";
@@ -104,7 +105,7 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = fu
     // const profile = dataService.getCharacterProfileFor(qName);
     // const { gender } = profile || {};
     return (<>
-        <Grid container spacing={3}>
+        <Grid container spacing={3}  {...buildUiScopeProps("characterProfile")}>
             <Grid item md={5}>
                 <h2>{resourceManager.getPrompt("NamesTitle")}</h2>
                 {renderNames(qName, languagePref)}
@@ -122,7 +123,10 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = fu
             </Grid>
         </Grid>
         <h2>{resourceManager.getPrompt("FamilyTreeTitle")}<span className={entityPageScss.actionBadge}>
-            <Link href={routePathBuilders.familyTree({ character: qName }, resetQueryParams(loc.search))}>{resourceManager.getPrompt("More")}</Link>
+            <Link
+                href={routePathBuilders.familyTree({ character: qName }, resetQueryParams(loc.search))}
+                {...buildFeatureAnchorProps("navigation.entity.familyTree")}
+            >{resourceManager.getPrompt("More")}</Link>
         </span></h2>
         <CharacterFamilyTree
             onNodeClick={(qName) => { location.href = routePathBuilders.entityProfile({ qName }, loc.search); }}

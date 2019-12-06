@@ -123,7 +123,7 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     return (<Paper
         className={scss.familytreeContainer}
         data-is-scrollable
-        {...buildUiScopeProps("characterFamilyTree" + (familyTreeData ? ":empty" : ""))}
+        {...buildUiScopeProps("characterFamilyTree" + (familyTreeData ? "" : ":empty"))}
     >{familyTreeData
         ? <FamilyTree
             className={scss.characterFamilyTree} familyTree={familyTreeData}

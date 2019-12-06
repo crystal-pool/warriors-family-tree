@@ -86,7 +86,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                 </Grid>
             </React.Fragment>)
             : (<Grid container spacing={4}>
-                <Grid item sm={12} md={5}>
+                <Grid item sm={12} md={5} {...buildUiScopeProps("title")}>
                     <h1>
                         <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                         <span className={Scss.titleBadges}>{partials.badges}</span>

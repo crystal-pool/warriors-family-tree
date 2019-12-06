@@ -1,6 +1,7 @@
 import { Link } from "@material-ui/core";
 import * as React from "react";
 import { dataService } from "../../services";
+import { buildFeatureAnchorProps } from "../../utility/featureUsage";
 import Scss from "./EntityExternalLinks.scss";
 import { IEntityDrivenComponentProps } from "./types";
 
@@ -49,7 +50,7 @@ export const EntityExternalLinks: React.FC<IEntityDrivenComponentProps> = functi
     return (<ul className={Scss.externalLinks}>
         {links.map((l, i) => (<li key={i}>
             <span className={Scss.linkSite}>{l.site}</span>
-            <Link href={l.href} target="_blank">{l.name || l.href}</Link>
+            <Link href={l.href} target="_blank" {...buildFeatureAnchorProps("navigation.external.entity.site")}>{l.name || l.href}</Link>
         </li>))}
     </ul>);
 };

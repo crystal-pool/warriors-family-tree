@@ -53,7 +53,9 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
     }, [loc.pathname, loc.search]);
     const onCloseMenu = React.useCallback(() => setMenuAnchor(undefined), []);
     return (<div className={classes.root}>
-        <div className={classes.title}>{props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>) : props.children}</div>
+        <div className={classes.title} {...buildUiScopeProps("title")}>
+            {props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>) : props.children}
+        </div>
         <div className={classes.toolbar} {...buildUiScopeProps("toolbar")}>
             <Tooltip title={resourceManager.getPrompt("OpenInNewWindow")}>
                 <IconButton
