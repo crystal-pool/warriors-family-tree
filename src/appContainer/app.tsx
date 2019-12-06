@@ -12,7 +12,7 @@ import { LocalizationProgress } from "../localization/common";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
 import { dataService } from "../services";
-import { trackFeatureUsageFromElement } from "../utility/featureUsage";
+import { buildFeatureAnchorProps, buildUiScopeProps, trackFeatureUsageFromElement } from "../utility/featureUsage";
 import { parseQueryParams } from "../utility/queryParams";
 import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
 import { appInsights, telemetryEnvironment } from "../utility/telemetry";
@@ -101,14 +101,21 @@ class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
     }
     public render() {
         if (this.state.error != null) {
-            return (<div className="error-root-container">
+            return (<div className="error-root-container" {...buildUiScopeProps("errorRoot")}>
                 <h3>Oops</h3>
                 <p>We are sorry for the inconvenience. Please refresh the page to see if it helps.</p>
-                <p><Button variant="contained" onClick={() => location.reload()}><Icons.Refresh />Refresh</Button></p>
+                <p><Button
+                    variant="contained"
+                    onClick={() => location.reload()}
+                    {...buildFeatureAnchorProps("navigation.refresh")}><Icons.Refresh />Refresh</Button></p>
                 <p>Sincerely,</p>
                 <p>Warriors Family Tree</p>
                 <Divider />
-                <p>If it does not help, consider <Link href={issueTrackerUrl} target="_blank">opening an issue on GitHub</Link> to let us know.</p>
+                <p>If it does not help, consider <Link
+                    href={issueTrackerUrl}
+                    target="_blank"
+                    {...buildFeatureAnchorProps("navigation.external.issueTracker")}
+                >opening an issue on GitHub</Link> to let us know.</p>
                 <p><Link href={contactUrl} target="_blank">Other contact information</Link></p>
                 <Typography variant="subtitle1">Please attach the following information when reporting the issue:</Typography>
                 <div className="error-technical">
@@ -183,26 +190,26 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         return (
             <HashRouter>
                 <main onClickCapture={this._onRootContainerClick}>
-                <PageTitleContext.Provider value={this.state.titleContext}>
-                    <LanguageContext.Provider value={this.state.languageContext}>
-                        <AppErrorBoundary>
-                            <Route component={RouteRoot} />
-                        </AppErrorBoundary>
-                        <Snackbar
-                            open={this.state.error != null}
-                            message={
-                                <div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>
-                            }
-                            action={<IconButton
-                                aria-label="close"
-                                color="inherit"
-                                onClick={this.clearError}
-                            >
-                                <Icons.Close />
-                            </IconButton>} />
-                        <LocalizationProgressSnakbar language={this.state.languageContext.language} progress={resourceManager.getPromptRaw("__STATUS")} />
-                    </LanguageContext.Provider>
-                </PageTitleContext.Provider>
+                    <PageTitleContext.Provider value={this.state.titleContext}>
+                        <LanguageContext.Provider value={this.state.languageContext}>
+                            <AppErrorBoundary>
+                                <Route component={RouteRoot} />
+                            </AppErrorBoundary>
+                            <Snackbar
+                                open={this.state.error != null}
+                                message={
+                                    <div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>
+                                }
+                                action={<IconButton
+                                    aria-label="close"
+                                    color="inherit"
+                                    onClick={this.clearError}
+                                >
+                                    <Icons.Close />
+                                </IconButton>} />
+                            <LocalizationProgressSnakbar language={this.state.languageContext.language} progress={resourceManager.getPromptRaw("__STATUS")} />
+                        </LanguageContext.Provider>
+                    </PageTitleContext.Provider>
                 </main>
             </HashRouter>
         );
@@ -255,20 +262,24 @@ const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> =
                 break;
         }
     }
-    return <Snackbar open={!!message} message={message} action={<>
-        <Button
-            color="inherit"
-            size="small"
-            href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts#readme"
-            target="_blank"
-        >Help with the translations!</Button>
-        <IconButton
-            aria-label="close"
-            color="inherit"
-            onClick={() => setDismissedLanguage(props.language)}
-        >
-            <Icons.Close />
-        </IconButton>
-    </>
-    } />;
+    return <Snackbar open={!!message} message={message}
+        action={<>
+            <Button
+                color="inherit"
+                size="small"
+                href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts#readme"
+                target="_blank"
+                {...buildFeatureAnchorProps("navigation.external.repo.localization")}
+            >Help with the translations!</Button>
+            <IconButton
+                aria-label="close"
+                color="inherit"
+                onClick={() => setDismissedLanguage(props.language)}
+                {...buildFeatureAnchorProps("dismiss")}
+            >
+                <Icons.Close />
+            </IconButton>
+        </>
+        }
+        {...buildUiScopeProps("mtToast")} />;
 };

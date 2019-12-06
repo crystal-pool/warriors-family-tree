@@ -7,8 +7,17 @@ import { routePathBuilders } from "../pages";
 import { dataService } from "../services";
 import { tryGetFullUri } from "../services/dataConfig";
 import { RdfQName, useDataServiceLanguage, useLabelFor } from "../services/dataService";
+import { buildFeatureAnchorProps } from "../utility/featureUsage";
 import { resetQueryParams } from "../utility/queryParams";
 import Scss from "./RdfEntity.scss";
+
+function buildRdfLocalNavigationFeatureAnchorProps(qName: RdfQName) {
+    return buildFeatureAnchorProps("navigation.entity.profile", { qName });
+}
+
+function buildRdfExternalNavigationFeatureAnchorProps(qName: RdfQName) {
+    return buildFeatureAnchorProps("navigation.external.entity", { qName });
+}
 
 export interface IRdfEntityLinkProps {
     qName: RdfQName;
@@ -26,7 +35,8 @@ export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
     }
     return (<Tooltip title={title}>
         {uri
-            ? <Link className="entity-id entity-uri-link" href={uri} target="_blank">{props.qName}</Link>
+            ? <Link className="entity-id entity-uri-link" href={uri} target="_blank"
+                {...buildRdfExternalNavigationFeatureAnchorProps(props.qName)}>{props.qName}</Link>
             : <span className="entity-id entity-not-expandable">{props.qName}</span>}
     </Tooltip>);
 };
@@ -49,7 +59,10 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((
         const isIdVisible = variant === "plain-with-id-link" || variant === "link-with-id-link";
         const displayLabel = label ?? props.fallbackLabel ?? (isIdVisible ? undefined : qName);
         if (variant === "link" || variant === "link-with-id-link")
-            return (<Link className={className} href={routePathBuilders.entityProfile({ qName }, resetQueryParams(loc.search))}>{displayLabel}</Link>);
+            return (<Link
+                className={className}
+                href={routePathBuilders.entityProfile({ qName }, resetQueryParams(loc.search))}
+                {...buildRdfLocalNavigationFeatureAnchorProps(qName)}>{displayLabel}</Link>);
         else
             return (<span className={className}>{displayLabel}</span>);
     }

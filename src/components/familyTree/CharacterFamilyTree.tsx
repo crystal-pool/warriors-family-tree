@@ -6,6 +6,7 @@ import { resourceManager } from "../../localization";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
 import { isRegExUnicodeCategorySupported } from "../../utility/compatibility";
+import { buildUiScopeProps } from "../../utility/featureUsage";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { EntityHoverCard } from "../entities/hoverCard/EntityCard";
 import scss from "./CharacterFamilyTree.scss";
@@ -119,7 +120,11 @@ export const CharacterFamilyTree: React.FC<ICharacterFamilyTreeProps> = React.me
     const renderNode: NodeRenderCallback = React.useCallback((id, brct) => {
         return (<FamilyTreeNode qName={id} isCurrent={id === props.centerQName} onClick={props.onNodeClick} />);
     }, [props.centerQName, props.onNodeClick]);
-    return (<Paper className={scss.familytreeContainer} data-is-scrollable>{familyTreeData
+    return (<Paper
+        className={scss.familytreeContainer}
+        data-is-scrollable
+        {...buildUiScopeProps("characterFamilyTree" + (familyTreeData ? ":empty" : ""))}
+    >{familyTreeData
         ? <FamilyTree
             className={scss.characterFamilyTree} familyTree={familyTreeData}
             onRenderNode={renderNode} onRendered={onFamilyTreeRendered}

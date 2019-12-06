@@ -12,6 +12,22 @@ export function trackFeatureUsage(featureName: string, featureLocation?: string,
     });
 }
 
+interface ILogicallyParentedDomElementProps {
+    _l_f_owner?: Element;
+}
+
+export function setLogicalParent(element: Element, parent?: Element | null): void {
+    if (parent) {
+        (element as ILogicallyParentedDomElementProps)._l_f_owner = parent;
+    } else {
+        delete (element as ILogicallyParentedDomElementProps)._l_f_owner;
+    }
+}
+
+export function getLogicalParent(element: Element): Element | null {
+    return (element as ILogicallyParentedDomElementProps)._l_f_owner || element.parentElement || null;
+}
+
 export interface IFeatureDataProps {
     ["data-f1"]?: string | null;
     ["data-f2"]?: string | null;
@@ -30,17 +46,23 @@ export function trackFeatureUsageFromElement(element: Element): boolean {
     const scopes: string[] = [];
     let featureName: string | undefined;
     let usageContext: Record<string, any> | undefined;
-    for (let currentElement: Element | null = element; currentElement; currentElement = currentElement.parentElement) {
+    for (let currentElement: Element | null = element; currentElement; currentElement = getLogicalParent(currentElement)) {
         const featureData: IFeatureDataProps = {
             "data-f1": currentElement.getAttribute("data-f1"),
             "data-f2": currentElement.getAttribute("data-f2"),
         };
+        if (featureData["data-f2"]) {
+            if (featureName) scopes.push(featureData["data-f2"]);
+            // Seen a ui scope, but not seen any feature yet.
+            else if (!featureData["data-f1"]) return false;
+        }
         if (featureData["data-f1"]) {
             const [fn, uc] = JSON.parse(featureData["data-f1"]);
             if (featureName == null) {
                 featureName = fn;
                 usageContext = uc;
             } else {
+                // Usually the case when a logically parented popup menu item has been clicked.
                 appInsights.trackTrace({
                     message: "Detected nested f1 prop. Ignored outer one.",
                     severityLevel: SeverityLevel.Warning,
@@ -56,11 +78,12 @@ export function trackFeatureUsageFromElement(element: Element): boolean {
         if (currentElement instanceof HTMLAnchorElement && currentElement.href) {
             if (featureName == null) featureName = "navigation.link";
             usageContext = usageContext || {};
-            if (!("href" in usageContext)) usageContext.href = currentElement.href;
-        }
-        if (featureData["data-f2"]) {
-            if (featureName == null) return false;
-            scopes.push(featureData["data-f2"]);
+            if (!("htmlAnchor" in usageContext)) {
+                usageContext.htmlAnchor = {
+                    href: currentElement.href,
+                    target: currentElement.target
+                };
+            }
         }
     }
     if (featureName == null) return false;

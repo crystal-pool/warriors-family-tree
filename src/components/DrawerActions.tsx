@@ -45,7 +45,7 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((p
             <ItemComponent onClick={() => {
                 openUrl("https://github.com/crystal-pool/warriors-family-tree");
                 props.onItemClick && props.onItemClick();
-            }} {...buildFeatureAnchorProps("navigation.external.github")}>
+            }} {...buildFeatureAnchorProps("navigation.external.repo")}>
                 <ListItemIcon><LocalIcons.GitHub /></ListItemIcon>
                 <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
             </ItemComponent>
@@ -75,7 +75,7 @@ export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardR
                     onClick={() => {
                         openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId);
                         props.onItemClick && props.onItemClick();
-                    }} {...buildFeatureAnchorProps("navigation.external.github.revisionTree")}>
+                    }} {...buildFeatureAnchorProps("navigation.external.repo.currentRevision")}>
                     <ListItemText primary="Revision" secondary={environment.commitId.substr(0, 8)} />
                 </ItemComponent>
             </Tooltip>

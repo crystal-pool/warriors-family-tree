@@ -7,7 +7,7 @@ import { EntitySearchBox } from "../components/EntitySearchBox";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { LanguageContext } from "../localization/react";
 import { InitializationScreen, routePathBuilders } from "../pages";
-import { buildUiScopeProps } from "../utility/featureUsage";
+import { buildFeatureAnchorProps, buildUiScopeProps } from "../utility/featureUsage";
 import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
@@ -135,17 +135,23 @@ export const AppFull: React.FC = (props) => {
         <div className={classes.root} {...buildUiScopeProps("app")}>
             <CssBaseline />
             <AppBar position="fixed" className={classes.appBar}>
-                <Toolbar>
+                <Toolbar {...buildUiScopeProps("toolbar")}>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
                         className={classes.menuButton}
+                        {...buildFeatureAnchorProps("app.toggleDrawer")}
                     >
                         <Icons.Menu />
                     </IconButton>
-                    <Link href={routePathBuilders.welcome()} className={classes.title}>
+                    <Link
+                        href={routePathBuilders.welcome()}
+                        className={classes.title}
+                        {...buildFeatureAnchorProps("navigation.home")}
+
+                    >
                         <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
                     </Link>
                     <div className={classes.farItems}>
@@ -178,6 +184,7 @@ export const AppFull: React.FC = (props) => {
                         ModalProps={{
                             keepMounted: true, // Better open performance on mobile.
                         }}
+                        {...buildUiScopeProps("app/toolbar/popupDrawer")}
                     >
                         {drawer}
                     </SwipeableDrawer>

@@ -1,7 +1,9 @@
-import { Theme, Tooltip, withStyles } from "@material-ui/core";
+import { Theme, withStyles } from "@material-ui/core";
 import * as React from "react";
 import { dataService } from "../../../services";
 import { RdfQName } from "../../../services/dataService";
+import { buildUiScopeProps } from "../../../utility/featureUsage";
+import { LogicallyParentedTooltip } from "../../mui";
 import { CharacterCard } from "./CharacterCard";
 import { DefaultCard } from "./DefaultCard";
 
@@ -23,7 +25,7 @@ const HoverTooltip = withStyles((theme: Theme) => ({
         fontSize: "unset",
         fontWeight: "unset"
     },
-}))(Tooltip);
+}))(LogicallyParentedTooltip);
 
 export interface IEntityHoverCardProps extends IEntityCardProps {
     children: React.ReactElement;
@@ -34,5 +36,6 @@ export const EntityHoverCard: React.FC<IEntityHoverCardProps> = function EntityH
         title={<EntityCard qName={props.qName} />}
         enterDelay={300} leaveDelay={300}
         interactive
+        PopperProps={buildUiScopeProps("entityCard") as {}}
     >{props.children}</HoverTooltip>);
 };

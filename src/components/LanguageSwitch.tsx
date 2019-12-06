@@ -1,8 +1,10 @@
-import { Button, createStyles, ListItemText, makeStyles, Menu, MenuItem, Theme, Tooltip } from "@material-ui/core";
+import { Button, createStyles, ListItemText, makeStyles, MenuItem, Theme, Tooltip } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import * as React from "react";
 import { resourceManager } from "../localization";
 import { KnownLanguage, knownLanguages, languageInfo } from "../localization/languages";
+import { buildFeatureAnchorProps, buildUiScopeProps } from "../utility/featureUsage";
+import { LogicallyParentedMenu } from "./mui";
 
 export type LanguageSwitchClassName = "root" | "buttonText";
 
@@ -32,12 +34,12 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
             <Button
                 color="inherit"
                 onClick={(e) => setAnchorEl(e.currentTarget)}
+                {...buildFeatureAnchorProps("app.selectLanguage.toggle")}
+                {...buildUiScopeProps("selectLanguage")}
             ><Icons.Translate /><span className={classes.buttonText}>{languageInfo[props.language].autonym}</span></Button>
         </Tooltip>
-        <Menu
-            id="simple-menu"
+        <LogicallyParentedMenu
             anchorEl={anchorEl}
-            keepMounted
             open={!!anchorEl}
             onClose={() => setAnchorEl(undefined)}
         >
@@ -49,10 +51,12 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
                     onClick={() => {
                         setAnchorEl(undefined);
                         props.onLanguageChanged(lang);
-                    }}>
+                    }}
+                    {...buildFeatureAnchorProps("app.selectLanguage.item", { lang })}
+                >
                     <ListItemText primary={languageInfo[lang].autonym} />
                 </MenuItem>
             ))}
-        </Menu>
+        </LogicallyParentedMenu>
     </React.Fragment>);
 };

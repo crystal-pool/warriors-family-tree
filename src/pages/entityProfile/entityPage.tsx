@@ -11,6 +11,7 @@ import { RdfEntityDescription, RdfEntityLabel } from "../../components/RdfEntity
 import { resourceManager } from "../../localization";
 import { useLanguage } from "../../localization/react";
 import { dataService } from "../../services";
+import { buildUiScopeProps } from "../../utility/featureUsage";
 import { parseQueryParams } from "../../utility/queryParams";
 import { useSetPageTitle } from "../../utility/react";
 import CommonScss from "../common.scss";
@@ -64,14 +65,14 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
         location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + entityQName }, props.location.search));
     }
     const partials = renderEntityPartials(entityQName);
-    return (<React.Fragment>
+    return (<div {...buildUiScopeProps("entityPage")}>
         {queryParams.embed
             ? (<React.Fragment>
                 <EmbedAppBar title={<span>
                     <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </span>} />
-                <Grid container>
+                <Grid container {...buildUiScopeProps("siteLinks")}>
                     <Grid item sm={12} md={5}>
                         <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                         <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
@@ -83,7 +84,6 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                         </Paper>
                     </Grid>
                 </Grid>
-
             </React.Fragment>)
             : (<Grid container spacing={4}>
                 <Grid item sm={12} md={5}>
@@ -94,7 +94,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                     <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
                 </Grid>
-                <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor}>
+                <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor} {...buildUiScopeProps("siteLinks")}>
                     <Paper className={Scss.expandablePanelContainer}>
                         <h2>{resourceManager.getPrompt("SiteLinksTitle")}</h2>
                         <EntityExternalLinks qName={entityQName} />
@@ -103,7 +103,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
             </Grid>)
         }
         {partials.detail}
-    </React.Fragment>);
+    </div>);
 }, function propsComparer(prevProps, nextProps) {
     return prevProps.location === nextProps.location;
 });

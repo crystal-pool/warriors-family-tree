@@ -9,6 +9,7 @@ import { RdfEntityDescription, RdfEntityLabel } from "../components/RdfEntity";
 import { resourceManager } from "../localization";
 import { useLanguage } from "../localization/react";
 import { dataService } from "../services";
+import { buildUiScopeProps } from "../utility/featureUsage";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
 import CommonScss from "./common.scss";
@@ -42,7 +43,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
     if (characterId.indexOf(":") < 0) {
         location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + characterId }, props.location.search));
     }
-    return (<React.Fragment>
+    return (<div {...buildUiScopeProps("familyTreePage")}>
         {queryParams.embed
             ? (<React.Fragment>
                 <EmbedAppBar title={resourceManager.renderPrompt("FamilyTreeTitle1", [<RdfEntityLabel key="0" qName={characterId} />])} />
@@ -81,8 +82,9 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
                 <p>{resourceManager.renderPrompt("HoweverCheckout1", [
                     <Link key={0} href={routePathBuilders.entityProfile({ qName: characterId }, props.location.search)}>{resourceManager.getPrompt("EntityProfileTitle")}</Link>
                 ])}</p>
-            </>} />
-    </React.Fragment>);
+            </>}
+        />
+    </div>);
 }, function propsComparer(prevProps, nextProps) {
     return prevProps.location === nextProps.location;
 });
