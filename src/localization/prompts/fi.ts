@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Vaihda kieli",
     TimelineUntilNow: "Nyt",
     UnknownValue: "Tuntematon",
-    WelcomeDescription: "Tämä on edelleen keskeneräinen automaattinen sukupuu <i>Warriors</i> -sarjalle. Kirjoita jotain alla olevaan hakukenttään jatkaaksesi. <br /> Esimerkki: kirjoita <b>Firestar </b> ja paina enter.",
+    WelcomeDescription: "Tämä on edelleen keskeneräinen automaattinen sukupuu <i>Warriors</i>-sarjalle. Kirjoita jotain alla olevaan hakukenttään jatkaaksesi. <br /> Esimerkki: kirjoita <b>Firestar</b> ja paina enter.",
     WelcomeTitle: "Tervetuloa",
 };
 

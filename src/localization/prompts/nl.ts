@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Schakel taal",
     TimelineUntilNow: "Nu",
     UnknownValue: "Onbekend",
-    WelcomeDescription: "Dit is een nog steeds lopende automatische stamboom voor de <i>Warriors</i> -serie. Typ iets in het onderstaande zoekvak om door te gaan. <br /> Bijv. typ <b>Firestar </b> en druk op enter.",
+    WelcomeDescription: "Dit is een nog steeds lopende automatische stamboom voor de <i>Warriors</i>-serie. Typ iets in het onderstaande zoekvak om door te gaan. <br /> Bijv. typ <b>Firestar </b> en druk op enter.",
     WelcomeTitle: "Welkom",
 };
 
