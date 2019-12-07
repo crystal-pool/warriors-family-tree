@@ -39,20 +39,41 @@ function startNewPageScope(location: Location<any>): string {
     return id;
 }
 
-function endPageScope(id: string, title?: string) {
-    appInsights.stopTrackPage(id, undefined, { _name: title, contextId: id });
+function endPageScope(id: string, url: string, title?: string, refUri?: string, endReason?: string) {
+    appInsights.stopTrackPage(id, url, {
+        contextId: id,
+        endReason,
+        _outer_overrides: {
+            name: title,
+            refUri
+        }
+    });
 }
 
 export class RouteRoot extends React.PureComponent<IRouteRootProps> {
     private _pageScopeId: string | undefined;
     private _pageTitle: string | undefined;
+    private _refUrl: string;
+    private _pageUrl: string;
     public constructor(props: Readonly<IRouteRootProps>) {
         super(props);
+        this._pageUrl = location.href;
+        this._refUrl = document.referrer;
+    }
+    private endPageScopeIfNeeded(endReason?: string) {
+        if (this._pageScopeId) {
+            // Keep track of the last title before routing to the next location.
+            endPageScope(this._pageScopeId, this._pageUrl, this._pageTitle, this._refUrl, endReason);
+        }
+    }
+    private onWindowUnload = () => {
+        this.endPageScopeIfNeeded("unload");
     }
     private _onLocationChanged(): void {
-        // Keep track of the last title before routing to the next location.
-        endPageScope(this._pageScopeId!, this._pageTitle);
+        this.endPageScopeIfNeeded("locationChanged");
         this._pageScopeId = startNewPageScope(this.props.location);
+        this._refUrl = this._pageUrl;
+        this._pageUrl = location.href;
     }
     public render() {
         const queryParams = parseQueryParams(this.props.location.search);
@@ -66,10 +87,13 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
         </PageTitleContext.Consumer>);
     }
     public componentDidMount() {
+        this._pageUrl = location.href;
         this._pageScopeId = startNewPageScope(this.props.location);
+        window.addEventListener("unload", this.onWindowUnload);
     }
     public componentWillUnmount() {
-        endPageScope(this._pageScopeId!, this._pageTitle);
+        window.removeEventListener("unload", this.onWindowUnload);
+        this.endPageScopeIfNeeded("unmount");
     }
     public componentDidUpdate(prevProps: Readonly<IRouteRootProps>) {
         if (prevProps.location !== this.props.location) {
