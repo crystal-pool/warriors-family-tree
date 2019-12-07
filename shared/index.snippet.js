@@ -166,6 +166,33 @@ if (!Array.from) {
         document.head.appendChild(l);
         pushTrace("Added CDN link.", trackId, nominalUrl);
     }
+    if (location.search) {
+        if (location.search !== "?") {
+            var dict;
+            if (typeof URLSearchParams === "function") {
+                var sp = new URLSearchParams(location.search);
+                dict = {};
+                sp.forEach(function (v, k) {
+                    if (!dict[k]) {
+                        dict[k] = v;
+                    } else if (Array.isArray(k)) {
+                        dict[k].push(v);
+                    } else {
+                        dict[k] = [dict[k], v];
+                    }
+                });
+            }
+            pushTrace("location.search", location.search, dict);
+        }
+        // Remove search params (our "search" is inside hash)
+        if (typeof URL === "function" && history.replaceState) {
+            var u = new URL(location.href);
+            u.search = "";
+            history.replaceState(history.state, document.title, u.href);
+        } else {
+            location.search = null;
+        }
+    }
     addCDNLink("mui-css", "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
     addCDNLink("mui-icon", "https://fonts.googleapis.com/icon?family=Material+Icons");
     registerResourceLoadCallback("index-js", "ij");
