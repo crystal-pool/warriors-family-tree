@@ -1,4 +1,5 @@
 import { SeverityLevel } from "@microsoft/applicationinsights-web";
+import { hashString } from "./general";
 import { appInsights } from "./telemetry";
 
 export function trackFeatureUsage(featureName: string, featureLocation?: string, usageContext?: Record<string, any>) {
@@ -30,16 +31,31 @@ export function getLogicalParent(element: Element): Element | null {
 
 export interface IFeatureDataProps {
     ["data-f1"]?: string | null;
+    ["data-f3"]?: string | null;
     ["data-f2"]?: string | null;
 }
 
+const featureAnchorIntegritySalt = Math.round(Math.random() * 1677216);
+
 export function buildFeatureAnchorProps(featureName: string, usageContext?: Record<string, any>): IFeatureDataProps {
     if (!featureName) throw new RangeError("Expect non-empty featureName.");
-    return { "data-f1": JSON.stringify([featureName, usageContext]) };
+    const rawValue = JSON.stringify([featureName, usageContext]);
+    const integrity = (hashString(rawValue) ^ featureAnchorIntegritySalt).toString(36);
+    return { "data-f1": rawValue, "data-f3": integrity };
 }
 
 export function buildUiScopeProps(scopeName: string): IFeatureDataProps {
     return { "data-f2": scopeName };
+}
+
+export function checkFeatureAnchorIntegrity(props: IFeatureDataProps): boolean {
+    if (props["data-f1"]) {
+        if (!props["data-f3"]) return false;
+        const rawValue = props["data-f1"];
+        const integrity = (hashString(rawValue) ^ featureAnchorIntegritySalt).toString(36);
+        return props["data-f3"] === integrity;
+    }
+    return true;
 }
 
 export function trackFeatureUsageFromElement(element: Element): boolean {
@@ -50,7 +66,11 @@ export function trackFeatureUsageFromElement(element: Element): boolean {
         const featureData: IFeatureDataProps = {
             "data-f1": currentElement.getAttribute("data-f1"),
             "data-f2": currentElement.getAttribute("data-f2"),
+            "data-f3": currentElement.getAttribute("data-f3"),
         };
+        if (!checkFeatureAnchorIntegrity(featureData)) {
+            return false;
+        }
         if (featureData["data-f2"]) {
             if (featureName) scopes.push(featureData["data-f2"]);
             // Seen a ui scope, but not seen any feature yet.
