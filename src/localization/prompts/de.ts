@@ -1,17 +1,17 @@
 import { PromptsTable } from "./en";
 
 const prompts: Partial<PromptsTable> = {
-    __STATUS: "machine-translation",
+    __STATUS: "partial-machine-translation",
     AboutThisApp: "Über diese App",
     AboutThisAppDescription: "Oder geben Sie uns Feedback",
     AffiliationsTitle: "Mitgliedschaften",
     Brackets: "({0})",
-    CharacterApprentice: "Lehrling",
-    CharacterApprentices: "Lehrlinge",
+    CharacterApprentice: "Schüler(in)",
+    CharacterApprentices: "Schüler(in)",
     CharacterChild: "Kind",
     CharacterChildren: "Kinder",
-    CharacterMate: "Kumpel",
-    CharacterMates: "Freunde",
+    CharacterMate: "Gefährte/Gefährtin",
+    CharacterMates: "Gefährten/Gefährtinnen",
     CharacterMentor: "Mentor",
     CharacterMentors: "Mentoren",
     CharacterParent: "Elternteil",
