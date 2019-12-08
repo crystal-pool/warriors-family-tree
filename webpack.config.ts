@@ -7,19 +7,21 @@ import TerserPlugin from "terser-webpack-plugin";
 import webpack from "webpack";
 import WebpackDevServer from "webpack-dev-server";
 import { IEnvironmentInfo } from "./shared/environment";
-import { getGitHead } from "./shared/git";
+import { getGitHead, getGitVersionSpec } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
 
 declare module "webpack" {
   interface Configuration {
-      devServer?: WebpackDevServer.Configuration;
+    devServer?: WebpackDevServer.Configuration;
   }
 }
 
 async function buildEnvironmentDefinitions(isProduction: boolean) {
+  const version = await getGitVersionSpec();
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: ({
       commitId: await getGitHead(),
+      version,
       buildTimestamp: Date.now(),
       isProduction,
       aiInstrumentationKey: undefined
@@ -42,6 +44,7 @@ async function buildEnvironmentDefinitions(isProduction: boolean) {
     const contentJson = JSON.parse(content.toString());
     Object.assign(definitions, contentJson);
   }
+  console.info("App version:", version);
   return definitions;
 }
 

@@ -1,5 +1,6 @@
 export interface IEnvironmentInfo {
     isProduction: boolean;
+    version: string;
     commitId: string;
     buildTimestamp: number;
     aiInstrumentationKey?: string;

@@ -76,7 +76,7 @@ export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardR
                         openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId);
                         props.onItemClick && props.onItemClick();
                     }} {...buildFeatureAnchorProps("navigation.external.repo.currentRevision")}>
-                    <ListItemText primary="Revision" secondary={environment.commitId.substr(0, 8)} />
+                    <ListItemText primary="Version" secondary={environment.version || environment.commitId.substr(0, 8)} />
                 </ItemComponent>
             </Tooltip>
             <ItemComponent>

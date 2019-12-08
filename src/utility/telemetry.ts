@@ -39,7 +39,7 @@ export function initializeTracking() {
         return true;
     }
     appInsights.loadAppInsights();
-    appInsights.context.application.ver = environment.commitId;
+    appInsights.context.application.ver = environment.version;
     appInsights.context.application.build = String(environment.buildTimestamp);
     appInsights.addTelemetryInitializer(processTelemetry);
     appInsights.trackTrace({ message: "Session started." });
