@@ -123,8 +123,8 @@ export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((prop
     const suggestions = React.useMemo(() => searchEntities(searchExpr), [searchExpr]);
     return (
         <Downshift
-            itemToString={(item: IEntityLookupResultItem) => item && item.qName}
-            onChange={(value?: string) => {
+            itemToString={(item) => item && item.qName || ""}
+            onChange={(value) => {
                 if (value) {
                     const label = dataService.getLabelFor(value);
                     setSearchExpr(label && label.label || value);
