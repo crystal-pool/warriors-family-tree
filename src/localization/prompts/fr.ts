@@ -1,7 +1,7 @@
 import { PromptsTable } from "./en";
 
 const prompts: Partial<PromptsTable> = {
-    __STATUS: "machine-translation",
+    __STATUS: "complete",
     AboutThisApp: "À propos de cette application",
     AboutThisAppDescription: "Ou nous faire part de vos commentaires",
     AffiliationsTitle: "Affiliations",
