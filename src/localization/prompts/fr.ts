@@ -46,7 +46,7 @@ const prompts: Partial<PromptsTable> = {
     SwitchLanguage: "Changer de langue",
     TimelineUntilNow: "Actuellement",
     UnknownValue: "Inconnu",
-    WelcomeDescription: "Cette application est un arbre généalogique automatique en cours de création pour <i>La Guerre des Clans/i>. Tapez quelque chose dans la case de recherche ci-dessous pour continuer. <br /> Ex. tapez <b>Étoile de Feu</b> et appuyez sur Entrée.",
+    WelcomeDescription: "Cette application est un arbre généalogique automatique en cours de création pour <i>La Guerre des Clans</i>. Tapez quelque chose dans la case de recherche ci-dessous pour continuer. <br /> Ex. tapez <b>Étoile de Feu</b> et appuyez sur Entrée.",
     WelcomeTitle: "Bienvenue",
 };
 
