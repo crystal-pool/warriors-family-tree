@@ -25,7 +25,8 @@ Copy-Item $RdfPath "$RawDataPath/wbdump.ttl"
 # Assumes $PWD is repo root
 dotnet run -c Release -p $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
 if ($LASTEXITCODE) {
-    Write-Warning "TimelineBuilder fetching live module failed. Will use fallback timeline data."
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
+    Write-Warning "::warning ::TimelineBuilder fetching live module failed. Will use fallback timeline data."
 }
 dotnet run -c Release -p $AssetsBuilderProjectDir -- $RawDataPath $DataPath
 checkLastExitCode
