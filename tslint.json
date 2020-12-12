@@ -22,10 +22,6 @@
         "no-var-keyword": true,
         "semicolon": true,
         "member-access": true,
-        "member-ordering": [
-            true,
-            "fields-first"
-        ],
         "no-floating-promises": true,
         "object-literal-key-quotes": [
             true,
