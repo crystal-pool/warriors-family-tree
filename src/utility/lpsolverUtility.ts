@@ -1,4 +1,4 @@
-import { IModel, ReformatLP } from "javascript-lp-solver";
+import Solver from "javascript-lp-solver";
 
 export type Polynomial = Record<string, number | null | undefined>;
 export type Contraint = [Polynomial, "<=" | "=" | ">=", number];
@@ -41,8 +41,8 @@ export function buildLPModel(model: ILPModel): string[] {
     return expr;
 }
 
-export function buildJSLPModel(model: ILPModel): IModel {
-    return ReformatLP(buildLPModel(model));
+export function buildJSLPModel(model: ILPModel): Solver.IModel {
+    return Solver.ReformatLP(buildLPModel(model));
 }
 
 export function dumpLPModel(model: ILPModel): string {
