@@ -9,3 +9,32 @@
  
  // Place everything under the Solver Name Space
  var Solver = function () {
+@@ -231,16 +231,21 @@ var Solver = function () {
+ // var define = define || undefined;
+ // var window = window || undefined;
+ 
++var exports = {
++    __esModule: { value: true },
++    default: new Solver()
++};
++
+ // If the project is loading through require.js, use `define` and exit
+ if (typeof define === "function") {
+     define([], function () {
+-        return new Solver();
++        return exports;
+     });
+-// If the project doesn't see define, but sees window, put solver on window
+-} else if (typeof window === "object"){
+-    window.solver = new Solver();
+-} else if (typeof self === "object"){
+-    self.solver = new Solver();
++    // If the project doesn't see define, but sees window, put solver on window
++} else if (typeof window === "object") {
++    window.solver = exports.Solver;
++} else if (typeof self === "object") {
++    self.solver = exports.Solver;
+ }
+ // Ensure that its available in node.js env
+-module.exports = new Solver();
++module.exports = exports;

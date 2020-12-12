@@ -81,23 +81,18 @@ export default async function config(env: any, argv: Record<string, string>): Pr
         },
         {
           test: /\.s[ac]ss$/i,
-          loader: [
+          use: [
             //isRunAsDevServer ? "style-loader" : MiniCssExtractPlugin.loader,
-            {
-              loader: MiniCssExtractPlugin.loader,
-              options: {
-                hmr: isRunAsDevServer,
-              },
-            },
+            { loader: MiniCssExtractPlugin.loader },
             "@teamsupercell/typings-for-css-modules-loader",
             // Translates CSS into CommonJS
             {
               loader: "css-loader",
               options: {
                 modules: {
-                  localIdentName: isProduction ? "[hash:base64]" : "[path][name]__[local]"
+                  localIdentName: isProduction ? "[hash:base64]" : "[path][name]__[local]",
+                  exportLocalsConvention: "camelCaseOnly",
                 },
-                localsConvention: "camelCaseOnly",
               }
             },
             // Compiles Sass to CSS
@@ -107,29 +102,43 @@ export default async function config(env: any, argv: Record<string, string>): Pr
       ]
     },
     resolve: {
-      extensions: [".tsx", ".ts", ".js"]
+      extensions: [".tsx", ".ts", ".js"],
+      alias: {
+        fs: false,
+        child_process: false
+      }
     },
     plugins: [
-      new CopyPlugin([
-        { from: path.join(__dirname, "assets"), to: outputPath }
-      ]),
+      new CopyPlugin({
+        patterns: [
+          { from: path.join(__dirname, "assets"), to: outputPath }
+        ]
+      }),
       new webpack.DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
       new ForkTsCheckerWebpackPlugin({
-        useTypescriptIncrementalApi: true,
-        tsconfig: path.join(__dirname, "./src/tsconfig.json"),
-        reportFiles: ["!**/node_modules/**"]
+        typescript: {
+          configFile: path.join(__dirname, "./src/tsconfig.json"),
+        },
+        issue: {
+          exclude: [
+            (issue) => !!issue.file?.match(/[\\\/]node_modules[\\\/]/),
+          ],
+        },
       }),
       new MiniCssExtractPlugin({ filename: "index1.css" })
-    ] as webpack.Plugin[],
+    ],
     optimization: {
       minimize: isProduction,
       minimizer: [
         new TerserPlugin({
-          cache: true,
           parallel: true,
-          sourceMap: true, // Must be set to true if using source-maps in production
           terserOptions: {
             // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+            ecma: 2015,
+            sourceMap: true,  // Must be set to true if using source-maps in production
+            parse: {
+              ecma: 2018,
+            },
           }
         }),
       ],

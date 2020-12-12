@@ -4,19 +4,16 @@
         "strict": true,
         "noUnusedLocals": true,
         "sourceMap": true,
-        "target": "es5",
+        "target": "ES2016",
         "jsx": "react",
         "lib": [
-            "es5",
-            "es2015.promise",
-            "es2015.collection",
-            "es2015.iterable",
-            "es2015.core",
-            "es2017.object",
-            "dom"
+            "DOM",
+            "ES2016",
+            "ES2017.Object"
         ],
         "esModuleInterop": true,
         "downlevelIteration": true,
-        "importHelpers": true
+        "importHelpers": true,
+        "removeComments": false
     }
 }

@@ -17,7 +17,7 @@ function buildRdfNavigationFeatureAnchorProps(qName: RdfQName, external: boolean
 
 export interface IRdfEntityLinkProps {
     qName: RdfQName;
-    title?: React.ReactNode;
+    title?: string | null | React.ReactElement;
     external?: boolean;
 }
 
@@ -25,14 +25,18 @@ export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {
     const { qName, external = false } = props;
     const href = props.qName && (external ? tryGetFullUri(qName) : routePathBuilders.entityProfile({ qName }, resetQueryParams(useLocation().search)));
     let title = props.title;
-    if (title === undefined && href) {
-        if (external) {
-            title = resourceManager.getPrompt("GoToEntityDataSource");
-            if (props.qName.startsWith("wd:")) {
-                title += resourceManager.getPrompt("Brackets", ["Crystal Pool"]);
+    if (title == null) {
+        if (href) {
+            if (external) {
+                title = resourceManager.getPrompt("GoToEntityDataSource");
+                if (props.qName.startsWith("wd:")) {
+                    title += resourceManager.getPrompt("Brackets", ["Crystal Pool"]);
+                }
+            } else {
+                title = resourceManager.getPrompt("EntityProfileTitle");
             }
         } else {
-            title = resourceManager.getPrompt("EntityProfileTitle");
+            title = "";     // No availble.
         }
     }
     return (<Tooltip title={title}>
@@ -53,7 +57,7 @@ export interface IRdfEntityLabelProps {
 }
 
 export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((props, ref: React.Ref<HTMLElement>) => {
-    const { qName, variant = "plain" } = props;
+    const { qName, variant = "plain", fallbackLabel, ...extraProps } = props;
     const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, qName)?.label;
     function renderLabel() {
@@ -67,10 +71,6 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((
         else
             return (<span className={className}>{displayLabel}</span>);
     }
-    const extraProps = { ...props };
-    delete extraProps.qName;
-    delete extraProps.fallbackLabel;
-    delete extraProps.variant;
     return (<span ref={ref} className={Scss.entityLabelContainer} lang={language} {...extraProps}>
         {renderLabel()}
         {variant === "plain-with-id-link" && (<span className={Scss.entityId}>{resourceManager.renderPrompt("Brackets", [<RdfEntityLink key={0} qName={props.qName} external />])}</span>)}

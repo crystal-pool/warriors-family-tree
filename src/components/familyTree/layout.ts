@@ -1,4 +1,4 @@
-import * as Solver from "javascript-lp-solver";
+import Solver from "javascript-lp-solver";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUtility";

@@ -86,7 +86,7 @@ interface ILabelsRoot {
 
 interface IEntityLinksRoot {
     // [link, site, name?]
-    links: { [entity: string]: [string, string, string?] };
+    links: { [entity: string]: [string, string, string?][] };
 }
 
 interface IEntityLookupRoot {
