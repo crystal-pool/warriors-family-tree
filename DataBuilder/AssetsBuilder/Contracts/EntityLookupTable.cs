@@ -38,8 +38,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, EntityLookupKeywordEntry value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, EntityLookupKeywordEntry? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.Keyword);
             serializer.Serialize(writer, value.Entities);
@@ -47,7 +52,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override EntityLookupKeywordEntry ReadJson(JsonReader reader, Type objectType, EntityLookupKeywordEntry existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override EntityLookupKeywordEntry ReadJson(JsonReader reader, Type objectType, EntityLookupKeywordEntry? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }
@@ -58,8 +63,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, EntityLookupEntityEntry value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, EntityLookupEntityEntry? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.QName);
             writer.WriteValue(value.Language);
@@ -68,7 +78,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override EntityLookupEntityEntry ReadJson(JsonReader reader, Type objectType, EntityLookupEntityEntry existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override EntityLookupEntityEntry ReadJson(JsonReader reader, Type objectType, EntityLookupEntityEntry? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }

@@ -85,8 +85,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, CharacterLocalizedName value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, CharacterLocalizedName? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.Text);
             writer.WriteValue(value.Language);
@@ -94,7 +99,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override CharacterLocalizedName ReadJson(JsonReader reader, Type objectType, CharacterLocalizedName existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override CharacterLocalizedName ReadJson(JsonReader reader, Type objectType, CharacterLocalizedName? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }
