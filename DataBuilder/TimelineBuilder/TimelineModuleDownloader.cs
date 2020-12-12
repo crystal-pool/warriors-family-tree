@@ -38,7 +38,24 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder
             using var wikiClient = new WikiClient { ClientUserAgent = "WarriorsFamilyTree.DataBuilder.TimelineBuilder/1.0" };
             var wikiSite = new WikiSite(wikiClient, MwApiEndpointUrl);
             await wikiSite.Initialization;
-            var root = await wikiSite.ScribuntoLoadDataAsync<JObject>("Timeline/bookData");
+            var root = await wikiSite.ScribuntoLoadDataAsync<JObject>("Timeline/bookData", @"
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+return deepcopy(p)
+");
             // Name: entity ID, Value: book abbr.
             var itemLookupDict = root["__itemLookup"]?.Children<JProperty>().ToDictionary(p => p.Value, p => p.Name);
             // Fix Lua objects
