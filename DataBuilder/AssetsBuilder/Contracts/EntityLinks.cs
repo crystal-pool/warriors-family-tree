@@ -30,8 +30,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, EntityLink value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, EntityLink? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.Link);
             writer.WriteValue(value.Site);
@@ -40,7 +45,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override EntityLink ReadJson(JsonReader reader, Type objectType, EntityLink existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override EntityLink ReadJson(JsonReader reader, Type objectType, EntityLink? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }

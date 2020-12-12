@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>WarriorsFamilyTree.DataBuilder.AssetsBuilder</RootNamespace>
     <AssemblyName>WarriorsFamilyTree.DataBuilder.AssetsBuilder</AssemblyName>
     <Nullable>enable</Nullable>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotNetRDF" Version="2.2.0" />
+    <PackageReference Include="dotNetRDF" Version="2.6.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

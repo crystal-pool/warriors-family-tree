@@ -18,7 +18,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
 
         public string Label { get; set; } = "";
 
-        public string Description { get; set; } = "";
+        public string? Description { get; set; }
 
     }
 
@@ -26,8 +26,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, EntityLabel value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, EntityLabel? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.Label);
             if (value.Description != null)
@@ -36,7 +41,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override EntityLabel ReadJson(JsonReader reader, Type objectType, EntityLabel existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override EntityLabel ReadJson(JsonReader reader, Type objectType, EntityLabel? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }

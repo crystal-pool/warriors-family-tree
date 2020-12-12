@@ -28,8 +28,13 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
     {
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, TimelineMarkerInfo value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, TimelineMarkerInfo? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
             writer.WriteStartArray();
             writer.WriteValue(value.TimelineName);
             writer.WriteValue(value.Month);
@@ -37,7 +42,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts
         }
 
         /// <inheritdoc />
-        public override TimelineMarkerInfo ReadJson(JsonReader reader, Type objectType, TimelineMarkerInfo existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override TimelineMarkerInfo ReadJson(JsonReader reader, Type objectType, TimelineMarkerInfo? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             throw new NotSupportedException();
         }
