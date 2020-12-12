@@ -63,7 +63,7 @@ export default async function config(env: any, argv: Record<string, string>): Pr
         },
         {
           test: /\.s[ac]ss$/i,
-          loader: [
+          use: [
             // Creates `style` nodes from JS strings
             "style-loader",
             // Translates CSS into CommonJS
@@ -79,21 +79,29 @@ export default async function config(env: any, argv: Record<string, string>): Pr
     },
     plugins: [
       isProduction || new ForkTsCheckerWebpackPlugin({
-        useTypescriptIncrementalApi: true,
-        tsconfig: path.join(__dirname, "./src/tsconfig.json"),
-        reportFiles: ["!**/node_modules/**"]
+        typescript: {
+          configFile: path.join(__dirname, "./src/tsconfig.json"),
+        },
+        issue: {
+          exclude: [
+            (issue) => !!issue.file?.match(/[\\\/]node_modules[\\\/]/),
+          ],
+        },
       }),
       new DefinePlugin(await buildEnvironmentDefinitions(isProduction)),
-    ].filter((p): p is webpack.Plugin => typeof p === "object"),
+    ].filter((p): p is ForkTsCheckerWebpackPlugin | DefinePlugin => typeof p === "object"),
     optimization: {
       minimize: isProduction,
       minimizer: [
         new TerserPlugin({
-          cache: true,
           parallel: true,
-          sourceMap: true, // Must be set to true if using source-maps in production
           terserOptions: {
             // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+            ecma: 2015,
+            sourceMap: true,  // Must be set to true if using source-maps in production
+            parse: {
+              ecma: 2018,
+            },
           }
         }),
       ],
