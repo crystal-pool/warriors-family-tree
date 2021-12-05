@@ -1,4 +1,4 @@
-import { createMuiTheme, List, ListItem, ListItemIcon, ListItemText, MenuItem, Tooltip } from "@material-ui/core";
+import { createTheme, List, ListItem, ListItemIcon, ListItemText, MenuItem, Tooltip } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
 import { ThemeProvider } from "@material-ui/styles";
 import React from "react";
@@ -6,7 +6,7 @@ import { resourceManager } from "../localization";
 import { buildFeatureAnchorProps } from "../utility/featureUsage";
 import * as LocalIcons from "../utility/muiIcons";
 
-const environmentInfoListTheme = createMuiTheme({
+const environmentInfoListTheme = createTheme({
     typography: {
         fontSize: 12,
     }
