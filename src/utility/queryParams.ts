@@ -34,7 +34,7 @@ export function parseQueryParams(queryExpr: string | URLSearchParams): IQueryPar
             throw new RangeError("Invalid integer expression in query params.");
         return parsed;
     }
-    let s = typeof queryExpr === 'string' ? new URLSearchParams(queryExpr) : queryExpr;
+    let s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
     return {
         embed: parseBoolean(s.get("embed")),
         depth: parseIntNumber(s.get("depth")),
@@ -43,7 +43,7 @@ export function parseQueryParams(queryExpr: string | URLSearchParams): IQueryPar
 }
 
 export function setQueryParams<T extends IQueryParams>(queryExpr: string | URLSearchParams, replacements: { [k in keyof T]?: T[k] | null }): string {
-    let s = typeof queryExpr === 'string' ? new URLSearchParams(queryExpr) : queryExpr;
+    let s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
     for (const k in replacements) {
         if (replacements.hasOwnProperty(k)) {
             const v = replacements[k];

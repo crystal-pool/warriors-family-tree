@@ -13,7 +13,7 @@ export const routePaths = {
 export type KnownRouteName = keyof typeof routePaths;
 
 export function buildRoutePath(pathName: string, search?: string | URLSearchParams): string {
-    if (search && typeof search !== 'string') search = String(search);
+    if (search && typeof search !== "string") search = String(search);
     if (search && (!search.startsWith("?"))) search = "?" + search;
     return "#" + pathName + (search || "");
 }

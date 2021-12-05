@@ -107,7 +107,7 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
 const RouteRootFC: React.FC = () => {
     const location = useLocation();
     return <RouteRoot location={location} />;
-}
+};
 
 function formatError(error: any): string {
     if (!error || typeof error !== "object") return String(error);
