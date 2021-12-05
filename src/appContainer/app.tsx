@@ -1,6 +1,5 @@
 import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@material-ui/core";
 import * as Icons from "@material-ui/icons";
-import { TelemetryTrace } from "@microsoft/applicationinsights-properties-js";
 import { Location } from "history";
 import * as React from "react";
 import { Route, RouteComponentProps } from "react-router";
@@ -35,7 +34,8 @@ function startNewPageScope(location: Location<any>): string {
     const id = generateRandomId8();
     // Let the previous page tracking stop first.
     appInsights.startTrackPage(id);
-    appInsights.context.telemetryTrace = new TelemetryTrace(id, undefined, location.pathname + location.search);
+    appInsights.context.telemetryTrace.traceID = id;
+    appInsights.context.telemetryTrace.name = location.pathname + location.search;
     return id;
 }
 
@@ -276,13 +276,13 @@ const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> =
                 message = <>
                     To make this app accessible to as many readers as possible, user interface (UI) for language <strong>{language}
                     </strong> has been translated with machine translation (MT).
-            </>;
+                </>;
                 break;
             case "partial-machine-translation":
                 message = <>
                     To make this app accessible to as many readers as possible, some part of the user interface (UI) for language <strong>{language}
                     </strong> has been translated with machine translation (MT).
-            </>;
+                </>;
                 break;
         }
     }

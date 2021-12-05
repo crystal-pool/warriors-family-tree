@@ -38,10 +38,13 @@ export default async function config(env: any, argv: Record<string, string>): Pr
     entry: path.join(__dirname, "./src/index.ts"),
     devtool: isProduction ? "source-map" : "inline-source-map",
     devServer: {
-      contentBase: path.join(__dirname, "assets"),
+      static: {
+        directory: path.join(__dirname, "assets"),
+        watch: true,
+        staticOptions: {}
+      },
       compress: true,
       port: 3082,
-      watchContentBase: true
     },
     module: {
       rules: [
