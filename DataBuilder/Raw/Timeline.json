@@ -89,6 +89,12 @@
     "wd:Q144": {
       "Segments": [
         {
+          "Chapter": "0",
+          "Timeline": "modern",
+          "Year": 29,
+          "Month": 2
+        },
+        {
           "Chapter": "1",
           "Timeline": "modern",
           "Year": 29,
@@ -449,6 +455,12 @@
     "wd:Q178": {
       "Segments": [
         {
+          "Chapter": "0",
+          "Timeline": "modern",
+          "Year": 15,
+          "Month": 3
+        },
+        {
           "Chapter": "1",
           "Timeline": "modern",
           "Year": 28,
@@ -541,7 +553,7 @@
     "wd:Q180": {
       "Segments": [
         {
-          "Chapter": "1",
+          "Chapter": "0",
           "Timeline": "modern",
           "Year": 19,
           "Month": 6
@@ -797,7 +809,14 @@
       ]
     },
     "wd:Q186": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 32,
+          "Month": 12
+        }
+      ]
     },
     "wd:Q187": {
       "Segments": []
@@ -826,7 +845,14 @@
       ]
     },
     "wd:Q191": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 29,
+          "Month": 6
+        }
+      ]
     },
     "wd:Q192": {
       "Segments": [
@@ -910,7 +936,32 @@
       ]
     },
     "wd:Q196": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 21,
+          "Month": 12
+        },
+        {
+          "Chapter": "2",
+          "Timeline": "modern",
+          "Year": 22,
+          "Month": 3
+        },
+        {
+          "Chapter": "9",
+          "Timeline": "modern",
+          "Year": 22,
+          "Month": 9
+        },
+        {
+          "Chapter": "9.5",
+          "Timeline": "modern",
+          "Year": 22,
+          "Month": 12
+        }
+      ]
     },
     "wd:Q197": {
       "Segments": [
@@ -953,6 +1004,9 @@
       ]
     },
     "wd:Q198": {
+      "Segments": []
+    },
+    "wd:Q202": {
       "Segments": []
     },
     "wd:Q206": {
@@ -1052,10 +1106,52 @@
       ]
     },
     "wd:Q3565": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 22,
+          "Month": 9
+        },
+        {
+          "Chapter": "4",
+          "Timeline": "modern",
+          "Year": 22,
+          "Month": 12
+        },
+        {
+          "Chapter": "4.5",
+          "Timeline": "modern",
+          "Year": 23,
+          "Month": 3
+        },
+        {
+          "Chapter": "7",
+          "Timeline": "modern",
+          "Year": 25,
+          "Month": 3
+        }
+      ]
     },
     "wd:Q3566": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 35,
+          "Month": 12
+        }
+      ]
+    },
+    "wd:Q3567": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "dotc",
+          "Year": 4,
+          "Month": 6
+        }
+      ]
     },
     "wd:Q3579": {
       "Segments": [
@@ -1078,10 +1174,40 @@
       ]
     },
     "wd:Q3627": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 33,
+          "Month": 3
+        }
+      ]
     },
     "wd:Q3628": {
-      "Segments": []
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 28,
+          "Month": 6
+        },
+        {
+          "Chapter": "8",
+          "Timeline": "modern",
+          "Year": 32,
+          "Month": 6
+        }
+      ]
+    },
+    "wd:Q3629": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 37,
+          "Month": 3
+        }
+      ]
     },
     "wd:Q4057": {
       "Segments": [
@@ -1256,6 +1382,82 @@
       ]
     },
     "wd:Q4183": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 37,
+          "Month": 5
+        },
+        {
+          "Chapter": "5",
+          "Timeline": "modern",
+          "Year": 37,
+          "Month": 6
+        }
+      ]
+    },
+    "wd:Q4311": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 26,
+          "Month": 12
+        }
+      ]
+    },
+    "wd:Q4336": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 26,
+          "Month": 12
+        }
+      ]
+    },
+    "wd:Q4337": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 35,
+          "Month": 7
+        }
+      ]
+    },
+    "wd:Q4385": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 37,
+          "Month": 6
+        }
+      ]
+    },
+    "wd:Q4411": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 28,
+          "Month": 10
+        }
+      ]
+    },
+    "wd:Q4426": {
+      "Segments": [
+        {
+          "Chapter": "1",
+          "Timeline": "modern",
+          "Year": 21,
+          "Month": 6
+        }
+      ]
+    },
+    "wd:Q4621": {
       "Segments": [
         {
           "Chapter": "1",
