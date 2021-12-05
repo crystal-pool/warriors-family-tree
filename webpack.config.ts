@@ -5,16 +5,9 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack from "webpack";
-import WebpackDevServer from "webpack-dev-server";
 import { IEnvironmentInfo } from "./shared/environment";
 import { getGitHead, getGitVersionSpec } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
-
-declare module "webpack" {
-  interface Configuration {
-    devServer?: WebpackDevServer.Configuration;
-  }
-}
 
 async function buildEnvironmentDefinitions(isProduction: boolean) {
   const version = await getGitVersionSpec();
