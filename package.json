@@ -1,6 +1,6 @@
 {
   "name": "warriors-family-tree",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "An complete and up-to-date warriors family tree.",
   "main": "index.js",
   "repository": "https://github.com/crystal-pool/warriors-family-tree",
