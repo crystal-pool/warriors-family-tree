@@ -1,7 +1,8 @@
 import { Grid, Slider, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import * as React from "react";
-import { RouteComponentProps } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import { EmbedAppBar } from "../components/EmbedAppBar";
 import { CharacterActionLinks } from "../components/entities/actionLinks";
 import { CharacterFamilyTree, CharacterFamilyTreeWalkMode } from "../components/familyTree/CharacterFamilyTree";
@@ -13,14 +14,17 @@ import { buildUiScopeProps } from "../utility/featureUsage";
 import { parseQueryParams, setQueryParams } from "../utility/queryParams";
 import { useSetPageTitle } from "../utility/react";
 import CommonScss from "./common.scss";
-import { IFamilyTreeRoutingParams, routePathBuilders } from "./routes";
+import { FamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
-export interface IFamilyTreeProps extends RouteComponentProps<IFamilyTreeRoutingParams> {
+export interface IFamilyTreeProps {
 }
 
-export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
-    const characterId = props.match.params.character;
-    const queryParams = parseQueryParams(props.location.search);
+export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
+    const params = useParams<FamilyTreeRoutingParams>();
+    const [search] = useSearchParams();
+    const queryParams = parseQueryParams(search);
+    const navigate = useNavigate();
+    const characterId = params.character;
     const depth = queryParams.depth || 3;
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     const setPageTitle = useSetPageTitle();
@@ -33,7 +37,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             const label = dataService.getLabelFor(characterId);
             setPageTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
         }
-    }, [props.match]);
+    }, [params]);
     if (!characterId) {
         return (<React.Fragment>
             <h1>{resourceManager.getPrompt("FamilyTreeTitle")}</h1>
@@ -41,7 +45,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
         </React.Fragment>);
     }
     if (characterId.indexOf(":") < 0) {
-        location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + characterId }, props.location.search));
+        location.replace(routePathBuilders.familyTree({ ...params, character: "wd:" + characterId }, search));
     }
     return (<div {...buildUiScopeProps("familyTreePage")}>
         {queryParams.embed
@@ -58,7 +62,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
                     <Grid item xs={12} md={6} lg={4}>
                         <Typography id="max-depth-slider">Max depth: {depth}</Typography>
                         <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => {
-                            location.replace(routePathBuilders.familyTree(props.match.params, setQueryParams(props.location.search, { depth: v as number })));
+                            navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v as number })));
                         }} />
                     </Grid>
                     {environment.isProduction ||
@@ -76,7 +80,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             )
         }
         <CharacterFamilyTree centerQName={characterId} walkMode={walkMode} maxDistance={depth}
-            onNodeClick={(qName) => { location.href = routePathBuilders.familyTree({ character: qName }, props.location.search); }}
+            onNodeClick={(qName) => { location.href = routePathBuilders.familyTree({ character: qName }, search); }}
             emptyPlaceholder={<>
                 <h3>{resourceManager.getPrompt("NoFamilyTreeInformation")}</h3>
                 <p>{resourceManager.renderPrompt("HoweverCheckout1", [
@@ -85,7 +89,5 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo((props) => {
             </>}
         />
     </div>);
-}, function propsComparer(prevProps, nextProps) {
-    return prevProps.location === nextProps.location;
 });
 FamilyTree.displayName = "FamilyTree";

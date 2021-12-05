@@ -1,8 +1,8 @@
 import { Grid, Paper, Typography } from "@material-ui/core";
 import classNames from "classnames";
 import * as React from "react";
-import { RouteComponentProps } from "react-router-dom";
-import { routePathBuilders } from "..";
+import { useParams, useSearchParams } from "react-router-dom";
+import { EntityRoutingParams, routePathBuilders } from "..";
 import { EmbedAppBar } from "../../components/EmbedAppBar";
 import { CharacterActionLinks } from "../../components/entities/actionLinks";
 import { CharacterBadges } from "../../components/entities/CharacterBadges";
@@ -15,11 +15,10 @@ import { buildUiScopeProps } from "../../utility/featureUsage";
 import { parseQueryParams } from "../../utility/queryParams";
 import { useSetPageTitle } from "../../utility/react";
 import CommonScss from "../common.scss";
-import { IEntityRoutingParams } from "../routes";
 import { CharacterEntityDetails } from "./character";
 import Scss from "./entityPage.scss";
 
-export interface IEntityProfileProps extends RouteComponentProps<IEntityRoutingParams> {
+export interface IEntityProfileProps {
 }
 
 interface IEntityPartials {
@@ -42,8 +41,10 @@ function renderEntityPartials(qName: string): IEntityPartials {
 }
 
 export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) => {
-    const entityQName = props.match.params.qName;
-    const queryParams = parseQueryParams(props.location.search);
+    const params = useParams<EntityRoutingParams>();
+    const [search] = useSearchParams();
+    const queryParams = parseQueryParams(search);
+    const entityQName = params.qName;
     const setPageTitle = useSetPageTitle();
     // Re-render the component when language changes.
     useLanguage();
@@ -54,7 +55,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
             const label = dataService.getLabelFor(entityQName);
             setPageTitle(label && label.label || entityQName);
         }
-    }, [props.match]);
+    }, [params]);
     if (!entityQName) {
         return (<React.Fragment>
             <h1>{resourceManager.getPrompt("EntityProfileTitle")}</h1>
@@ -62,7 +63,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
         </React.Fragment>);
     }
     if (entityQName.indexOf(":") < 0) {
-        location.replace(routePathBuilders.familyTree({ ...props.match.params, character: "wd:" + entityQName }, props.location.search));
+        location.replace(routePathBuilders.familyTree({ ...params, character: "wd:" + entityQName }, search));
     }
     const partials = renderEntityPartials(entityQName);
     return (<div {...buildUiScopeProps("entityPage")}>
@@ -104,7 +105,5 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
         }
         {partials.detail}
     </div>);
-}, function propsComparer(prevProps, nextProps) {
-    return prevProps.location === nextProps.location;
 });
 EntityProfile.displayName = "Entity";

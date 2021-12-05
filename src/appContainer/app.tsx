@@ -2,7 +2,7 @@ import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@materi
 import * as Icons from "@material-ui/icons";
 import { Location } from "history";
 import * as React from "react";
-import { Route, RouteComponentProps } from "react-router";
+import { useLocation } from "react-router";
 import { HashRouter } from "react-router-dom";
 import { generateRandomId8 } from "../../shared/utility";
 import { contactUrl, issueTrackerUrl } from "../constants";
@@ -19,6 +19,7 @@ import { AppEmbed } from "./appEmbed";
 import { AppFull } from "./appFull";
 
 export interface IAppProps {
+
 }
 
 export interface IAppStates {
@@ -27,10 +28,11 @@ export interface IAppStates {
     error?: any;
 }
 
-interface IRouteRootProps extends RouteComponentProps {
+interface IRouteRootProps {
+    location: Location;
 }
 
-function startNewPageScope(location: Location<any>): string {
+function startNewPageScope(location: Location): string {
     const id = generateRandomId8();
     // Let the previous page tracking stop first.
     appInsights.startTrackPage(id);
@@ -100,6 +102,11 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
             this._onLocationChanged();
         }
     }
+}
+
+const RouteRootFC: React.FC = () => {
+    const location = useLocation();
+    return <RouteRoot location={location} />;
 }
 
 function formatError(error: any): string {
@@ -217,7 +224,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
                     <PageTitleContext.Provider value={this.state.titleContext}>
                         <LanguageContext.Provider value={this.state.languageContext}>
                             <AppErrorBoundary>
-                                <Route component={RouteRoot} />
+                                <RouteRootFC />
                             </AppErrorBoundary>
                             <Snackbar
                                 open={this.state.error != null}

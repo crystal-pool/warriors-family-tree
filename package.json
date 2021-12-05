@@ -62,7 +62,7 @@
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router-dom": "^5.3.0",
+    "react-router-dom": "^6.0.2",
     "resize-observer": "^1.0.4",
     "svgjs": "^2.6.2",
     "tasklike-promise-library": "^0.0.13",

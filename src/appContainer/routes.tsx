@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Route } from "react-router";
+import { Route, Routes } from "react-router";
 import * as Pages from "../pages";
 import { dataService } from "../services";
 
@@ -7,15 +7,15 @@ export interface IRoutesProps {
     embed?: boolean;
 }
 
-export const Routes: React.FC<IRoutesProps> = (props) => {
-    return (<React.Fragment>
-        <Route exact path={Pages.routePaths.welcome} component={Pages.Welcome} />
-        <Route path={Pages.routePaths.familyTree} component={Pages.FamilyTree} />
-        <Route path={Pages.routePaths.entityProfile} component={Pages.EntityProfile} />
-    </React.Fragment>);
+export const AppRoutes: React.FC<IRoutesProps> = (props) => {
+    return (<Routes>
+        <Route path={Pages.routePaths.welcome} element={<Pages.Welcome />} />
+        <Route path={Pages.routePaths.familyTree} element={<Pages.FamilyTree />} />
+        <Route path={Pages.routePaths.entityProfile} element={<Pages.EntityProfile />} />
+    </Routes>);
 };
 
 export const RoutesAfterInitialization = React.lazy(async () => {
     await dataService.initialization;
-    return { default: Routes };
+    return { default: AppRoutes };
 });

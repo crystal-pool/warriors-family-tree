@@ -3,7 +3,7 @@ import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import { resourceManager } from "../../localization";
-import { routePathBuilders, useKnownRouteMatch } from "../../pages";
+import { routePathBuilders } from "../../pages";
 import { buildFeatureAnchorProps, buildUiScopeProps } from "../../utility/featureUsage";
 import Scss from "./actionLinks.scss";
 import { IEntityDrivenComponentProps } from "./types";
@@ -11,6 +11,8 @@ import { IEntityDrivenComponentProps } from "./types";
 export interface IActionLinksProps extends IEntityDrivenComponentProps {
     className?: string;
     displayAs?: "link" | "button";
+    disableProfileLink?: boolean;
+    disableFamilyTreeLink?: boolean;
 }
 
 type ActionLinkEntry = [string, string, string | undefined];
@@ -35,17 +37,16 @@ function renderActionLinks(actions: ActionLinkEntry[], className?: string, displ
 }
 
 export const CharacterActionLinks: React.FC<IActionLinksProps> = function CharacterActionLinks(props) {
-    const { qName, className } = props;
+    const { qName, className, disableProfileLink, disableFamilyTreeLink } = props;
     const loc = useLocation();
-    const match = useKnownRouteMatch();
     const actions: ActionLinkEntry[] = [];
     actions.push(["profile", resourceManager.getPrompt("EntityProfileTitle"),
-        match?.route === "entityProfile" && match.params.qName === qName
+        disableProfileLink
             ? undefined
-            : routePathBuilders.entityProfile({ qName: props.qName }, loc.search)]);
+            : routePathBuilders.entityProfile({ qName }, loc.search)]);
     actions.push(["familyTree", resourceManager.getPrompt("FamilyTreeTitle"),
-        match?.route === "familyTree" && match.params.character === qName
+        disableFamilyTreeLink
             ? undefined
-            : routePathBuilders.familyTree({ character: props.qName }, loc.search)]);
+            : routePathBuilders.familyTree({ character: qName }, loc.search)]);
     return renderActionLinks(actions, className, props.displayAs);
 };
