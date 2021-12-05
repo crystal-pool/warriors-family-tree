@@ -23,12 +23,12 @@ $AssetsBuilderProjectDir = (Resolve-Path "./DataBuilder/AssetsBuilder/AssetsBuil
 
 Copy-Item $RdfPath "$RawDataPath/wbdump.ttl"
 # Assumes $PWD is repo root
-dotnet run -c Release -p $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
+dotnet run -c Release --project $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
 if ($LASTEXITCODE) {
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
     Write-Warning "::warning ::TimelineBuilder fetching live module failed. Will use fallback timeline data."
 }
-dotnet run -c Release -p $AssetsBuilderProjectDir -- $RawDataPath $DataPath
+dotnet run -c Release --project $AssetsBuilderProjectDir -- $RawDataPath $DataPath
 checkLastExitCode
 
 yarn build-prod
