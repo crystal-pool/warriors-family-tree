@@ -21,11 +21,11 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: true
-          fetch-depth: 2
-      - uses: actions/checkout@v1
+          fetch-depth: 10
+      - uses: actions/checkout@v3
         with:
           repository: crystal-pool/Dump
           fetch-depth: 2
