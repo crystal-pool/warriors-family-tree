@@ -3,7 +3,7 @@
 param (
     [Parameter()]
     [string]
-    $RdfPath = "../Dump/wbdump.ttl"
+    $RdfPath = "Dump/wbdump.ttl"
 )
 
 function checkLastExitCode() {
