@@ -88,14 +88,25 @@ return deepcopy(p)
             return new TimelineTable
             {
                 Books = entries.ToDictionary(p => p.Key,
-                    p => new TimelineBookEntry
+                    p =>
                     {
-                        Segments = p.Value.Interval.Select(i =>
+                        try
                         {
-                            var details = p.Value.Details[i];
-                            var timeline = timelineOrigins.OrderBy(p => Math.Abs(p.Value - details.Year)).First();
-                            return new TimelineSegmentEntry(i, timeline.Key, details.Year - timeline.Value, details.Month);
-                        }).ToList()
+                            return new TimelineBookEntry
+                            {
+                                Segments = p.Value.Interval.Select(i =>
+                                {
+                                    var details = p.Value.Details[i];
+                                    var timeline = timelineOrigins.OrderBy(p => Math.Abs(p.Value - details.Year)).First();
+                                    return new TimelineSegmentEntry(i, timeline.Key, details.Year - timeline.Value, details.Month);
+                                }).ToList()
+                            };
+                        } catch (Exception)
+                        {
+                            Console.WriteLine("Failed to generate timeline table for book {0}.", p.Key);
+                            Console.WriteLine("Hint: available chapter keys are: {0}.", string.Join(", ", p.Value.Details.Keys));
+                            throw;
+                        }
                     })
             };
         }
