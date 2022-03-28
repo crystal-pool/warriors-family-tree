@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 $DataBuilderSolutionDir = (Resolve-Path "./DataBuilder/DataBuilder.sln").Path
 
 # Assumes $PWD is repo root
-yarn install
+yarn install --frozen-lockfile
 checkLastExitCode
 git apply ./patch.diff --verbose --ignore-whitespace
 checkLastExitCode
