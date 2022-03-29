@@ -25,7 +25,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: crystal-pool/Dump
-          fetch-depth: 2
+          # We want to also fetch tags.
+          fetch-depth: 0
           ref: master
           path: Dump
       - uses: actions/setup-dotnet@v1
