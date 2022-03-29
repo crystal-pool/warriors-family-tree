@@ -1,3 +1,4 @@
+/// <reference types="webpack-dev-server" />
 import CopyPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import fs from "fs";
@@ -5,7 +6,6 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import webpack from "webpack";
-import { } from "webpack-dev-server";
 import { IEnvironmentInfo } from "./shared/environment";
 import { getGitHead, getGitVersionSpec } from "./shared/git";
 import { flattenKeyPath, serializeRecordValues } from "./shared/utility";
