@@ -1,3 +1,4 @@
+/// <reference types="webpack-dev-server" />
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
