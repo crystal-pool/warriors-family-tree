@@ -10,13 +10,16 @@ import { resourceManager } from "../localization";
 import { LocalizationProgress } from "../localization/common";
 import { browserLanguage, KnownLanguage } from "../localization/languages";
 import { ILanguageContextValue, LanguageContext } from "../localization/react";
+import { InitializationScreen } from "../pages";
 import { dataService } from "../services";
 import { buildFeatureAnchorProps, buildUiScopeProps, trackFeatureUsageFromElement } from "../utility/featureUsage";
 import { parseQueryParams } from "../utility/queryParams";
 import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
 import { appInsights, telemetryEnvironment } from "../utility/telemetry";
-import { AppEmbed } from "./appEmbed";
-import { AppFull } from "./appFull";
+
+const AppEmbedLazy = React.lazy(async () => ({ default: (await import("./appEmbed")).AppEmbed }));
+
+const AppFullLazy = React.lazy(async () => ({ default: (await import("./appFull")).AppFull }));
 
 export interface IAppProps {
 
@@ -82,9 +85,11 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
         return (<PageTitleContext.Consumer unstable_observedBits={PageTitleContextBits.title}>
             {(state) => {
                 this._pageTitle = state.title;
-                return (queryParams.embed
-                    ? <AppEmbed postMessageToken={queryParams.pmToken} />
-                    : <AppFull />);
+                return (<React.Suspense fallback={<InitializationScreen />}>{
+                    queryParams.embed
+                        ? <AppEmbedLazy postMessageToken={queryParams.pmToken} />
+                        : <AppFullLazy />
+                }</React.Suspense>);
             }}
         </PageTitleContext.Consumer>);
     }

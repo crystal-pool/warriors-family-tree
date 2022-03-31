@@ -1,4 +1,4 @@
-import _ from "lodash";
+import * as _ from "lodash";
 import { IDisposable } from "tasklike-promise-library";
 import { EmbedMessage, HostMessage, IHostSettings } from "../../shared/messages";
 

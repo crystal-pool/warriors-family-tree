@@ -131,7 +131,7 @@ export default async function config(env: any, argv: Record<string, string>): Pr
           parallel: true,
           terserOptions: {
             // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
-            ecma: 2015,
+            ecma: 2018,
             sourceMap: true,  // Must be set to true if using source-maps in production
             parse: {
               ecma: 2018,
