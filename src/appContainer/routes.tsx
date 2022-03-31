@@ -14,7 +14,7 @@ const AppRoutesAsync: Promise<React.FC<IRoutesProps>> = (async () => {
             <Route path={Pages.routePaths.familyTree} element={<Pages.FamilyTree />} />
             <Route path={Pages.routePaths.entityProfile} element={<Pages.EntityProfile />} />
         </Routes>);
-    }
+    };
 })();
 
 export const RoutesAfterInitialization = React.lazy(async () => {
