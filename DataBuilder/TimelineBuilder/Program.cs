@@ -8,25 +8,25 @@ using WikiClientLibrary.Client;
 using WikiClientLibrary.Scribunto;
 using WikiClientLibrary.Sites;
 
-namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder
-{
-    internal static class Program
-    {
+namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder;
 
-        public static async Task<int> Main(string[] args)
+internal static class Program
+{
+
+    public static async Task<int> Main(string[] args)
+    {
+        if (args.Length < 1)
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine("Usage:\ndotnet run outputJsonPath");
-                return 1;
-            }
-            var timelineTable = await TimelineModuleDownloader.FetchTimelineModuleAsync();
-            // Sort keys.
-            timelineTable.Books = new SortedDictionary<string, TimelineBookEntry>(timelineTable.Books);
-            // Write formatted JSON.
-            await using (var writer = new StreamWriter(args[0]))
-                timelineTable.WriteTo(writer, true);
-            return 0;
+            Console.WriteLine("Usage:\ndotnet run outputJsonPath");
+            return 1;
         }
+        var timelineTable = await TimelineModuleDownloader.FetchTimelineModuleAsync();
+        // Sort keys.
+        timelineTable.Books = new SortedDictionary<string, TimelineBookEntry>(timelineTable.Books);
+        // Write formatted JSON.
+        await using (var writer = new StreamWriter(args[0]))
+            timelineTable.WriteTo(writer, true);
+        return 0;
     }
+
 }
