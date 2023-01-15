@@ -37,6 +37,7 @@ public static class TimelineModuleDownloader
         using var wikiClient = new WikiClient { ClientUserAgent = "WarriorsFamilyTree.DataBuilder.TimelineBuilder/1.0" };
         var wikiSite = new WikiSite(wikiClient, MwApiEndpointUrl);
         await wikiSite.Initialization;
+        // Mitigates https://phabricator.wikimedia.org/T269990
         var root = await wikiSite.ScribuntoLoadDataAsync<JObject>("Timeline/bookData", @"
 function deepcopy(orig)
     local orig_type = type(orig)
@@ -57,33 +58,34 @@ return deepcopy(p)
 ");
         // Name: entity ID, Value: book abbr.
         var itemLookupDict = root["__itemLookup"]?.Children<JProperty>().ToDictionary(p => p.Value, p => p.Name);
-        // Fix Lua objects
-        foreach (var p in root.Properties())
+        // Skip non-book entity special data constructs.
+        var bookEntries = root.Properties().Where(p => !p.Name.StartsWith("__")).ToList();
+        // Fix Lua objects: Convert [ "a", "b", "c" ] into { "1": "a", "2": "b", "3": "c" }
+        foreach (var p in bookEntries)
         {
             if (p.Value["details"] is JArray arr)
             {
                 p.Value["details"] = new JObject(arr.Select((e, i) => new JProperty((i + 1).ToString(), e)));
             }
         }
-        var entries = root.Properties().Where(p => !p.Name.StartsWith("__"))
-            .ToDictionary(p =>
+        var entries = bookEntries.ToDictionary(p =>
+        {
+            var name = p.Name;
+            if (itemLookupDict != null && itemLookupDict.TryGetValue(name, out var mappedQName))
             {
-                var name = p.Name;
-                if (itemLookupDict != null && itemLookupDict.TryGetValue(name, out var mappedQName))
-                {
-                    name = mappedQName;
-                }
-                if (name.StartsWith("Q"))
-                {
-                    name = "wd:" + name;
-                }
-                else
-                {
-                    Console.WriteLine("Warning: {0} does not seem like a valid entity name.", name);
-                    name = ":" + name;
-                }
-                return name;
-            }, p => p.Value.ToObject<BookEntry>(jsonSerializer)!);
+                name = mappedQName;
+            }
+            if (name.StartsWith("Q"))
+            {
+                name = "wd:" + name;
+            }
+            else
+            {
+                Console.WriteLine("Warning: {0} does not seem like a valid entity name.", name);
+                name = ":" + name;
+            }
+            return name;
+        }, p => p.Value.ToObject<BookEntry>(jsonSerializer)!);
         return new TimelineTable
         {
             Books = entries.ToDictionary(p => p.Key,
