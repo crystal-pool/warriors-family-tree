@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.Contracts;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 using WikiClientLibrary.Client;
@@ -30,13 +29,13 @@ public static class TimelineModuleDownloader
         Converters = { new NumberAsStringConverter(), new FloatToIntConverter() },
     };
 
-    public static async Task<TimelineTable> FetchTimelineModuleAsync()
+    public static async Task<TimelineTable> FetchTimelineModuleAsync(string? apiEndpointUrl = null)
     {
         using var wikiClient = new WikiClient
         {
             ClientUserAgent = "WarriorsFamilyTree.DataBuilder.TimelineBuilder/1.0",
         };
-        var wikiSite = new WikiSite(wikiClient, MwApiEndpointUrl);
+        var wikiSite = new WikiSite(wikiClient, apiEndpointUrl ?? MwApiEndpointUrl);
         await wikiSite.Initialization;
         // Mitigates https://phabricator.wikimedia.org/T269990
         Console.WriteLine("Fetching live timeline data from: [[Module:{0}]]", TimelineBookDataModuleName);

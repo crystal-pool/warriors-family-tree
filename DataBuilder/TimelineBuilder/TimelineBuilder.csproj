@@ -6,6 +6,7 @@
     <RootNamespace>WarriorsFamilyTree.DataBuilder.TimelineBuilder</RootNamespace>
     <AssemblyName>WarriorsFamilyTree.DataBuilder.TimelineBuilder</AssemblyName>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
