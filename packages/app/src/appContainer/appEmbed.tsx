@@ -1,4 +1,4 @@
-import { CssBaseline } from "@material-ui/core";
+import { CssBaseline } from "@mui/material";
 import * as React from "react";
 import { InitializationScreen } from "../pages";
 import { isOwnerWindowPresent, postReadyMessage } from "../utility/embedInterop";

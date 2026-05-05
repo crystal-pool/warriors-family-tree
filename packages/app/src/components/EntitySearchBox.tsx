@@ -1,6 +1,6 @@
-import { createStyles, InputBase, makeStyles, MenuItem, Paper, Theme, Typography } from "@material-ui/core";
-import { MenuItemProps } from "@material-ui/core/MenuItem";
-import SearchIcon from "@material-ui/icons/Search";
+import { InputBase, MenuItem, Paper, Typography } from "@mui/material";
+import { MenuItemProps } from "@mui/material/MenuItem";
+import SearchIcon from "@mui/icons-material/Search";
 import Downshift from "downshift";
 import * as React from "react";
 import { resourceManager } from "../localization";
@@ -16,58 +16,31 @@ export interface IEntitySearchBoxProps {
     onAccept: (qName: RdfQName) => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles<EntitySearchBoxClassName, IEntitySearchBoxProps>({
-        root: {
-            position: "relative"
-        },
-        searchIcon: {
-            width: theme.spacing(7),
-            height: "100%",
-            position: "absolute",
-            pointerEvents: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-        },
-        inputRoot: {
-            color: "inherit",
-            width: "100%"
-        },
-        inputInput: {
-            padding: theme.spacing(1, 1, 1, 7),
-            margin: 0,
-            width: "auto"
-        },
-        autoCompletePopup: {
-            position: "absolute",
-            zIndex: 1,
-            marginTop: theme.spacing(1),
-            left: 0,
-            right: 0,
-            maxHeight: "80vh",
-            opacity: 0.9,
-            overflowY: "auto"
-        },
-        autoCompleteItemRoot: {
-            whiteSpace: "normal"
-        },
-        autoCompleteItem: {
-        },
-        autoCompleteItemHeader: {
-        },
-        autoCompleteItemDetails: {
-            opacity: 0.7
-        }
-    }),
-);
+const defaultStyles: Record<EntitySearchBoxClassName, React.CSSProperties> = {
+    root: { position: "relative" },
+    searchIcon: {
+        width: 56, height: "100%", position: "absolute",
+        pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center",
+    },
+    inputRoot: { color: "inherit", width: "100%" },
+    inputInput: { padding: "8px 8px 8px 56px", margin: 0, width: "auto" },
+    autoCompletePopup: {
+        position: "absolute", zIndex: 1, marginTop: 8,
+        left: 0, right: 0, maxHeight: "80vh", opacity: 0.9, overflowY: "auto"
+    },
+    autoCompleteItemRoot: { whiteSpace: "normal" },
+    autoCompleteItem: {},
+    autoCompleteItemHeader: {},
+    autoCompleteItemDetails: { opacity: 0.7 },
+};
 
 interface ISuggestionItemProps {
     data: IEntityLookupResultItem;
     isActive: boolean;
     isSelected: boolean;
     itemProps: MenuItemProps<"div", { button?: never }>;
-    classes: Record<EntitySearchBoxClassName, string>;
+    defaultStyles: Record<EntitySearchBoxClassName, React.CSSProperties>;
+    classes: Partial<Record<EntitySearchBoxClassName, string>>;
 }
 
 const EntitySuggestionItem: React.FC<ISuggestionItemProps> = React.memo((props) => {
@@ -90,16 +63,14 @@ const EntitySuggestionItem: React.FC<ISuggestionItemProps> = React.memo((props) 
             {...props.itemProps}
             selected={props.isActive}
             component="div"
-            classes={
-                { root: props.classes.autoCompleteItemRoot }
-            }
+            sx={{ whiteSpace: "normal" }}
             style={{
                 fontWeight: props.isSelected ? 500 : 400,
             }}
         >
             <div className={props.classes.autoCompleteItem}>
                 <Typography variant="body1" className={props.classes.autoCompleteItemHeader}>{header}</Typography>
-                {details && <Typography variant="body2" className={props.classes.autoCompleteItemDetails}>{details}</Typography>}
+                {details && <Typography variant="body2" style={props.defaultStyles.autoCompleteItemDetails} className={props.classes.autoCompleteItemDetails}>{details}</Typography>}
             </div>
         </MenuItem>
     );
@@ -118,7 +89,7 @@ function searchEntities(searchExpr: string): IEntityLookupResultItem[] {
 }
 
 export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((props) => {
-    const classes = useStyles(props);
+    const classes = props.classes ?? {};
     const [searchExpr, setSearchExpr] = React.useState("");
     const suggestions = React.useMemo(() => searchEntities(searchExpr), [searchExpr]);
     return (
@@ -151,8 +122,8 @@ export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((prop
                         },
                         onFocus: options.openMenu,
                     });
-                    return (<div className={classes.root}>
-                        <div className={classes.searchIcon}>
+                    return (<div className={classes.root} style={defaultStyles.root}>
+                        <div className={classes.searchIcon} style={defaultStyles.searchIcon}>
                             <SearchIcon />
                         </div>
                         <InputBase
@@ -160,18 +131,20 @@ export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((prop
                                 root: classes.inputRoot,
                                 input: classes.inputInput,
                             }}
+                            sx={defaultStyles.inputRoot}
                             {...{ onBlur, onChange, onFocus }}
                             inputProps={inputProps}
                         />
                         <div {...options.getMenuProps()}>
                             {options.isOpen ? (
-                                <Paper className={classes.autoCompletePopup} square>
+                                <Paper style={defaultStyles.autoCompletePopup} square>
                                     {suggestions.map((data, i) => (<EntitySuggestionItem
                                         data={data}
                                         key={i}
                                         isActive={options.highlightedIndex === i}
                                         isSelected={options.selectedItem === data.qName}
                                         itemProps={options.getItemProps({ item: data.qName })}
+                                        defaultStyles={defaultStyles}
                                         classes={classes}
                                     />))}
                                 </Paper>

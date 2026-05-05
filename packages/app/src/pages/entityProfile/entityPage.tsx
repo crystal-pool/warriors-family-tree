@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from "@material-ui/core";
+import { Grid, Paper, Typography } from "@mui/material";
 import classNames from "classnames";
 import * as React from "react";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -74,11 +74,11 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <span className={Scss.titleBadges}>{partials.badges}</span>
                 </span>} />
                 <Grid container {...buildUiScopeProps("siteLinks")}>
-                    <Grid item sm={12} md={5}>
+                    <Grid size={{ sm: 12, md: 5 }}>
                         <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                         <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
                     </Grid>
-                    <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor}>
+                    <Grid size={{ sm: 12, md: 7 }} className={Scss.expandablePanelAnchor}>
                         <Paper className={classNames(Scss.expandablePanelContainer, Scss.compact)}>
                             <h4>{resourceManager.getPrompt("SiteLinksTitle")}</h4>
                             <EntityExternalLinks qName={entityQName} />
@@ -87,7 +87,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                 </Grid>
             </React.Fragment>)
             : (<Grid container spacing={4}>
-                <Grid item sm={12} md={5} {...buildUiScopeProps("title")}>
+                <Grid size={{ sm: 12, md: 5 }} {...buildUiScopeProps("title")}>
                     <h1>
                         <RdfEntityLabel qName={entityQName} variant="plain-with-id-link" />
                         <span className={Scss.titleBadges}>{partials.badges}</span>
@@ -95,7 +95,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
                     <div className={CommonScss.titleLinks}>{partials.titleLinks}</div>
                     <Typography variant="subtitle1"><RdfEntityDescription qName={entityQName} /></Typography>
                 </Grid>
-                <Grid item sm={12} md={7} className={Scss.expandablePanelAnchor} {...buildUiScopeProps("siteLinks")}>
+                <Grid size={{ sm: 12, md: 7 }} className={Scss.expandablePanelAnchor} {...buildUiScopeProps("siteLinks")}>
                     <Paper className={Scss.expandablePanelContainer}>
                         <h2>{resourceManager.getPrompt("SiteLinksTitle")}</h2>
                         <EntityExternalLinks qName={entityQName} />

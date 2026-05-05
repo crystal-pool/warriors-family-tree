@@ -1,5 +1,5 @@
-import { Button, createStyles, ListItemText, makeStyles, MenuItem, Theme, Tooltip } from "@material-ui/core";
-import * as Icons from "@material-ui/icons";
+import { Button, ListItemText, MenuItem, Tooltip } from "@mui/material";
+import * as Icons from "@mui/icons-material";
 import * as React from "react";
 import { resourceManager } from "../localization";
 import { KnownLanguage, knownLanguages, languageInfo } from "../localization/languages";
@@ -14,20 +14,11 @@ interface ILanguageSwitchProps {
     onLanguageChanged: (language: KnownLanguage) => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles<LanguageSwitchClassName, ILanguageSwitchProps>({
-        root: {},
-        buttonText: {
-            marginLeft: theme.spacing(1)
-        }
-    }));
-
 export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | undefined>();
-    const classes = useStyles(props);
     return (<React.Fragment>
         <Tooltip
-            className={classes.root}
+            className={props.classes?.root}
             aria-label={resourceManager.getPrompt("SwitchLanguage")}
             title={resourceManager.getPrompt("SwitchLanguage")}
         >
@@ -36,7 +27,7 @@ export const LanguageSwitch: React.FC<ILanguageSwitchProps> = (props) => {
                 onClick={(e) => setAnchorEl(e.currentTarget)}
                 {...buildFeatureAnchorProps("app.selectLanguage.toggle")}
                 {...buildUiScopeProps("selectLanguage")}
-            ><Icons.Translate /><span className={classes.buttonText}>{languageInfo[props.language].autonym}</span></Button>
+            ><Icons.Translate /><span className={props.classes?.buttonText} style={{ marginLeft: 8 }}>{languageInfo[props.language].autonym}</span></Button>
         </Tooltip>
         <LogicallyParentedMenu
             anchorEl={anchorEl}

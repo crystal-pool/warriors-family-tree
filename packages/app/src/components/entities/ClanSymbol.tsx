@@ -1,4 +1,4 @@
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 import classNames from "classnames";
 import * as React from "react";
 import commonScss from "../../common.module.scss";

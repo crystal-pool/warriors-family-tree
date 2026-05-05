@@ -1,4 +1,4 @@
-import { Link } from "@material-ui/core";
+import { Link } from "@mui/material";
 import * as React from "react";
 import { dataService } from "../../services";
 import { buildFeatureAnchorProps } from "../../utility/featureUsage";

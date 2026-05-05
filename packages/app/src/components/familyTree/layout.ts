@@ -434,7 +434,7 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
                     }
                 }
                 const mateNode = layoutNodes.get(mate);
-                console.assert(mateNode);
+                console.assert(!!mateNode);
                 if (!mateNode) continue;
                 const lNode = node.offsetX <= mateNode.offsetX ? node : mateNode;
                 const rNode = node.offsetX <= mateNode.offsetX ? mateNode : node;

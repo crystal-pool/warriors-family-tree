@@ -7,7 +7,7 @@ export function renderTemplate(template: string, args?: TemplateArguments<React.
         return template;
     }
     let re = /\{(.+?)\}/g;
-    const result: React.ReactNodeArray = [];
+    const result: React.ReactNode[] = [];
     do {
         const lastIndex = re.lastIndex;
         const match = re.exec(template);

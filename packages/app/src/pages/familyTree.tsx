@@ -1,5 +1,4 @@
-import { Grid, Slider, Typography } from "@material-ui/core";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { Grid, Slider, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import * as React from "react";
 import { useNavigate, useParams } from "react-router";
 import { useSearchParams } from "react-router-dom";
@@ -59,18 +58,18 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
                 <CharacterActionLinks className={CommonScss.titleLinks} qName={characterId} />
                 <Typography variant="subtitle1"><RdfEntityDescription qName={characterId} /></Typography>
                 <Grid container spacing={1}>
-                    <Grid item xs={12} md={6} lg={4}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <Typography id="max-depth-slider">Max depth: {depth}</Typography>
                         <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => {
                             navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v as number })));
                         }} />
                     </Grid>
                     {environment.isProduction ||
-                        (<Grid item xs={12} md={6} lg={4}>
+                        (<Grid size={{ xs: 12, md: 6, lg: 4 }}>
                             <Typography id="mode-selector">Mode</Typography>
                             <ToggleButtonGroup
                                 aria-labelledby="mode-selector" size="small"
-                                exclusive value={walkMode} onChange={(_, v) => { v && setWalkMode(v); }}>
+                                exclusive value={walkMode} onChange={(_: React.MouseEvent, v: string | null) => { v && setWalkMode(v as CharacterFamilyTreeWalkMode); }}>
                                 <ToggleButton value="naive">Naïve</ToggleButton>
                                 <ToggleButton value="bloodline">Bloodline</ToggleButton>
                             </ToggleButtonGroup>

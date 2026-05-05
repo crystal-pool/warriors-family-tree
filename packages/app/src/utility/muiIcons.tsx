@@ -1,5 +1,4 @@
-import createSvgIcon from "@material-ui/icons/utils/createSvgIcon";
-import * as React from "react";
+import { createSvgIcon } from "@mui/material/utils";
 
 // Copied from https://materialdesignicons.com/
 

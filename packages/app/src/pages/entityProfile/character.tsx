@@ -1,4 +1,4 @@
-import { Grid, Link } from "@material-ui/core";
+import { Grid, Link } from "@mui/material";
 import _ from "lodash";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
@@ -106,7 +106,7 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = fu
     // const { gender } = profile || {};
     return (<>
         <Grid container spacing={3}  {...buildUiScopeProps("characterProfile")}>
-            <Grid item md={5}>
+            <Grid size={{ md: 5 }}>
                 <h2>{resourceManager.getPrompt("NamesTitle")}</h2>
                 {renderNames(qName, languagePref)}
                 <h2>{resourceManager.getPrompt("AffiliationsTitle")}</h2>
@@ -114,7 +114,7 @@ export const CharacterEntityDetails: React.FC<ICharacterEntityDetailsProps> = fu
                 <h2>{resourceManager.getPrompt("PositionsHeldTitle")}</h2>
                 {renderPositionsHeld(qName)}
             </Grid>
-            <Grid item md={7}>
+            <Grid size={{ md: 7 }}>
                 <h2>{resourceManager.getPrompt("RelationsTitle")}</h2>
                 <CharacterRelationInfobox
                     qName={qName}

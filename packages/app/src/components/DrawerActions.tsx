@@ -1,6 +1,6 @@
-import { createTheme, List, ListItem, ListItemIcon, ListItemText, MenuItem, Tooltip } from "@material-ui/core";
-import * as Icons from "@material-ui/icons";
-import { ThemeProvider } from "@material-ui/styles";
+import { createTheme, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Tooltip } from "@mui/material";
+import * as Icons from "@mui/icons-material";
+import { ThemeProvider } from "@mui/material/styles";
 import React from "react";
 import { resourceManager } from "../localization";
 import { buildFeatureAnchorProps } from "../utility/featureUsage";
@@ -20,6 +20,7 @@ interface IItemComponentProps {
     asMenuItem?: boolean;
     onClick?: () => void;
     href?: string;
+    children?: React.ReactNode;
 }
 
 export interface IDrawerActionsProps {
@@ -29,12 +30,13 @@ export interface IDrawerActionsProps {
 
 // Need ref to make Tooltip work
 const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, ref: React.Ref<any>) => {
-    if (props.asMenuItem) {
-        return (<MenuItem ref={ref} {...props}>{props.children}</MenuItem>);
+    const { asMenuItem, children, ...rest } = props;
+    if (asMenuItem) {
+        return (<MenuItem ref={ref} {...rest}>{children}</MenuItem>);
     } else if (props.onClick || props.href) {
-        return (<ListItem ref={ref} button {...props}>{props.children}</ListItem>);
+        return (<ListItemButton ref={ref} {...rest}>{children}</ListItemButton>);
     } else {
-        return (<ListItem ref={ref} {...props}>{props.children}</ListItem>);
+        return (<ListItem ref={ref} {...rest}>{children}</ListItem>);
     }
 });
 

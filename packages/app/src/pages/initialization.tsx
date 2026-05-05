@@ -1,4 +1,4 @@
-import { LinearProgress } from "@material-ui/core";
+import { LinearProgress } from "@mui/material";
 import * as React from "react";
 import { resourceManager } from "../localization";
 import { setDocumentTitle } from "../utility/general";

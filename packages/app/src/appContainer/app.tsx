@@ -1,6 +1,5 @@
-import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@material-ui/core";
-import * as Icons from "@material-ui/icons";
-import { Location } from "history";
+import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@mui/material";
+import * as Icons from "@mui/icons-material";
 import * as React from "react";
 import { useLocation } from "react-router";
 import { HashRouter } from "react-router-dom";
@@ -14,7 +13,7 @@ import { InitializationScreen } from "../pages";
 import { dataService } from "../services";
 import { buildFeatureAnchorProps, buildUiScopeProps, trackFeatureUsageFromElement } from "../utility/featureUsage";
 import { parseQueryParams } from "../utility/queryParams";
-import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
+import { IPageTitleContextValue, PageTitleContext } from "../utility/react";
 import { appInsights, telemetryEnvironment } from "../utility/telemetry";
 
 const AppEmbedLazy = React.lazy(async () => ({ default: (await import("./appEmbed")).AppEmbed }));
@@ -32,10 +31,10 @@ export interface IAppStates {
 }
 
 interface IRouteRootProps {
-    location: Location;
+    location: { pathname: string; search: string; hash: string };
 }
 
-function startNewPageScope(location: Location): string {
+function startNewPageScope(location: { pathname: string; search: string }): string {
     const id = generateRandomId8();
     // Let the previous page tracking stop first.
     appInsights.startTrackPage(id);
@@ -62,7 +61,7 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
     private _pageUrl: string;
     public constructor(props: Readonly<IRouteRootProps>) {
         super(props);
-        this._pageUrl = location.href;
+        this._pageUrl = window.location.href;
         this._refUrl = document.referrer;
     }
     private endPageScopeIfNeeded(endReason?: string) {
@@ -80,9 +79,9 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
         this._refUrl = this._pageUrl;
         this._pageUrl = location.href;
     }
-    public render() {
+    public override render() {
         const queryParams = parseQueryParams(this.props.location.search);
-        return (<PageTitleContext.Consumer unstable_observedBits={PageTitleContextBits.title}>
+        return (<PageTitleContext.Consumer>
             {(state) => {
                 this._pageTitle = state.title;
                 return (<React.Suspense fallback={<InitializationScreen />}>{
@@ -93,16 +92,16 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
             }}
         </PageTitleContext.Consumer>);
     }
-    public componentDidMount() {
-        this._pageUrl = location.href;
+    public override componentDidMount() {
+        this._pageUrl = window.location.href;
         this._pageScopeId = startNewPageScope(this.props.location);
         window.addEventListener("unload", this.onWindowUnload);
     }
-    public componentWillUnmount() {
+    public override componentWillUnmount() {
         window.removeEventListener("unload", this.onWindowUnload);
         this.endPageScopeIfNeeded("unmount");
     }
-    public componentDidUpdate(prevProps: Readonly<IRouteRootProps>) {
+    public override componentDidUpdate(prevProps: Readonly<IRouteRootProps>) {
         if (prevProps.location !== this.props.location) {
             this._onLocationChanged();
         }
@@ -132,10 +131,10 @@ class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
     public static getDerivedStateFromError(error: any): Partial<AppErrorBoundaryState> {
         return { error };
     }
-    public componentDidCatch(error: any, errorInfo: React.ErrorInfo) {
-        this.setState({ error, componentStack: errorInfo.componentStack });
+    public override componentDidCatch(error: any, errorInfo: React.ErrorInfo) {
+        this.setState({ error, componentStack: errorInfo.componentStack ?? undefined });
     }
-    public render() {
+    public override render() {
         if (this.state.error != null) {
             return (<div className="error-root-container" {...buildUiScopeProps("errorRoot")}>
                 <h3>Oops</h3>
@@ -162,7 +161,7 @@ class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
                 </div>
             </div>);
         }
-        return this.props.children;
+        return (this.props as { children?: React.ReactNode }).children;
     }
 }
 
@@ -221,7 +220,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         if (!(e.target instanceof Element)) return;
         trackFeatureUsageFromElement(e.target);
     }
-    public render() {
+    public override render() {
         const errorMessage = this.state.error != null && formatError(this.state.error);
         return (
             <HashRouter>
@@ -250,12 +249,12 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
             </HashRouter>
         );
     }
-    public componentDidMount() {
+    public override componentDidMount() {
         window.addEventListener("error", this._onGlobalError);
         window.addEventListener("unhandledrejection", this._onGlobalError);
         this._applyLanguage(this.state.languageContext.language);
     }
-    public componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
+    public override componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
         if (prevStates.languageContext.language !== this.state.languageContext.language) {
             this._applyLanguage(this.state.languageContext.language, prevStates.languageContext.language);
         }
@@ -263,7 +262,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
             this._applyTitle(this.state.titleContext.title, this.state.titleContext.withAppName);
         }
     }
-    public componentWillUnmount() {
+    public override componentWillUnmount() {
         window.removeEventListener("error", this._onGlobalError);
         window.removeEventListener("unhandledrejection", this._onGlobalError);
     }

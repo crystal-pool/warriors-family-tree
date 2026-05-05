@@ -1,5 +1,5 @@
-import { Button, createStyles, Divider, Hidden, IconButton, ListItemText, makeStyles, Tooltip, Typography } from "@material-ui/core";
-import * as Icons from "@material-ui/icons";
+import { Box, Button, Divider, IconButton, ListItemText, Tooltip, Typography } from "@mui/material";
+import * as Icons from "@mui/icons-material";
 import * as React from "react";
 import { useLocation } from "react-router";
 import { resourceManager } from "../localization";
@@ -16,34 +16,14 @@ export type EmbedAppBarClassName = "root" | "title" | "toolbar" | "languageSwitc
 interface IEmbedAppBarProps {
     classes?: Partial<Record<EmbedAppBarClassName, string>>;
     title?: React.ReactNode;
+    children?: React.ReactNode;
 }
-
-const useStyles = makeStyles(theme => createStyles<EmbedAppBarClassName, IEmbedAppBarProps>({
-    root: {
-        [theme.breakpoints.up("sm")]: {
-            display: "flex",
-            flexDirection: "row"
-        }
-    },
-    title: {
-        flexGrow: 1,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center"
-    },
-    toolbar: {
-    },
-    languageSwitchButtonText: {
-        display: "none"
-    }
-}));
 
 function openUrl(url: string): void {
     window.open(url, "_blank");
 }
 
 export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
-    const classes = useStyles(props);
     const languageContext = React.useContext(LanguageContext);
     const loc = useLocation();
     const [menuAnchor, setMenuAnchor] = React.useState<HTMLElement | undefined>();
@@ -52,18 +32,18 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
         openUrl(newUrl);
     }, [loc.pathname, loc.search]);
     const onCloseMenu = React.useCallback(() => setMenuAnchor(undefined), []);
-    return (<div className={classes.root}>
-        <div className={classes.title} {...buildUiScopeProps("title")}>
+    return (<Box className={props.classes?.root} sx={{ display: { sm: "flex" }, flexDirection: { sm: "row" } }}>
+        <div className={props.classes?.title} style={{ flexGrow: 1, display: "flex", flexDirection: "row", alignItems: "center" }} {...buildUiScopeProps("title")}>
             {props.title ? (<Typography variant="h6" noWrap>{props.title}</Typography>) : props.children}
         </div>
-        <div className={classes.toolbar} {...buildUiScopeProps("toolbar")}>
+        <div className={props.classes?.toolbar} {...buildUiScopeProps("toolbar")}>
             <Tooltip title={resourceManager.getPrompt("OpenInNewWindow")}>
                 <IconButton
                     onClick={onOpenInNewWindowClicked}
                     {...buildFeatureAnchorProps("navigation.openFull")}
                 ><Icons.OpenInNew /></IconButton>
             </Tooltip>
-            <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
+            <LanguageSwitch classes={{ buttonText: props.classes?.languageSwitchButtonText ?? "" }}
                 language={languageContext.language} onLanguageChanged={languageContext.setLanguage} />
             <Tooltip title={<ListItemText
                 primary={resourceManager.renderPrompt("EmbedPoweredBy1", [<span key={1} style={{ fontVariant: "small-caps" }}>Warriors Family Tree</span>])}
@@ -73,7 +53,11 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
                     onClick={(e) => setMenuAnchor(e.currentTarget)}
                     {...buildFeatureAnchorProps("app.toggleDrawer")}
                     {...buildUiScopeProps("popupDrawer")}
-                ><Hidden xsDown>Warriors Family Tree</Hidden><Hidden smUp>WFT</Hidden><Icons.MoreVert /></Button>
+                >
+                    <Box sx={{ display: { xs: "none", sm: "inline" } }}>Warriors Family Tree</Box>
+                    <Box sx={{ display: { xs: "inline", sm: "none" } }}>WFT</Box>
+                    <Icons.MoreVert />
+                </Button>
             </Tooltip>
         </div>
         <LogicallyParentedMenu
@@ -85,5 +69,5 @@ export const EmbedAppBar: React.FC<IEmbedAppBarProps> = (props) => {
             <Divider />
             <EnvironmentInfoList asMenuItem onItemClick={onCloseMenu} />
         </LogicallyParentedMenu>
-    </div>);
+    </Box>);
 };

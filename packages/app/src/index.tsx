@@ -1,6 +1,5 @@
 import "@wft-repo/shared/environment";
 
-import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { applyPolyfills } from "./utility/polyfill";
 import { initializeTracking } from "./utility/telemetry";

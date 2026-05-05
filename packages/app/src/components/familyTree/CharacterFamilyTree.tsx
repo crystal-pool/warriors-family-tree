@@ -1,4 +1,4 @@
-import { Paper } from "@material-ui/core";
+import { Paper } from "@mui/material";
 import classNames from "classnames";
 import * as React from "react";
 import wu from "wu";

@@ -1,4 +1,4 @@
-import { Card, CardActions, CardContent } from "@material-ui/core";
+import { Card, CardActions, CardContent } from "@mui/material";
 import * as React from "react";
 import { RdfQName } from "../../../services/dataService";
 import { RdfEntityDescription, RdfEntityLabel } from "../../RdfEntity";

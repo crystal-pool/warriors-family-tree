@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import _ from "lodash";
 import * as React from "react";
-import Svg from "svgjs";
+import { SVG, Container, Polyline } from "@svgdotjs/svg.js";
 import { dataService } from "../../services";
 import { RdfQName } from "../../services/dataService";
 import scss from "./FamilyTree.module.scss";
@@ -84,7 +84,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             drawingHeight = currentY;
         }
         // Note the px in svg represents a physical length.
-        const drawing = Svg(this._drawingRoot)
+        const drawing = SVG().addTo(this._drawingRoot)
             .size(drawingWidth, drawingHeight)
             .viewbox(0, 0, drawingWidth, drawingHeight);
         function getNodeRect(node: ILayoutNode): IRect {
@@ -152,8 +152,8 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 const { id1, id2, slot1, childrenId, childrenSlot } = connection;
                 const node1 = layout.nodeFromId(id1);
                 const node2 = layout.nodeFromId(id2);
-                console.assert(node1, "Mate node [0] missing", id1, id2);
-                console.assert(node2, "Mate node [1] missing", id1, id2);
+                console.assert(!!node1, "Mate node [0] missing", id1, id2);
+                console.assert(!!node2, "Mate node [1] missing", id1, id2);
                 if (!node1 || !node2) continue;
                 const nodeL = node1.offsetX < node2.offsetX ? node1 : node2;
                 const nodeR = node1.offsetX < node2.offsetX ? node2 : node1;
@@ -233,7 +233,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                 // ISingleParentLayoutConnection
                 const { id1, childrenSlot, childrenId } = connection;
                 const node1 = layout.nodeFromId(id1);
-                console.assert(node1, "Single parent node missing", id1);
+                console.assert(!!node1, "Single parent node missing", id1);
                 if (!node1) continue;
                 const rect1 = getNodeRect(node1);
                 if (childrenId && childrenSlot) {
@@ -275,13 +275,13 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         });
         return true;
     }
-    public render(): React.ReactNode {
+    public override render(): React.ReactNode {
         return (<div className={classNames(scss.familyTreeDrawing, this.props.className)}>
             <div className={scss.overlay} ref={this._overlayDomRoot}>{this._nodeContainers}</div>
             <div className={scss.drawing} ref={this._onDrawingRootChanged}></div>
         </div>);
     }
-    public componentDidUpdate(prevProps: IFamilyTreeProps) {
+    public override componentDidUpdate(prevProps: IFamilyTreeProps) {
         if (this._pendingOnRenderedCall && this.props.onRendered) {
             this.props.onRendered(this);
             this._pendingOnRenderedCall = false;
@@ -295,12 +295,12 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     }
 }
 
-function plotElbowHorizontal(container: Svg.Container, x1: number, y1: number, y2: number, x3: number, y3: number): Svg.PolyLine {
+function plotElbowHorizontal(container: Container, x1: number, y1: number, y2: number, x3: number, y3: number): Polyline {
     return container
         .polyline([x1, y1, x1, y2, x3, y2, x3, y3]);
 }
 
-// function plotElbowVertical(container: Svg.Container, x1: number, y1: number, x2: number, x3: number, y3: number): Svg.PolyLine {
+// function plotElbowVertical(container: Container, x1: number, y1: number, x2: number, x3: number, y3: number): Polyline {
 //     return container
 //         .polyline([x1, y1, x2, y1, x2, y3, x3, y3]);
 // }

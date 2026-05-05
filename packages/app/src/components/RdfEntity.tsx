@@ -1,4 +1,4 @@
-import { Link, Tooltip } from "@material-ui/core";
+import { Link, Tooltip } from "@mui/material";
 import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
@@ -19,6 +19,7 @@ export interface IRdfEntityLinkProps {
     qName: RdfQName;
     title?: string | null | React.ReactElement;
     external?: boolean;
+    children?: React.ReactNode;
 }
 
 export const RdfEntityLink: React.FC<IRdfEntityLinkProps> = (props) => {

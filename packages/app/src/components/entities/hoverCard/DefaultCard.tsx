@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent } from "@material-ui/core";
+import { Button, Card, CardActions, CardContent } from "@mui/material";
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { resourceManager } from "../../../localization";

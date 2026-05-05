@@ -1,6 +1,5 @@
-import { AppBar, CssBaseline, Divider, Drawer, Hidden, IconButton, Link, makeStyles, SwipeableDrawer, Toolbar, Typography, useTheme } from "@material-ui/core";
-import { fade } from "@material-ui/core/styles";
-import * as Icons from "@material-ui/icons";
+import { AppBar, Box, CssBaseline, Divider, Drawer, IconButton, Link, SwipeableDrawer, Toolbar, Typography, useMediaQuery, useTheme } from "@mui/material";
+import * as Icons from "@mui/icons-material";
 import * as React from "react";
 import { AppActionsList, EnvironmentInfoList } from "../components/DrawerActions";
 import { EntitySearchBox } from "../components/EntitySearchBox";
@@ -12,107 +11,9 @@ import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        display: "flex",
-    },
-    drawer: {
-        [theme.breakpoints.up("md")]: {
-            width: drawerWidth,
-            flexShrink: 0,
-        },
-    },
-    drawerContent: {
-        display: "flex",
-        flexDirection: "column",
-        height: "100%"
-    },
-    drawerSpacing: {
-        flexGrow: 1,
-        minHeight: "1em"
-    },
-    appBar: {
-        marginLeft: drawerWidth,
-        [theme.breakpoints.up("md")]: {
-            width: `calc(100% - ${drawerWidth}px)`,
-        },
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-        [theme.breakpoints.up("md")]: {
-            display: "none",
-        },
-    },
-    toolbar: theme.mixins.toolbar,
-    title: {
-        flexGrow: 1,
-        display: "none",
-        color: "inherit",
-        [theme.breakpoints.up("sm")]: {
-            display: "block",
-        }
-    },
-    farItems: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        flexGrow: 1,
-        [theme.breakpoints.up("sm")]: {
-            flexGrow: 0
-        }
-    },
-    languageSwitchButtonText: {
-        [theme.breakpoints.down("sm")]: {
-            display: "none",
-        }
-    },
-    searchBoxRoot: {
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: fade(theme.palette.common.white, 0.15),
-        "&:hover": {
-            backgroundColor: fade(theme.palette.common.white, 0.25),
-        },
-        marginLeft: 0,
-        marginRight: theme.spacing(2),
-        width: "100%",
-        [theme.breakpoints.up("sm")]: {
-            marginLeft: theme.spacing(1),
-            width: "auto",
-        },
-    },
-    searchBoxInput: {
-        transition: theme.transitions.create("width"),
-        [theme.breakpoints.up("sm")]: {
-            width: 160,
-            "&:focus": {
-                width: 180,
-            },
-        },
-        [theme.breakpoints.up("md")]: {
-            width: 200,
-            "&:focus": {
-                width: 300,
-            },
-        },
-        [theme.breakpoints.up("lg")]: {
-            "&:focus": {
-                width: 400,
-            },
-        },
-    },
-    drawerPaper: {
-        width: drawerWidth,
-    },
-    content: {
-        flexGrow: 1,
-        padding: theme.spacing(3),
-        minWidth: 0
-    },
-}));
-
 export const AppFull: React.FC = (props) => {
-    const classes = useStyles();
     const theme = useTheme();
+    const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const languageContext = React.useContext(LanguageContext);
 
@@ -121,92 +22,86 @@ export const AppFull: React.FC = (props) => {
     }
 
     const drawer = (
-        <div className={classes.drawerContent} {...buildUiScopeProps("drawer")}>
-            <div className={classes.toolbar} />
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }} {...buildUiScopeProps("drawer")}>
+            <Box sx={theme.mixins.toolbar} />
             <Divider />
             <AppActionsList />
             <Divider />
-            <div className={classes.drawerSpacing} />
+            <Box sx={{ flexGrow: 1, minHeight: "1em" }} />
             <EnvironmentInfoList />
-        </div>
+        </Box>
     );
 
     return (
-        <div className={classes.root} {...buildUiScopeProps("app")}>
+        <Box sx={{ display: "flex" }} {...buildUiScopeProps("app")}>
             <CssBaseline />
-            <AppBar position="fixed" className={classes.appBar}>
+            <AppBar position="fixed" sx={{ ml: `${drawerWidth}px`, width: { md: `calc(100% - ${drawerWidth}px)` } }}>
                 <Toolbar {...buildUiScopeProps("toolbar")}>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        className={classes.menuButton}
+                        sx={{ mr: 2, display: { md: "none" } }}
                         {...buildFeatureAnchorProps("app.toggleDrawer")}
                     >
                         <Icons.Menu />
                     </IconButton>
                     <Link
                         href={routePathBuilders.welcome()}
-                        className={classes.title}
+                        sx={{ flexGrow: 1, display: { xs: "none", sm: "block" }, color: "inherit" }}
                         {...buildFeatureAnchorProps("navigation.home")}
-
                     >
                         <Typography variant="h6" noWrap>Warriors Family Tree</Typography>
                     </Link>
-                    <div className={classes.farItems}>
+                    <Box sx={{
+                        display: "flex", flexDirection: "row", alignItems: "center",
+                        flexGrow: { xs: 1, sm: 0 }
+                    }}>
                         <EntitySearchBox classes={{
-                            root: classes.searchBoxRoot,
-                            inputInput: classes.searchBoxInput
+                            root: undefined,
+                            inputInput: undefined
                         }}
                             onAccept={(qName) => {
                                 location.href = routePathBuilders.entityProfile({ qName });
                             }}
                         />
-                        <LanguageSwitch classes={{ buttonText: classes.languageSwitchButtonText }}
+                        <LanguageSwitch classes={{ buttonText: undefined }}
                             language={languageContext.language} onLanguageChanged={languageContext.setLanguage} />
-                    </div>
+                    </Box>
                 </Toolbar>
             </AppBar>
-            <nav className={classes.drawer} aria-label="siderbar actions">
-                {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                <Hidden mdUp>
+            <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }} aria-label="siderbar actions">
+                {!isMdUp && (
                     <SwipeableDrawer
-                        container={undefined}
                         variant="temporary"
                         anchor={theme.direction === "rtl" ? "right" : "left"}
                         open={mobileOpen}
                         onOpen={handleDrawerToggle}
                         onClose={handleDrawerToggle}
-                        classes={{
-                            paper: classes.drawerPaper,
-                        }}
-                        ModalProps={{
-                            keepMounted: true, // Better open performance on mobile.
-                        }}
+                        sx={{ "& .MuiDrawer-paper": { width: drawerWidth } }}
+                        ModalProps={{ keepMounted: true }}
                         {...buildUiScopeProps("app/toolbar/popupDrawer")}
                     >
                         {drawer}
                     </SwipeableDrawer>
-                </Hidden>
-                <Hidden smDown>
+                )}
+                {isMdUp && (
                     <Drawer
-                        classes={{
-                            paper: classes.drawerPaper,
-                        }}
                         variant="permanent"
                         open
+                        sx={{ "& .MuiDrawer-paper": { width: drawerWidth } }}
                     >
                         {drawer}
                     </Drawer>
-                </Hidden>
-            </nav>
-            <main className={classes.content}>
-                <div className={classes.toolbar} />
+                )}
+            </Box>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
+                <Box sx={theme.mixins.toolbar} />
                 <React.Suspense fallback={<InitializationScreen />}>
                     <RoutesAfterInitialization />
                 </React.Suspense>
-            </main>
-        </div>
+            </Box>
+        </Box>
     );
 };

@@ -1,4 +1,4 @@
-import { Button, Link } from "@material-ui/core";
+import { Button, Link } from "@mui/material";
 import classNames from "classnames";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
