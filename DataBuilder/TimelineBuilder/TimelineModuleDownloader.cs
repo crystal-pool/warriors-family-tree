@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -29,11 +27,15 @@ public static class TimelineModuleDownloader
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
+        Converters = { new NumberAsStringConverter(), new FloatToIntConverter() },
     };
 
     public static async Task<TimelineTable> FetchTimelineModuleAsync()
     {
-        using var wikiClient = new WikiClient { ClientUserAgent = "WarriorsFamilyTree.DataBuilder.TimelineBuilder/1.0" };
+        using var wikiClient = new WikiClient
+        {
+            ClientUserAgent = "WarriorsFamilyTree.DataBuilder.TimelineBuilder/1.0",
+        };
         var wikiSite = new WikiSite(wikiClient, MwApiEndpointUrl);
         await wikiSite.Initialization;
         // Mitigates https://phabricator.wikimedia.org/T269990
