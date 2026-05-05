@@ -16,7 +16,7 @@ function checkLastExitCode() {
 $ErrorActionPreference = "Stop"
 
 $RdfPath = (Resolve-Path $RdfPath).Path
-$DataPath = (New-Item "./assets/data" -ItemType Directory -Force).FullName
+$DataPath = (New-Item "./packages/app/public/data" -ItemType Directory -Force).FullName
 $RawDataPath = (Resolve-Path "./DataBuilder/Raw").Path
 $TimelineBuilderProjectDir = (Resolve-Path "./DataBuilder/TimelineBuilder/TimelineBuilder.csproj").Path
 $AssetsBuilderProjectDir = (Resolve-Path "./DataBuilder/AssetsBuilder/AssetsBuilder.csproj").Path
@@ -31,10 +31,10 @@ if ($LASTEXITCODE) {
 dotnet run -c Release --project $AssetsBuilderProjectDir -- $RawDataPath $DataPath
 checkLastExitCode
 
-yarn build-prod
+yarn workspace warriors-family-tree run build -- --mode production
 checkLastExitCode
 
-yarn build-embed-prod
+yarn workspace wft-embed run build -- --mode production
 checkLastExitCode
-New-Item -ItemType Directory ./dist/embed -Force
-Copy-Item ./embed/dist/* ./dist/embed/ -Recurse
+New-Item -ItemType Directory ./packages/app/dist/embed -Force
+Copy-Item ./packages/embed/dist/* ./packages/app/dist/embed/ -Recurse

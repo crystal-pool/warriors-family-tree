@@ -1,0 +1,22 @@
+{
+  "name": "wft-embed",
+  "version": "0.1.4",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@wft-repo/shared": "workspace:*",
+    "lodash": "^4.17.21",
+    "tasklike-promise-library": "^0.0.13",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.181",
+    "vite": "^8.0.10",
+    "vite-plugin-checker": "^0.13.0"
+  }
+}

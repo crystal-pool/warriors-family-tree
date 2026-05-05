@@ -12,10 +12,10 @@ $ErrorActionPreference = "Stop"
 $DataBuilderSolutionDir = (Resolve-Path "./DataBuilder/DataBuilder.sln").Path
 
 # Assumes $PWD is repo root
-yarn install --frozen-lockfile
+yarn install --immutable
 checkLastExitCode
-git apply ./patch.diff --verbose --ignore-whitespace
-checkLastExitCode
+# NOTE: patch.diff for javascript-lp-solver is no longer needed.
+# Vite externalizes fs/child_process for browser builds automatically.
 yarn lint
 checkLastExitCode
 

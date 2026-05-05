@@ -1,0 +1,321 @@
+import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@material-ui/core";
+import * as Icons from "@material-ui/icons";
+import { Location } from "history";
+import * as React from "react";
+import { useLocation } from "react-router";
+import { HashRouter } from "react-router-dom";
+import { generateRandomId8 } from "@wft-repo/shared";
+import { contactUrl, issueTrackerUrl } from "../constants";
+import { resourceManager } from "../localization";
+import { LocalizationProgress } from "../localization/common";
+import { browserLanguage, KnownLanguage } from "../localization/languages";
+import { ILanguageContextValue, LanguageContext } from "../localization/react";
+import { InitializationScreen } from "../pages";
+import { dataService } from "../services";
+import { buildFeatureAnchorProps, buildUiScopeProps, trackFeatureUsageFromElement } from "../utility/featureUsage";
+import { parseQueryParams } from "../utility/queryParams";
+import { IPageTitleContextValue, PageTitleContext, PageTitleContextBits } from "../utility/react";
+import { appInsights, telemetryEnvironment } from "../utility/telemetry";
+
+const AppEmbedLazy = React.lazy(async () => ({ default: (await import("./appEmbed")).AppEmbed }));
+
+const AppFullLazy = React.lazy(async () => ({ default: (await import("./appFull")).AppFull }));
+
+export interface IAppProps {
+
+}
+
+export interface IAppStates {
+    languageContext: ILanguageContextValue;
+    titleContext: IPageTitleContextValue;
+    error?: any;
+}
+
+interface IRouteRootProps {
+    location: Location;
+}
+
+function startNewPageScope(location: Location): string {
+    const id = generateRandomId8();
+    // Let the previous page tracking stop first.
+    appInsights.startTrackPage(id);
+    appInsights.context.telemetryTrace.traceID = id;
+    appInsights.context.telemetryTrace.name = location.pathname + location.search;
+    return id;
+}
+
+function endPageScope(id: string, url: string, title?: string, refUri?: string, endReason?: string) {
+    appInsights.stopTrackPage(id, url, {
+        contextId: id,
+        endReason,
+        _outer_overrides: {
+            name: title,
+            refUri
+        }
+    });
+}
+
+export class RouteRoot extends React.PureComponent<IRouteRootProps> {
+    private _pageScopeId: string | undefined;
+    private _pageTitle: string | undefined;
+    private _refUrl: string;
+    private _pageUrl: string;
+    public constructor(props: Readonly<IRouteRootProps>) {
+        super(props);
+        this._pageUrl = location.href;
+        this._refUrl = document.referrer;
+    }
+    private endPageScopeIfNeeded(endReason?: string) {
+        if (this._pageScopeId) {
+            // Keep track of the last title before routing to the next location.
+            endPageScope(this._pageScopeId, this._pageUrl, this._pageTitle, this._refUrl, endReason);
+        }
+    }
+    private onWindowUnload = () => {
+        this.endPageScopeIfNeeded("unload");
+    }
+    private _onLocationChanged(): void {
+        this.endPageScopeIfNeeded("locationChanged");
+        this._pageScopeId = startNewPageScope(this.props.location);
+        this._refUrl = this._pageUrl;
+        this._pageUrl = location.href;
+    }
+    public render() {
+        const queryParams = parseQueryParams(this.props.location.search);
+        return (<PageTitleContext.Consumer unstable_observedBits={PageTitleContextBits.title}>
+            {(state) => {
+                this._pageTitle = state.title;
+                return (<React.Suspense fallback={<InitializationScreen />}>{
+                    queryParams.embed
+                        ? <AppEmbedLazy postMessageToken={queryParams.pmToken} />
+                        : <AppFullLazy />
+                }</React.Suspense>);
+            }}
+        </PageTitleContext.Consumer>);
+    }
+    public componentDidMount() {
+        this._pageUrl = location.href;
+        this._pageScopeId = startNewPageScope(this.props.location);
+        window.addEventListener("unload", this.onWindowUnload);
+    }
+    public componentWillUnmount() {
+        window.removeEventListener("unload", this.onWindowUnload);
+        this.endPageScopeIfNeeded("unmount");
+    }
+    public componentDidUpdate(prevProps: Readonly<IRouteRootProps>) {
+        if (prevProps.location !== this.props.location) {
+            this._onLocationChanged();
+        }
+    }
+}
+
+const RouteRootFC: React.FC = () => {
+    const location = useLocation();
+    return <RouteRoot location={location} />;
+};
+
+function formatError(error: any): string {
+    if (!error || typeof error !== "object") return String(error);
+    return error.stack || error.message || error.toString();
+}
+
+interface AppErrorBoundaryState {
+    error?: any;
+    componentStack?: string;
+}
+
+class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
+    public constructor(props: Readonly<{}>) {
+        super(props);
+        this.state = {};
+    }
+    public static getDerivedStateFromError(error: any): Partial<AppErrorBoundaryState> {
+        return { error };
+    }
+    public componentDidCatch(error: any, errorInfo: React.ErrorInfo) {
+        this.setState({ error, componentStack: errorInfo.componentStack });
+    }
+    public render() {
+        if (this.state.error != null) {
+            return (<div className="error-root-container" {...buildUiScopeProps("errorRoot")}>
+                <h3>Oops</h3>
+                <p>We are sorry for the inconvenience. Please refresh the page to see if it helps.</p>
+                <p><Button
+                    variant="contained"
+                    onClick={() => location.reload()}
+                    {...buildFeatureAnchorProps("navigation.refresh")}><Icons.Refresh />Refresh</Button></p>
+                <p>Sincerely,</p>
+                <p>Warriors Family Tree</p>
+                <Divider />
+                <p>If it does not help, consider <Link
+                    href={issueTrackerUrl}
+                    target="_blank"
+                    {...buildFeatureAnchorProps("navigation.external.issueTracker")}
+                >opening an issue on GitHub</Link> to let us know.</p>
+                <p><Link href={contactUrl} target="_blank">Other contact information</Link></p>
+                <Typography variant="subtitle1">Please attach the following information when reporting the issue:</Typography>
+                <div className="error-technical">
+                    <Typography variant="subtitle2">Error</Typography>
+                    <div className="error-callstack">{formatError(this.state.error)}</div>
+                    <Typography variant="subtitle2">Component stack</Typography>
+                    <div className="error-callstack">{this.state.componentStack}</div>
+                </div>
+            </div>);
+        }
+        return this.props.children;
+    }
+}
+
+export class App extends React.PureComponent<IAppProps, IAppStates> {
+    public constructor(props: Readonly<IAppProps>) {
+        super(props);
+        this.state = {
+            languageContext: {
+                language: browserLanguage,
+                setLanguage: this.setLanguage
+            },
+            titleContext: {
+                title: document.title,
+                withAppName: false,
+                setTitle: this.setTitle
+            },
+            error: undefined
+        };
+    }
+    public setLanguage = (language: KnownLanguage) => {
+        if (language === this.state.languageContext.language) return;
+        // Change the languages of external objects first.
+        telemetryEnvironment.language = language;
+        resourceManager.language = language;
+        dataService.language = language;
+        // Then trigger render.
+        this.setState({
+            languageContext: { language, setLanguage: this.setLanguage }
+        });
+    }
+    public setTitle = (title: string, withAppName: boolean) => {
+        const context = this.state.titleContext;
+        if (context.title !== title || context.withAppName !== withAppName) {
+            this.setState({ titleContext: { title, withAppName, setTitle: this.setTitle } });
+        }
+    }
+    public clearError = () => {
+        this.setState({ error: undefined });
+    }
+    private _applyLanguage(language: KnownLanguage, prevLanguage?: KnownLanguage): void {
+        document.documentElement.lang = language;
+        appInsights.trackEvent({ name: "language.applied", properties: { language, prevLanguage } });
+    }
+    private _applyTitle(title?: string, withAppName?: boolean): void {
+        if (withAppName || withAppName == null) {
+            document.title = (title ? (title + " - ") : "") + "Warriors Family Tree";
+        } else {
+            document.title = title || "";
+        }
+    }
+    private _onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
+        const merged = e as (ErrorEvent & PromiseRejectionEvent);
+        this.setState({ error: merged.error || merged.reason || "<Error>" });
+    }
+    private _onRootContainerClick(e: React.MouseEvent) {
+        if (!(e.target instanceof Element)) return;
+        trackFeatureUsageFromElement(e.target);
+    }
+    public render() {
+        const errorMessage = this.state.error != null && formatError(this.state.error);
+        return (
+            <HashRouter>
+                <main onClickCapture={this._onRootContainerClick}>
+                    <PageTitleContext.Provider value={this.state.titleContext}>
+                        <LanguageContext.Provider value={this.state.languageContext}>
+                            <AppErrorBoundary>
+                                <RouteRootFC />
+                            </AppErrorBoundary>
+                            <Snackbar
+                                open={this.state.error != null}
+                                message={
+                                    <div style={{ whiteSpace: "pre-wrap" }}>{errorMessage}</div>
+                                }
+                                action={<IconButton
+                                    aria-label="close"
+                                    color="inherit"
+                                    onClick={this.clearError}
+                                >
+                                    <Icons.Close />
+                                </IconButton>} />
+                            <LocalizationProgressSnakbar language={this.state.languageContext.language} progress={resourceManager.getPromptRaw("__STATUS")} />
+                        </LanguageContext.Provider>
+                    </PageTitleContext.Provider>
+                </main>
+            </HashRouter>
+        );
+    }
+    public componentDidMount() {
+        window.addEventListener("error", this._onGlobalError);
+        window.addEventListener("unhandledrejection", this._onGlobalError);
+        this._applyLanguage(this.state.languageContext.language);
+    }
+    public componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
+        if (prevStates.languageContext.language !== this.state.languageContext.language) {
+            this._applyLanguage(this.state.languageContext.language, prevStates.languageContext.language);
+        }
+        if (prevStates.titleContext !== this.state.titleContext) {
+            this._applyTitle(this.state.titleContext.title, this.state.titleContext.withAppName);
+        }
+    }
+    public componentWillUnmount() {
+        window.removeEventListener("error", this._onGlobalError);
+        window.removeEventListener("unhandledrejection", this._onGlobalError);
+    }
+}
+
+
+interface ILocalizationProgressSnakbarProps {
+    language: string;
+    progress?: LocalizationProgress;
+}
+
+const LocalizationProgressSnakbar: React.FC<ILocalizationProgressSnakbarProps> = (props) => {
+    const { language, progress } = props;
+    const [dismissedLanguage, setDismissedLanguage] = React.useState<string | undefined>();
+    let message: React.ReactNode;
+    if (dismissedLanguage !== language) {
+        switch (progress) {
+            case "none":
+                message = "Sorry. No translation available for the user interface (UI).";
+                break;
+            case "machine-translation":
+                message = <>
+                    To make this app accessible to as many readers as possible, user interface (UI) for language <strong>{language}
+                    </strong> has been translated with machine translation (MT).
+                </>;
+                break;
+            case "partial-machine-translation":
+                message = <>
+                    To make this app accessible to as many readers as possible, some part of the user interface (UI) for language <strong>{language}
+                    </strong> has been translated with machine translation (MT).
+                </>;
+                break;
+        }
+    }
+    return <Snackbar open={!!message} message={message}
+        action={<>
+            <Button
+                color="inherit"
+                size="small"
+                href="https://github.com/crystal-pool/warriors-family-tree/tree/master/src/localization/prompts#readme"
+                target="_blank"
+                {...buildFeatureAnchorProps("navigation.external.repo.localization")}
+            >Help with the translations!</Button>
+            <IconButton
+                aria-label="close"
+                color="inherit"
+                onClick={() => setDismissedLanguage(props.language)}
+                {...buildFeatureAnchorProps("dismiss")}
+            >
+                <Icons.Close />
+            </IconButton>
+        </>
+        }
+        {...buildUiScopeProps("mtToast")} />;
+};

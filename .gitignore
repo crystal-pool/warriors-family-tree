@@ -7,11 +7,21 @@ dist
 *.zip
 *.gz
 *.tgz
+*.tsbuildinfo
 
 _private
 
-/assets/data
-*.s[ac]ss.d.ts
+/packages/app/public/data
+*.module.s[ac]ss.d.ts
+
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
 
 bin
 obj

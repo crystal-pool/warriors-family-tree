@@ -32,6 +32,10 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
       - name: PrepEnv
         shell: pwsh
         run: ./scripts/prepEnv.ps1

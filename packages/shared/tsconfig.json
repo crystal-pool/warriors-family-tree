@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "types": ["node"],
+    "lib": [
+      "ESNext"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

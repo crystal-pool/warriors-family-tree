@@ -1,0 +1,39 @@
+{
+  "name": "warriors-family-tree",
+  "version": "0.1.4",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "@microsoft/applicationinsights-web": "^2.7.4",
+    "@wft-repo/shared": "workspace:*",
+    "classnames": "^2.3.1",
+    "downshift": "^6.1.7",
+    "javascript-lp-solver": "^0.4.24",
+    "lodash": "^4.17.21",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.2.2",
+    "resize-observer": "^1.0.4",
+    "svgjs": "^2.6.2",
+    "tasklike-promise-library": "^0.0.13",
+    "tslib": "^2.3.1",
+    "wu": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.181",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^17.0.14",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/wu": "^2.1.42",
+    "vite": "^8.0.10",
+    "vite-plugin-checker": "^0.13.0"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800, initial-scale=1.0">
+    <title>Embedded family tree sample (dev)</title>
+    <style>
+        .family-tree-container { border: 1px dashed blue; }
+        .long-spacing { height: 100vh; min-height: 100px; }
+    </style>
+</head>
+
+<body>
+    <h1>Embedded family tree sample</h1>
+    <div class="family-tree-container" data-family-tree-entity="wd:Q621"></div>
+    <div class="long-spacing"></div>
+    <div class="family-tree-container" data-family-tree-entity="wd:Q621"></div>
+    <script type="module">
+        import * as WarriorsFamilyTreeEmbed from "./src/index.ts";
+        const containers = document.getElementsByClassName("family-tree-container");
+        for (let i = 0; i < containers.length; i++) {
+            const container = containers[i];
+            WarriorsFamilyTreeEmbed.mountFamilyTree(container, { qName: container.dataset.familyTreeEntity });
+        }
+    </script>
+</body>
+
+</html>
