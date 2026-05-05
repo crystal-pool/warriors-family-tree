@@ -22,7 +22,7 @@ public static class TimelineModuleDownloader
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new NumberAsStringConverter(), new FloatToIntConverter() },
+        Converters = { new NumberAsStringConverter() },
     };
 
     public static async Task<TimelineTable> FetchTimelineModuleAsync(string? apiEndpointUrl = null)
@@ -78,7 +78,7 @@ public static class TimelineModuleDownloader
             b.Value.Details.Remove("__");
         }
         // Name: entity ID, Value: book abbr.
-        var itemLookupDict = root.ItemLookup;
+        var itemLookupDict = root.ItemLookup?.ToDictionary(p => p.Value, p => p.Key);
         // Book entries are keyed by abbreviation or entity ID in the module.
         var entries = root.Books.ToDictionary(kvp =>
         {

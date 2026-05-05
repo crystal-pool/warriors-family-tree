@@ -9,6 +9,9 @@ namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder.Contracts;
 [JsonConverter(typeof(TimelineModuleRootConverter))]
 internal class TimelineModuleRoot
 {
+    /// <summary>
+    /// Maps the <em>Entity ID</em> back to <em>book abbreviation</em> (a.k.a. internal book ID).
+    /// </summary>
     public IDictionary<string, string>? ItemLookup { get; set; }
 
     public required IDictionary<string, BookEntry> Books { get; set; }
