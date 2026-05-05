@@ -43,6 +43,8 @@ jobs:
         run: ./scripts/prepProject.ps1
       - name: Build
         shell: pwsh
+        env:
+          MW_API_ENDPOINT: ${{ secrets.MW_API_ENDPOINT }}
         run: ./scripts/build.ps1
       - name: Cleanup 1
         shell: pwsh
