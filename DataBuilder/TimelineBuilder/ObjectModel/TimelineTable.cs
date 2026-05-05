@@ -82,7 +82,7 @@ public class TimelineBookEntry
 public class TimelineSegmentEntry
 {
 
-    public TimelineSegmentEntry(string chapter, string timeline, int year, int month)
+    public TimelineSegmentEntry(string chapter, string timeline, int year, float month)
     {
         Chapter = chapter;
         switch (chapter)
@@ -108,6 +108,6 @@ public class TimelineSegmentEntry
 
     public int Year { get; }
 
-    public int Month { get; }
+    public float Month { get; }
 
 }

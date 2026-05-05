@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
+﻿using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 
 namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder;
 

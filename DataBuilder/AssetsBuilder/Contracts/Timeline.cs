@@ -20,7 +20,7 @@ public class TimelineMarkerInfo
 
     public string TimelineName { get; set; } = "";
 
-    public int Month { get; set; }
+    public float Month { get; set; }
 
 }
 

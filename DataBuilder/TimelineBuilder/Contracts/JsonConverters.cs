@@ -49,10 +49,10 @@ internal class FloatToIntConverter : JsonConverter<int>
             var d = reader.GetDouble();
             var truncated = (int)d;
             if (Math.Abs(d - truncated) > 1e-9)
-                throw new JsonException($"Cannot convert {d} to Int32 without rounding loss.");
+                throw JsonContractHelper.CreateJsonException($"Cannot convert {d} to Int32 without rounding loss.");
             return truncated;
         }
-        throw new JsonException($"Unexpected token type {reader.TokenType} when reading Int32.");
+        throw JsonContractHelper.CreateJsonException($"Unexpected token type {reader.TokenType} when reading Int32.");
     }
 
     public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)

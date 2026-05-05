@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.Contracts;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 using WikiClientLibrary.Client;
@@ -37,49 +33,56 @@ public static class TimelineModuleDownloader
         };
         var wikiSite = new WikiSite(wikiClient, apiEndpointUrl ?? MwApiEndpointUrl);
         await wikiSite.Initialization;
-        // Mitigates https://phabricator.wikimedia.org/T269990
         Console.WriteLine("Fetching live timeline data from: [[Module:{0}]]", TimelineBookDataModuleName);
-        var root = await wikiSite.ScribuntoLoadDataAsync<JsonObject>(TimelineBookDataModuleName, @"
-function deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
-        end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
-end
+        // A: Mitigates https://phabricator.wikimedia.org/T269990
+        // B: Remove other unused fields (e.g., notes)
+        // C: Prevents $.[n].details from being serialized as JSON array.
+        // Note that tables either starts with 0 or 1 will be serialized into arrays the same.
+        var root = await wikiSite.ScribuntoLoadDataAsync<TimelineModuleRoot>(TimelineBookDataModuleName,
+            """
+            -- A
+            function deepcopy(orig)
+                local orig_type = type(orig)
+                local copy
+                if orig_type == 'table' then
+                    copy = {}
+                    for orig_key, orig_value in next, orig, nil do
+                        copy[deepcopy(orig_key)] = deepcopy(orig_value)
+                    end
+                    setmetatable(copy, deepcopy(getmetatable(orig)))
+                else -- number, string, boolean, etc
+                    copy = orig
+                end
+                return copy
+            end
 
-return deepcopy(p)
-");
+            p = deepcopy(p)
+
+            for _, v in pairs(p) do
+                if v.details then
+                    -- B
+                    for k1, v1 in pairs(v.details) do
+                        v.details[k1] = { year = v1.year, month = v1.month }
+                    end
+                    -- C
+                    v.details.__ = { _ = '' }
+                end
+            end
+
+            return p
+            """, jsonOptions, CancellationToken.None);
         Console.WriteLine("Building timeline data.");
-        // Name: entity ID, Value: book abbr.
-        var itemLookupNode = root["__itemLookup"]?.AsObject();
-        var itemLookupDict = itemLookupNode?.ToDictionary(p => p.Value!.GetValue<string>(), p => p.Key);
-        // Skip non-book entity special data constructs.
-        var bookEntryKeys = root.Where(p => !p.Key.StartsWith("__")).Select(p => p.Key).ToList();
-        // Fix Lua objects: Convert [ "a", "b", "c" ] into { "1": "a", "2": "b", "3": "c" }
-        foreach (var key in bookEntryKeys)
+        // Remove workaround detail entries
+        foreach (var b in root.Books)
         {
-            var entry = root[key];
-            if (entry?["details"] is JsonArray arr)
-            {
-                var obj = new JsonObject();
-                for (int i = 0; i < arr.Count; i++)
-                {
-                    obj[(i + 1).ToString()] = arr[i]?.DeepClone();
-                }
-                entry["details"] = obj;
-            }
+            b.Value.Details.Remove("__");
         }
-        var entries = bookEntryKeys.ToDictionary(key =>
+        // Name: entity ID, Value: book abbr.
+        var itemLookupDict = root.ItemLookup;
+        // Book entries are keyed by abbreviation or entity ID in the module.
+        var entries = root.Books.ToDictionary(kvp =>
         {
-            var name = key;
+            var name = kvp.Key;
             if (itemLookupDict != null && itemLookupDict.TryGetValue(name, out var mappedQName))
             {
                 name = mappedQName;
@@ -94,7 +97,7 @@ return deepcopy(p)
                 name = ":" + name;
             }
             return name;
-        }, key => root[key].Deserialize<BookEntry>(jsonOptions)!);
+        }, kvp => kvp.Value);
         return new TimelineTable
         {
             Books = entries.ToDictionary(p => p.Key,
@@ -113,8 +116,8 @@ return deepcopy(p)
                         };
                     } catch (Exception)
                     {
-                        Console.WriteLine("Failed to generate timeline table for book {0}.", p.Key);
-                        Console.WriteLine("Hint: available chapter keys are: {0}.", string.Join(", ", p.Value.Details.Keys));
+                        Console.WriteLine("Failed to generate timeline table for book {0} ({1}).", p.Key, p.Value.BookName);
+                        Console.WriteLine("Hint: available chapter keys (in $.details) are: {0}.", string.Join(", ", p.Value.Details.Keys));
                         throw;
                     }
                 })
