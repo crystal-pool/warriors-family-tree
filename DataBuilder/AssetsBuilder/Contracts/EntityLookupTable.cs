@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
@@ -36,24 +37,17 @@ public class EntityLookupEntityEntry
 public class EntityLookupKeywordEntryJsonConverter : JsonConverter<EntityLookupKeywordEntry>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, EntityLookupKeywordEntry? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.Keyword);
-        serializer.Serialize(writer, value.Entities);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override EntityLookupKeywordEntry ReadJson(JsonReader reader, Type objectType, EntityLookupKeywordEntry? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override EntityLookupKeywordEntry? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, EntityLookupKeywordEntry value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.Keyword);
+        JsonSerializer.Serialize(writer, value.Entities, options);
+        writer.WriteEndArray();
     }
 
 }
@@ -61,25 +55,18 @@ public class EntityLookupKeywordEntryJsonConverter : JsonConverter<EntityLookupK
 public class EntityLookupEntityEntryJsonConverter : JsonConverter<EntityLookupEntityEntry>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, EntityLookupEntityEntry? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.QName);
-        writer.WriteValue(value.Language);
-        writer.WriteValue(value.Priority);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override EntityLookupEntityEntry ReadJson(JsonReader reader, Type objectType, EntityLookupEntityEntry? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override EntityLookupEntityEntry? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, EntityLookupEntityEntry value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.QName);
+        writer.WriteStringValue(value.Language);
+        writer.WriteNumberValue(value.Priority);
+        writer.WriteEndArray();
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
@@ -24,25 +25,18 @@ public class EntityLabel
 public class EntityLabelJsonConverter : JsonConverter<EntityLabel>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, EntityLabel? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.Label);
-        if (value.Description != null)
-            writer.WriteValue(value.Description);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override EntityLabel ReadJson(JsonReader reader, Type objectType, EntityLabel? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override EntityLabel? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, EntityLabel value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.Label);
+        if (value.Description != null)
+            writer.WriteStringValue(value.Description);
+        writer.WriteEndArray();
     }
 
 }

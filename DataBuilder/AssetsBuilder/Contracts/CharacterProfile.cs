@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
@@ -83,24 +84,17 @@ public class CharacterLocalizedName
 public class CharacterLocalizedNameJsonConverter : JsonConverter<CharacterLocalizedName>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, CharacterLocalizedName? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.Text);
-        writer.WriteValue(value.Language);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override CharacterLocalizedName ReadJson(JsonReader reader, Type objectType, CharacterLocalizedName? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override CharacterLocalizedName? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, CharacterLocalizedName value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.Text);
+        writer.WriteStringValue(value.Language);
+        writer.WriteEndArray();
     }
 
 }

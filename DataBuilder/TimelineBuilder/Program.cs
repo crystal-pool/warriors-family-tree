@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
-using WikiClientLibrary.Client;
-using WikiClientLibrary.Scribunto;
-using WikiClientLibrary.Sites;
 
 namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder;
 

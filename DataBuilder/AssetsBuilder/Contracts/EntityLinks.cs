@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
@@ -28,25 +29,18 @@ public class EntityLink
 public class EntityLinkJsonConverter : JsonConverter<EntityLink>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, EntityLink? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.Link);
-        writer.WriteValue(value.Site);
-        if (value.Name != null) writer.WriteValue(value.Name);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override EntityLink ReadJson(JsonReader reader, Type objectType, EntityLink? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override EntityLink? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, EntityLink value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.Link);
+        writer.WriteStringValue(value.Site);
+        if (value.Name != null) writer.WriteStringValue(value.Name);
+        writer.WriteEndArray();
     }
 
 }

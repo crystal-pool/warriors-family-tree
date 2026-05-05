@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using VDS.RDF;
 using VDS.RDF.Query.Datasets;
 using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
@@ -11,10 +11,10 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder;
 static class Program
 {
 
-    private static readonly JsonSerializer outputJsonSerializer = new JsonSerializer
+    private static readonly JsonSerializerOptions outputJsonOptions = new JsonSerializerOptions
     {
-        ContractResolver = new CamelCasePropertyNamesContractResolver(),
-        NullValueHandling = NullValueHandling.Ignore
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     static int Main(string[] args)
@@ -32,9 +32,8 @@ static class Program
         {
             var fullName = Path.Join(targetRoot, fileName);
             {
-                using var sw = new StreamWriter(fullName);
-                using var jw = new JsonTextWriter(sw);
-                outputJsonSerializer.Serialize(jw, root);
+                using var fs = new FileStream(fullName, FileMode.Create);
+                JsonSerializer.Serialize(fs, root, root.GetType(), outputJsonOptions);
             }
             Console.WriteLine("Exported {0} ({1:#,#} B).", fileName, new FileInfo(fullName).Length);
         }

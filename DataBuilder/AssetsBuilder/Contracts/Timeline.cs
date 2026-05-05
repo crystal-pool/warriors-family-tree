@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 
@@ -26,24 +27,17 @@ public class TimelineMarkerInfo
 public class TimelineMarkerInfoJsonConverter : JsonConverter<TimelineMarkerInfo>
 {
 
-    /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, TimelineMarkerInfo? value, JsonSerializer serializer)
-    {
-        if (value == null)
-        {
-            writer.WriteNull();
-            return;
-        }
-        writer.WriteStartArray();
-        writer.WriteValue(value.TimelineName);
-        writer.WriteValue(value.Month);
-        writer.WriteEndArray();
-    }
-
-    /// <inheritdoc />
-    public override TimelineMarkerInfo ReadJson(JsonReader reader, Type objectType, TimelineMarkerInfo? existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override TimelineMarkerInfo? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, TimelineMarkerInfo value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+        writer.WriteStringValue(value.TimelineName);
+        writer.WriteNumberValue(value.Month);
+        writer.WriteEndArray();
     }
 
 }

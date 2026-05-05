@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 
@@ -12,7 +13,8 @@ public class TimelineTable
 
     public IDictionary<string, TimelineBookEntry> Books { get; set; } = new Dictionary<string, TimelineBookEntry>();
 
-    private static readonly JsonSerializer jsonSerializer = new JsonSerializer();
+    private static readonly JsonSerializerOptions jsonOptions = new ();
+    private static readonly JsonSerializerOptions jsonFormattedOptions = new() { WriteIndented = true };
 
     public void WriteTo(TextWriter writer)
     {
@@ -21,16 +23,15 @@ public class TimelineTable
 
     public void WriteTo(TextWriter writer, bool formatted)
     {
-        using var jWriter = new JsonTextWriter(writer)
-        {
-            Formatting = formatted ? Formatting.Indented : Formatting.None
-        };
-        jsonSerializer.Serialize(jWriter, this);
+        var options = formatted ? jsonFormattedOptions : jsonOptions;
+        var json = JsonSerializer.Serialize(this, options);
+        writer.Write(json);
     }
 
     public static TimelineTable ReadFrom(TextReader reader)
     {
-        return (TimelineTable)jsonSerializer.Deserialize(reader, typeof(TimelineTable))!;
+        var json = reader.ReadToEnd();
+        return JsonSerializer.Deserialize<TimelineTable>(json)!;
     }
 
     public static TimelineTable LoadFrom(string path)
