@@ -3,16 +3,14 @@ import eslint from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
+import { repoRootDir } from "../environment.js";
 
-export default defineConfig(
+export const baseConfig = defineConfig(
   {
     ignores: [
       "**/dist/",
-      "**/node_modules/",
       "**/*.js",
       "**/*.d.ts",
-      "DataBuilder/",
-      "_private/",
     ],
   },
   eslint.configs.recommended,
@@ -22,17 +20,10 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: repoRootDir,
       },
     },
-    plugins: {
-      "@stylistic": stylistic,
-    },
     rules: {
-      // Ported from the original tslint.json
-      "@stylistic/quotes": ["error", "double"],
-      "@stylistic/semi": ["error", "always"],
-      "@stylistic/eol-last": "error",
       "@typescript-eslint/explicit-member-accessibility": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -65,10 +56,20 @@ export default defineConfig(
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
       "@typescript-eslint/no-base-to-string": ["error", {
         checkUnknown: false,
-        ignoredTypeNames: ['Error', 'RegExp', 'URL', 'URLSearchParams', '{}'],
+        ignoredTypeNames: ["Error", "RegExp", "URL", "URLSearchParams", "{}"],
       }],
       "no-var": "error",
       "no-duplicate-imports": "error",
+    },
+  },
+  {
+    plugins: {
+      "@stylistic": stylistic,
+    },
+    rules: {
+      "@stylistic/quotes": ["error", "double"],
+      "@stylistic/semi": ["error", "always"],
+      "@stylistic/eol-last": "error",
     },
   },
 );

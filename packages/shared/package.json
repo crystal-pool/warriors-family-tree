@@ -10,6 +10,10 @@
     "./build/*": "./src/build/*.ts"
   },
   "scripts": {
-    "build": "echo 'No build step for shared — consumed as TypeScript source via workspace protocol.'"
+    "build": "echo 'No build step for shared — consumed as TypeScript source via workspace protocol.'",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@wft-repo/linters": "workspace:*"
   }
 }

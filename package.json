@@ -15,18 +15,14 @@
     "build": "yarn workspaces foreach --all --verbose --topological-dev --parallel --interlaced run build",
     "dev": "yarn workspace warriors-family-tree run dev",
     "dev:embed": "yarn workspace wft-embed run dev",
-    "lint": "eslint .",
+    "lint": "yarn workspaces foreach --all --verbose --parallel --interlaced run lint",
     "deploy-prod": "gh-pages -d ./packages/app/dist",
     "deploy": "pause && gh-pages -d ./packages/app/dist"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^25.6.2",
-    "eslint": "^10.3.0",
     "gh-pages": "^3.2.3",
     "sass": "^1.99.0",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.2"
+    "typescript": "^6.0.3"
   }
 }

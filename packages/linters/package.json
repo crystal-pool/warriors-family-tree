@@ -1,0 +1,27 @@
+{
+  "name": "@wft-repo/linters",
+  "version": "0.1.4",
+  "description": "linters & linter rules",
+  "repository": "https://github.com/crystal-pool/warriors-family-tree",
+  "author": "CXuesong",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "bin": {
+    "eslint": "./bin/eslint.js"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.3.0",
+    "typescript-eslint": "^8.59.2"
+  }
+}

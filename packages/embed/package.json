@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@wft-repo/shared": "workspace:*",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
+    "@wft-repo/linters": "workspace:*",
     "vite": "^8.0.11",
     "vite-plugin-checker": "^0.13.0"
   }
