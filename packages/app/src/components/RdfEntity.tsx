@@ -78,7 +78,6 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((
     </span>);
 });
 RdfEntityLabel.displayName = "RdfEntityLabel";
-RdfEntityLabel.defaultProps = { variant: "plain" };
 
 export interface IRdfEntityDescriptionProps {
     qName: RdfQName;
@@ -88,6 +87,6 @@ export interface IRdfEntityDescriptionProps {
 export const RdfEntityDescription: React.FC<IRdfEntityDescriptionProps> = (props) => {
     const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, props.qName);
-    return <span lang={language}>{label && label.description || props.fallbackContent}</span>;
+    return <span lang={language}>{label?.description || props.fallbackContent}</span>;
 };
 RdfEntityDescription.displayName = "RdfEntityDescription";

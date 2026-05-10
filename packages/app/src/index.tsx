@@ -1,6 +1,6 @@
 import "@wft-repo/shared/environment";
 
-import * as ReactDOM from "react-dom";
+import * as ReactDOMClient from "react-dom/client";
 import { applyPolyfills } from "./utility/polyfill";
 import { initializeTracking } from "./utility/telemetry";
 
@@ -9,5 +9,6 @@ applyPolyfills();
 
 // The order matters. We need to initialize tracking first, then initialize dataService.
 import { App } from "./appContainer";
-const domRoot = document.querySelector(".react-root");
-ReactDOM.render(<App />, domRoot);
+const domRoot = document.querySelector(".react-root")!;
+const root = ReactDOMClient.createRoot(domRoot);
+root.render(<App />);

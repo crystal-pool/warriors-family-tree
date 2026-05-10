@@ -20,13 +20,12 @@
     "deploy": "pause && gh-pages -d ./packages/app/dist"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.0",
+    "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.6.2",
     "eslint": "^10.3.0",
     "gh-pages": "^3.2.3",
-    "globals": "^16.0.0",
-    "sass": "^1.49.10",
+    "sass": "^1.99.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2"
   }
