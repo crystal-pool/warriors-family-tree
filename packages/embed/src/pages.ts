@@ -1,5 +1,4 @@
-import { IDisposable } from "tasklike-promise-library";
-import { mountEmbed } from "./embed";
+import { IDisposable, mountEmbed } from "./embed";
 
 export interface IFamilyTreeOptions {
     qName: string;

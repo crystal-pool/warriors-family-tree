@@ -18,12 +18,12 @@
     "@wft-repo/shared": "workspace:*",
     "classnames": "^2.3.1",
     "javascript-lp-solver": "^0.4.24",
+    "jscorlib": "^0.0.0-int.7",
     "lodash": "^4.18.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.3",
     "resize-observer": "^1.0.4",
-    "tasklike-promise-library": "^0.0.13",
     "tslib": "^2.8.1",
     "wu": "^2.1.0"
   },

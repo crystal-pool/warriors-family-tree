@@ -1,5 +1,5 @@
 import * as ResizeObserverPolyfill from "resize-observer";
-import { delay } from "tasklike-promise-library";
+import { delay } from "jscorlib/promises";
 
 declare global {
     interface Window {

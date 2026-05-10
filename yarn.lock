@@ -1270,8 +1270,6 @@ __metadata:
 "@wft-repo/shared@workspace:*, @wft-repo/shared@workspace:packages/shared":
   version: 0.0.0-use.local
   resolution: "@wft-repo/shared@workspace:packages/shared"
-  dependencies:
-    tasklike-promise-library: "npm:^0.0.13"
   languageName: unknown
   linkType: soft
 
@@ -2046,6 +2044,13 @@ __metadata:
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
   checksum: 10/af37d0d913fb56aec6dc0074c163cc71cd23c0b8aad5c2350747b6721d37ba118af35abdd8b33c47ec2800de07dedb16a527ca9c530ee004093e04958bd0cbf2
+  languageName: node
+  linkType: hard
+
+"jscorlib@npm:^0.0.0-int.7":
+  version: 0.0.0-int.7
+  resolution: "jscorlib@npm:0.0.0-int.7"
+  checksum: 10/cb89a83198d30c8d7e4440cdedc31faf8cdd482cbb66fd9150a8f3bdeba61a59e2ecbfb35064b9fca120a3a7dc55bfb5c7fe690de0c029ac42c968fdf5f571d2
   languageName: node
   linkType: hard
 
@@ -2937,15 +2942,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tasklike-promise-library@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "tasklike-promise-library@npm:0.0.13"
-  dependencies:
-    tslib: "npm:^1.11.1"
-  checksum: 10/016cac26279adeaec1e3186bb29e157179e1efaa07e6241919a244846464a9f931c18d24a1b853648b2db43323c77bc19c7f7ba7f58631e4d42c4d90b38bd338
-  languageName: node
-  linkType: hard
-
 "tiny-invariant@npm:^1.3.3":
   version: 1.3.3
   resolution: "tiny-invariant@npm:1.3.3"
@@ -2978,13 +2974,6 @@ __metadata:
   peerDependencies:
     typescript: ">=4.8.4"
   checksum: 10/d5f1936f5618c6ab6942a97b78802217540ced00e7501862ae1f578d9a3aa189fc06050e64cb8951d21f7088e5fd35f53d2bf0d0370a883861c7b05e993ebc44
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^1.11.1":
-  version: 1.14.1
-  resolution: "tslib@npm:1.14.1"
-  checksum: 10/7dbf34e6f55c6492637adb81b555af5e3b4f9cc6b998fb440dac82d3b42bdc91560a35a5fb75e20e24a076c651438234da6743d139e4feabf0783f3cdfe1dddb
   languageName: node
   linkType: hard
 
@@ -3222,12 +3211,12 @@ __metadata:
     "@wft-repo/shared": "workspace:*"
     classnames: "npm:^2.3.1"
     javascript-lp-solver: "npm:^0.4.24"
+    jscorlib: "npm:^0.0.0-int.7"
     lodash: "npm:^4.18.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.30.3"
     resize-observer: "npm:^1.0.4"
-    tasklike-promise-library: "npm:^0.0.13"
     tslib: "npm:^2.8.1"
     vite: "npm:^8.0.11"
     vite-plugin-checker: "npm:^0.13.0"
@@ -3242,7 +3231,6 @@ __metadata:
     "@types/lodash": "npm:^4.17.24"
     "@wft-repo/shared": "workspace:*"
     lodash: "npm:^4.18.1"
-    tasklike-promise-library: "npm:^0.0.13"
     tslib: "npm:^2.8.1"
     vite: "npm:^8.0.11"
     vite-plugin-checker: "npm:^0.13.0"

@@ -1,9 +1,9 @@
-import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@mui/material";
 import * as Icons from "@mui/icons-material";
+import { Button, Divider, IconButton, Link, Snackbar, Typography } from "@mui/material";
+import { generateRandomId8 } from "@wft-repo/shared";
 import * as React from "react";
 import { useLocation } from "react-router";
 import { HashRouter } from "react-router-dom";
-import { generateRandomId8 } from "@wft-repo/shared";
 import { contactUrl, issueTrackerUrl } from "../constants";
 import { resourceManager } from "../localization";
 import { LocalizationProgress } from "../localization/common";
@@ -20,14 +20,14 @@ const AppEmbedLazy = React.lazy(async () => ({ default: (await import("./appEmbe
 
 const AppFullLazy = React.lazy(async () => ({ default: (await import("./appFull")).AppFull }));
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IAppProps {
-
 }
 
 export interface IAppStates {
     languageContext: ILanguageContextValue;
     titleContext: IPageTitleContextValue;
-    error?: any;
+    error?: unknown;
 }
 
 interface IRouteRootProps {
@@ -113,25 +113,26 @@ const RouteRootFC: React.FC = () => {
     return <RouteRoot location={location} />;
 };
 
-function formatError(error: any): string {
+function formatError(error: unknown): string {
     if (!error || typeof error !== "object") return String(error);
-    return error.stack || error.message || error.toString();
+    const anyError = error as Error;
+    return anyError.stack || anyError.message || anyError.toString();
 }
 
 interface AppErrorBoundaryState {
-    error?: any;
+    error?: unknown;
     componentStack?: string;
 }
 
-class AppErrorBoundary extends React.PureComponent<{}, AppErrorBoundaryState> {
-    public constructor(props: Readonly<{}>) {
+class AppErrorBoundary extends React.PureComponent<Record<never, never>, AppErrorBoundaryState> {
+    public constructor(props: Readonly<Record<never, never>>) {
         super(props);
         this.state = {};
     }
-    public static getDerivedStateFromError(error: any): Partial<AppErrorBoundaryState> {
+    public static getDerivedStateFromError(error: unknown): Partial<AppErrorBoundaryState> {
         return { error };
     }
-    public override componentDidCatch(error: any, errorInfo: React.ErrorInfo) {
+    public override componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
         this.setState({ error, componentStack: errorInfo.componentStack ?? undefined });
     }
     public override render() {
@@ -192,10 +193,16 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
             languageContext: { language, setLanguage: this.setLanguage }
         });
     };
-    public setTitle = (title: string, withAppName: boolean) => {
+    public setTitle = (title: string, withAppName?: boolean) => {
         const context = this.state.titleContext;
         if (context.title !== title || context.withAppName !== withAppName) {
-            this.setState({ titleContext: { title, withAppName, setTitle: this.setTitle } });
+            this.setState({
+                titleContext: {
+                    title,
+                    withAppName: withAppName ?? false,
+                    setTitle: this.setTitle,
+                }
+            });
         }
     };
     public clearError = () => {
@@ -214,12 +221,12 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
     }
     private _onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
         const merged = e as (ErrorEvent & PromiseRejectionEvent);
-        this.setState({ error: merged.error || merged.reason || "<Error>" });
+        this.setState({ error: (merged.error || merged.reason || "<Error>") as unknown });
     };
-    private _onRootContainerClick(e: React.MouseEvent) {
+    private _onRootContainerClick = (e: React.MouseEvent) => {
         if (!(e.target instanceof Element)) return;
         trackFeatureUsageFromElement(e.target);
-    }
+    };
     public override render() {
         const errorMessage = this.state.error != null && formatError(this.state.error);
         return (
@@ -254,7 +261,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         window.addEventListener("unhandledrejection", this._onGlobalError);
         this._applyLanguage(this.state.languageContext.language);
     }
-    public override componentDidUpdate(prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
+    public override componentDidUpdate(_prevProps: Readonly<IAppProps>, prevStates: Readonly<IAppStates>) {
         if (prevStates.languageContext.language !== this.state.languageContext.language) {
             this._applyLanguage(this.state.languageContext.language, prevStates.languageContext.language);
         }

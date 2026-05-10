@@ -1,6 +1,6 @@
 import { SeverityLevel } from "@microsoft/applicationinsights-web";
 import { ResizeObserver } from "resize-observer";
-import { ICancellationToken, PromiseLikeResolutionSource } from "tasklike-promise-library";
+import { wait } from "jscorlib/promises";
 import { EmbedMessage, HostMessage, IHostSettings } from "@wft-repo/shared";
 import { appInsights } from "./telemetry";
 
@@ -27,24 +27,19 @@ export function postInteropMessage(message: EmbedMessage): boolean {
 
 let readyPosted = false;
 
-export function waitMessage<T extends HostMessage>(type: T["type"], cancellationToken?: ICancellationToken): PromiseLike<T> {
-    const plrs = new PromiseLikeResolutionSource<T>();
-    const cts = cancellationToken?.subscribe(() => {
-        window.removeEventListener("message", handler);
-        plrs.tryCancel();
-    });
+export async function waitMessage<T extends HostMessage>(type: T["type"], signal?: AbortSignal): Promise<T> {
+    const { promise, resolve } = Promise.withResolvers<T>();
     function handler(e: MessageEvent) {
         if (e.data && typeof e.data === "object" && e.data.token === currentToken && e.data.type === type) {
-            try {
-                plrs.tryResolve(e.data);
-            } finally {
-                cts?.dispose();
-                window.removeEventListener("message", handler);
-            }
+            resolve(e.data);
         }
     }
     window.addEventListener("message", handler);
-    return plrs.promiseLike;
+    try {
+        return await wait(promise, signal);
+    } finally {
+        window.removeEventListener("message", handler);
+    }
 }
 
 let documentHeightObserver: ResizeObserver | undefined;

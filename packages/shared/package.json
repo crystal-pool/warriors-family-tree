@@ -11,8 +11,5 @@
   },
   "scripts": {
     "build": "echo 'No build step for shared — consumed as TypeScript source via workspace protocol.'"
-  },
-  "dependencies": {
-    "tasklike-promise-library": "^0.0.13"
   }
 }

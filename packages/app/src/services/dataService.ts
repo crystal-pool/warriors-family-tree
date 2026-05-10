@@ -1,5 +1,6 @@
 import * as React from "react";
-import { CancellationTokenSource, EventEmitter, ICancellationToken, IDisposable, sendRequest } from "tasklike-promise-library";
+import { EventEmitter } from "jscorlib/events";
+import { ensureResponseOK } from "jscorlib/http";
 import wu from "wu";
 import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
 import { isRegExUnicodeCategorySupported } from "../utility/compatibility";
@@ -113,7 +114,7 @@ export class DataService {
     private labels: ILabelsRoot | undefined;
     private links: IEntityLinksRoot | undefined;
     private _language: string;
-    private _switchLanguageCts: CancellationTokenSource | undefined;
+    private _switchLanguageAc: AbortController | undefined;
     private _languageChanged = new EventEmitter();
     public constructor(private _dataPathPrefix: string, language?: string) {
         this._language = language?.toLowerCase() || browserLanguage;
@@ -128,15 +129,15 @@ export class DataService {
     public set language(value: string) {
         value = value.toLowerCase();
         if (value !== this._language) {
-            this._switchLanguageCts?.cancel();
-            this._switchLanguageCts = new CancellationTokenSource();
+            this._switchLanguageAc?.abort();
+            this._switchLanguageAc = new AbortController();
            
-            void this._switchLanguage(value, this._switchLanguageCts.token);
+            void this._switchLanguage(value, this._switchLanguageAc.signal);
             this._language = value;
         }
     }
-    public onLanguageChanged(listener: () => void): IDisposable {
-        return this._languageChanged.addListener(listener);
+    public onLanguageChanged(listener: () => void): Disposable {
+        return this._languageChanged.subscribe(listener);
     }
     public getCharacterProfileFor(entityId: RdfQName): Readonly<ICharacterProfileEntry> | undefined {
         if (!this.characters) return undefined;
@@ -229,20 +230,16 @@ export class DataService {
         });
         return results.slice(0, limit);
     }
-    private async _fetchJsonData<T extends object | []>(localName: string, cancellationToken?: ICancellationToken): Promise<T> {
-        const result = await sendRequest({
-            url: this._dataPathPrefix + localName,
-            method: "GET",
-            responseType: "json"
-        }, cancellationToken);
-        result.ensureSuccessfulStatusCode();
-        return result.xhr.response as T;
+    private async _fetchJsonData<T extends object | []>(localName: string, signal?: AbortSignal): Promise<T> {
+        const response = await fetch(this._dataPathPrefix + localName, { signal });
+        await ensureResponseOK(response);
+        return await response.json() as T;
     }
     private async _initialize(): Promise<void> {
         appInsights.trackTrace({ message: "dataService.initialize: Enter." });
         const sw = Stopwatch.startNew();
-        this._switchLanguageCts = new CancellationTokenSource();
-        const slPromise = this._switchLanguage(this._language, this._switchLanguageCts.token);
+        this._switchLanguageAc = new AbortController();
+        const slPromise = this._switchLanguage(this._language, this._switchLanguageAc.signal);
         const characters = this._fetchJsonData<ICharacterProfileRoot>("characters.json");
         const relations = this._fetchJsonData<IRelationsRoot>("relations.json");
         const timeline = this._fetchJsonData<ITimelineRoot>("timeline.json");
@@ -260,12 +257,12 @@ export class DataService {
         appInsights.trackTrace({ message: "dataService.initialize: Exit." }, { elapsed: sw.elapsed });
         appInsights.trackMetric({ name: "dataService.initialize.duration", average: sw.elapsed });
     }
-    private async _switchLanguage(language: string, cancellationToken?: ICancellationToken): Promise<void> {
+    private async _switchLanguage(language: string, signal?: AbortSignal): Promise<void> {
         appInsights.trackTrace({ message: "dataService.switchLanguage: Enter." }, { language });
-        const labels = this._fetchJsonData<ILabelsRoot>("labels." + language + ".json", cancellationToken);
+        const labels = this._fetchJsonData<ILabelsRoot>("labels." + language + ".json", signal);
         this.labels = await labels;
         appInsights.trackTrace({ message: "dataService.switchLanguage: Language changed." }, { language });
-        this._languageChanged.raise();
+        this._languageChanged.invoke();
         appInsights.trackTrace({ message: "dataService.switchLanguage: Exit." }, { language });
     }
 }
@@ -288,7 +285,7 @@ export function useLanguageAwareData<T>(dataService: DataService, selector: () =
         const subscription = dataService.onLanguageChanged(() => {
             refreshData();
         });
-        return () => subscription.dispose();
+        return () => subscription[Symbol.dispose]();
     });
     // Update also when the deps changed.
     if (prevDeps && !shallowEquals(prevDeps.current, deps)) refreshData();

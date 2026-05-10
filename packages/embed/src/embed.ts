@@ -1,6 +1,9 @@
 import * as _ from "lodash";
-import { IDisposable } from "tasklike-promise-library";
 import { EmbedMessage, HostMessage, IHostSettings } from "@wft-repo/shared";
+
+export interface IDisposable {
+    dispose(): void;
+}
 
 export interface IEmbedIntrinsicOptions {
     urlStem?: string;
