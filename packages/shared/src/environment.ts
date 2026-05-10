@@ -3,7 +3,6 @@ export interface IEnvironmentInfo {
     version: string;
     commitId: string;
     buildTimestamp: number;
-    aiInstrumentationKey?: string;
 }
 
 declare global {

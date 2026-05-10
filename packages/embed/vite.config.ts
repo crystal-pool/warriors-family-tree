@@ -1,3 +1,4 @@
+import { IEnvironmentInfo } from "@wft-repo/shared";
 import { getGitHead } from "@wft-repo/shared/build/git";
 import { flattenKeyPath, serializeRecordValues } from "@wft-repo/shared/build/utility";
 import { resolve } from "path";
@@ -22,8 +23,9 @@ export default defineConfig(async (env): Promise<UserConfig> => {
       commitId,
       buildTimestamp: Date.now(),
       isProduction,
-      aiInstrumentationKey: undefined,
-    },
+      // TODO
+      version: "",
+    } satisfies IEnvironmentInfo,
   }));
 
   return {

@@ -27,6 +27,11 @@ param (
     [switch]
     $Restore,
 
+    # Overwrite existing files during restore.
+    [Parameter(ParameterSetName = "Restore")]
+    [switch]
+    $Force,
+
     [Parameter(ParameterSetName = "Clear", Mandatory = $true)]
     [switch]
     $Clear
@@ -36,7 +41,9 @@ $ErrorActionPreference = "Stop"
 
 $ArchiveRootFolder = "Root"
 $SaltLength = 100
-$FileList = @("_private/webpack.env.json")
+$FileList = @(
+    "packages/app/.env.local"
+)
 
 $KeyBytes = if ($Key) {
     [System.Convert]::FromBase64String($Key)
@@ -69,6 +76,14 @@ if ($Restore) {
             $Aes.Dispose()
         }
         $ArchiveSourceDir = Join-Path $WorkDir $ArchiveRootFolder | Resolve-Path
+        if (-not $Force) {
+            foreach ($FileName in $FileList) {
+                $TargetPath = Join-Path $SourceRootPath $FileName
+                if (Test-Path $TargetPath) {
+                    throw "File already exists: $TargetPath. Use -Force to overwrite."
+                }
+            }
+        }
         Copy-Item $ArchiveSourceDir/* $SourceRootPath -Recurse -Force
         Write-Host "Build secret restored."
     }

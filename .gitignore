@@ -12,6 +12,7 @@ dist
 _private
 
 /packages/app/public/data
+.env.local
 *.module.s[ac]ss.d.ts
 
 # Yarn Berry

@@ -17,7 +17,7 @@ $AssetsBuilderProjectDir = (Resolve-Path "./DataBuilder/AssetsBuilder/AssetsBuil
 
 Copy-Item $RdfPath "$RawDataPath/wbdump.ttl"
 # Assumes $PWD is repo root
-{
+& {
     $PSNativeCommandUseErrorActionPreference = $false
     dotnet run -c Release --project $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
     if ($LASTEXITCODE) {

@@ -24,7 +24,6 @@ export default defineConfig(async (env): Promise<UserConfig> => {
       version,
       buildTimestamp: Date.now(),
       isProduction,
-      aiInstrumentationKey: undefined,
     } satisfies IEnvironmentInfo,
   }));
 

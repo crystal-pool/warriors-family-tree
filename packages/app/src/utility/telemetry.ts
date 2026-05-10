@@ -8,7 +8,7 @@ interface WindowWithBacklog {
 
 export const appInsights = new ApplicationInsights({
     config: {
-        instrumentationKey: environment.aiInstrumentationKey || "",
+        connectionString: atob(import.meta.env.VITE_AI_CONNECTION_STRING_EXPR || "").split("|-|")[1] || "",
         disableTelemetry: !environment.isProduction
     }
 });
