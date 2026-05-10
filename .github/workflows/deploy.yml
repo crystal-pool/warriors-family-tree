@@ -49,6 +49,7 @@ jobs:
         shell: pwsh
         env:
           MW_API_ENDPOINT: ${{ secrets.MW_API_ENDPOINT }}
+          WFT_APP_BASE_PATH: /warriors-family-tree/
         run: ./scripts/build.ps1
       - name: Cleanup 1
         shell: pwsh

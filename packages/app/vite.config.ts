@@ -27,8 +27,11 @@ export default defineConfig(async (env): Promise<UserConfig> => {
     } satisfies IEnvironmentInfo,
   }));
 
+  const base = process.env.WFT_APP_BASE_PATH || "/";
+
   return {
     root: __dirname,
+    base,
     define: definitions,
     plugins: [
       checker({
@@ -36,7 +39,7 @@ export default defineConfig(async (env): Promise<UserConfig> => {
           tsconfigPath: "src/tsconfig.json",
         }
       }),
-      resourceLoadTrackingPlugin(),
+      resourceLoadTrackingPlugin(base),
     ],
     css: {
       modules: {
@@ -54,7 +57,7 @@ export default defineConfig(async (env): Promise<UserConfig> => {
 });
 
 
-function resourceLoadTrackingPlugin(): Plugin {
+function resourceLoadTrackingPlugin(base: string): Plugin {
   return {
     name: "resource-load-tracking",
     transformIndexHtml: {
@@ -75,26 +78,28 @@ function resourceLoadTrackingPlugin(): Plugin {
         // Add onload/onerror tracking to Vite-injected entry tags.
         // They call window.__rlc(name, element, event) defined in the snippet.
         function getTrackingName(attr: string, type: "js" | "css"): string {
-          // Extract chunk name from "/assets/{name}-{hash}.ext"
+          // Extract chunk name from "{base}assets/{name}-{hash}.ext"
           const filename = attr.split("/").pop()!;
           const chunkName = filename.replace(/-[\w]+\.\w+$/, "");
           return `${chunkName}-${type}`;
         }
 
-        for (const script of doc.querySelectorAll("script[src^='/assets/']")) {
+        const assetsPrefix = `${base}assets/`;
+        for (const script of doc.querySelectorAll(`script[src^='${assetsPrefix}']`)) {
           const name = getTrackingName(script.getAttribute("src")!, "js");
           script.setAttribute("onload", `__rlc('${name}',this,event);`);
           script.setAttribute("onerror", `__rlc('${name}',this,event);`);
         }
 
-        for (const link of doc.querySelectorAll("link[rel='stylesheet'][href^='/assets/']")) {
+        for (const link of doc.querySelectorAll(`link[rel='stylesheet'][href^='${assetsPrefix}']`)) {
           const name = getTrackingName(link.getAttribute("href")!, "css");
           link.setAttribute("onload", `__rlc('${name}',this,event);`);
           link.setAttribute("onerror", `__rlc('${name}',this,event);`);
         }
 
         // Also track the static index.css link.
-        for (const link of doc.querySelectorAll("link[rel='stylesheet'][href='/index.css']")) {
+        const indexCssHref = `${base}index.css`;
+        for (const link of doc.querySelectorAll(`link[rel='stylesheet'][href='${indexCssHref}']`)) {
           link.setAttribute("onload", `__rlc('index-css',this,event);`);
           link.setAttribute("onerror", `__rlc('index-css',this,event);`);
         }
