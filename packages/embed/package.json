@@ -16,7 +16,9 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
+    "@types/node": "^25.6.2",
     "@wft-repo/linters": "workspace:*",
+    "typescript": "^6.0.3",
     "vite": "^8.0.11",
     "vite-plugin-checker": "^0.13.0"
   }
