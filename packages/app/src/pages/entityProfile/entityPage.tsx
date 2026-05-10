@@ -56,7 +56,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo(() => {
             const label = dataService.getLabelFor(entityQName);
             setPageTitle(label?.label || entityQName);
         }
-    }, [params]);
+    }, [entityQName]);
     if (!entityQName) {
         return (<React.Fragment>
             <h1>{resourceManager.getPrompt("EntityProfileTitle")}</h1>
