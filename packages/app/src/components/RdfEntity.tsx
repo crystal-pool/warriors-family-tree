@@ -1,5 +1,5 @@
 import { Link, Tooltip } from "@mui/material";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import { resourceManager } from "../localization";
@@ -62,7 +62,7 @@ export const RdfEntityLabel: React.FC<IRdfEntityLabelProps> = React.forwardRef((
     const language = useDataServiceLanguage(dataService);
     const label = useLabelFor(dataService, qName)?.label;
     function renderLabel() {
-        const className = classNames(!label && Scss.entityLabelFallback);
+        const className = clsx(!label && Scss.entityLabelFallback);
         // Use qName as fallback label if label is missing and we need to show label only.
         const isIdVisible = variant === "plain-with-id-link" || variant === "link-with-id-link";
         const displayLabel = label ?? props.fallbackLabel ?? (isIdVisible ? undefined : qName);

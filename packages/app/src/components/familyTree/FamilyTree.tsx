@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import _ from "lodash";
 import * as React from "react";
 import { SVG, Container, Polyline } from "@svgdotjs/svg.js";
@@ -166,7 +166,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                     const mateLineY = rectL.top + rectL.height / 2;
                     drawing
                         .line(rectL.left + rectL.width, mateLineY, rectR.left, mateLineY)
-                        .addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
+                        .addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const centerX = ((rectL.left + rectL.width) + rectR.left) / 2;
                         for (const childId of childrenId) {
@@ -176,7 +176,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 centerX, mateLineY,
                                 getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
+                            ).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 } else if (nodeL.row === nodeR.row) {
@@ -185,7 +185,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         rectL.left + rectL.width / 2, rectL.top + rectL.height,
                         slotY,
                         rectR.left + rectR.width / 2, rectR.top + rectR.height
-                    ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
+                    ).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const startX = ((rectL.left + rectL.width) + rectR.left) / 2;
                         for (const childId of childrenId) {
@@ -195,7 +195,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 startX, slotY,
                                 getSlotY(nodeL, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
+                            ).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 } else {
@@ -215,7 +215,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                         edgeXR, slotYU,
                         edgeXR, edgeYR,
                         rectR.left, edgeYR
-                    ]).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionMate));
+                    ]).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionMate));
                     if (childrenId && childrenSlot) {
                         const startX = nodeD === nodeL
                             ? rectL.left + rectL.width + FAMILY_TREE_MATE_SLOT_OFFSET / 2
@@ -227,7 +227,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                                 startX, rectD.top + rectD.height / 2,
                                 getSlotY(nodeD, childrenSlot),
                                 rectC.left + rectC.width / 2, rectC.top
-                            ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
+                            ).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                         }
                     }
                 }
@@ -246,7 +246,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
                             rect1.left + rect1.width / 2, rect1.top + rect1.height,
                             getSlotY(node1, childrenSlot),
                             rectC.left + rectC.width / 2, rectC.top
-                        ).addClass(classNames(scss.familyTreeConnection, scss.familyTreeConnectionChild));
+                        ).addClass(clsx(scss.familyTreeConnection, scss.familyTreeConnectionChild));
                     }
                 }
             }
@@ -278,7 +278,7 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
         return true;
     }
     public override render(): React.ReactNode {
-        return (<div className={classNames(scss.familyTreeDrawing, this.props.className)}>
+        return (<div className={clsx(scss.familyTreeDrawing, this.props.className)}>
             <div className={scss.overlay} ref={this._overlayDomRoot}>{this._nodeContainers}</div>
             <div className={scss.drawing} ref={this._onDrawingRootChanged}></div>
         </div>);

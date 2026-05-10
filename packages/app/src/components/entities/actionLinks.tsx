@@ -1,5 +1,5 @@
 import { Button, Link } from "@mui/material";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import { resourceManager } from "../../localization";
@@ -20,7 +20,7 @@ type ActionLinkEntry = [string, string, string | undefined];
 function renderActionLinks(actions: ActionLinkEntry[], className?: string, displayAs?: IActionLinksProps["displayAs"]) {
     displayAs = displayAs || "link";
     return <ul
-        className={classNames(Scss.actionLinks, Scss[displayAs], className)}
+        className={clsx(Scss.actionLinks, Scss[displayAs], className)}
         {...buildUiScopeProps("entityActions")}
     >{actions.map(([name, label, href], i) => {
         let content: React.ReactNode = null;
@@ -32,7 +32,7 @@ function renderActionLinks(actions: ActionLinkEntry[], className?: string, displ
             content = href == null ? <span className={Scss.link}>{label}</span>
                 : <Link className={Scss.link} href={href} {...buildFeatureAnchorProps("navigation.entity." + name)}>{label}</Link>;
         }
-        return <li key={i} className={classNames(href == null && Scss.current)}>{content}</li>;
+        return <li key={i} className={clsx(href == null && Scss.current)}>{content}</li>;
     })}</ul>;
 }
 

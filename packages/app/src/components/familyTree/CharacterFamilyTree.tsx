@@ -1,5 +1,5 @@
 import { Paper } from "@mui/material";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import wu from "wu";
 import { resourceManager } from "../../localization";
@@ -139,7 +139,7 @@ export const FamilyTreeNode: React.FC<IFamilyTreeNodeProps> = (props) => {
     const label = useLabelFor(dataService, qName);
     const profile = dataService.getCharacterProfileFor(qName);
     return (<EntityHoverCard qName={qName}>
-        <div className={classNames(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])}
+        <div className={clsx(scss.familytreeNode, props.isCurrent && scss.current, profile?.gender && scss[profile?.gender])}
             onClick={onClick && (() => { onClick(qName); })}>
             {label && <div className="entityLabel">{label.label}</div>}
             <div className={scss.entityId}>{qName}</div>

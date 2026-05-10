@@ -1,5 +1,5 @@
 import { Tooltip } from "@mui/material";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import commonScss from "../../common.module.scss";
 import { RdfQName } from "../../services/dataService";
@@ -19,7 +19,7 @@ function makeClanSymbol(name: string, viewBoxWidth: number, viewBoxHeight: numbe
             // https://material-ui.com/components/tooltips/#custom-child-element
             {...props}
             ref={ref}
-            className={classNames(scss.clanSymbolIcon, props.className)}
+            className={clsx(scss.clanSymbolIcon, props.className)}
             viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}>
             {path}
         </svg>);
@@ -81,11 +81,11 @@ export const RdfClanSymbol: React.FC<IRdfClanSymbolProps> = (props) => {
     const ClanComponent = clanLookup[props.qName];
     let content: React.ReactElement | undefined;
     if (typeof ClanComponent === "string")
-        content = (<span className={classNames(scss.clanSymbolFallback, props.className)}>{ClanComponent}</span>);
+        content = (<span className={clsx(scss.clanSymbolFallback, props.className)}>{ClanComponent}</span>);
     else if (ClanComponent)
         content = <ClanComponent className={props.className} />;
     else
-        content = <span className={classNames(scss.clanSymbolFallback, props.className)}>??</span>;
+        content = <span className={clsx(scss.clanSymbolFallback, props.className)}>??</span>;
     const title = props.title !== undefined ? props.title : <RdfEntityLabel qName={props.qName} />;
     if (!title) return content;
     return (<Tooltip className={commonScss.abbr} title={title}>{content}</Tooltip>);

@@ -1,5 +1,5 @@
 import { Grid, Paper, Typography } from "@mui/material";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as React from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { EntityRoutingParams, routePathBuilders } from "..";
@@ -80,7 +80,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo(() => {
                         <Typography variant="subtitle2"><RdfEntityDescription qName={entityQName} /></Typography>
                     </Grid>
                     <Grid size={{ sm: 12, md: 7 }} className={Scss.expandablePanelAnchor}>
-                        <Paper className={classNames(Scss.expandablePanelContainer, Scss.compact)}>
+                        <Paper className={clsx(Scss.expandablePanelContainer, Scss.compact)}>
                             <h4>{resourceManager.getPrompt("SiteLinksTitle")}</h4>
                             <EntityExternalLinks qName={entityQName} />
                         </Paper>
