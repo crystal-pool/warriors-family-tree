@@ -2763,13 +2763,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "resize-observer@npm:1.0.4"
-  checksum: 10/a0d6ee1b5777205bfc286fb9228ee39ed385837a3e3773e2bffc834fa613010aef055c7858d35a8dfb24fa33f74b4c9f427cb64ef00cec5e718ba7c7fbbbcc45
-  languageName: node
-  linkType: hard
-
 "resolve-from@npm:^4.0.0":
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
@@ -3256,7 +3249,6 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.30.3"
-    resize-observer: "npm:^1.0.4"
     tslib: "npm:^2.8.1"
     vite: "npm:^8.0.11"
     vite-plugin-checker: "npm:^0.13.0"

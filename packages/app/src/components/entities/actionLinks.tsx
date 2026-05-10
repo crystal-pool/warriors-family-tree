@@ -23,7 +23,7 @@ function renderActionLinks(actions: ActionLinkEntry[], className?: string, displ
         className={clsx(Scss.actionLinks, Scss[displayAs], className)}
         {...buildUiScopeProps("entityActions")}
     >{actions.map(([name, label, href], i) => {
-        let content: React.ReactNode = null;
+        let content: React.ReactNode;
         if (displayAs === "button") {
             content = href == null
                 ? <Button className={Scss.link} disabled>{label}</Button>

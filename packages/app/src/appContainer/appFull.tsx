@@ -11,7 +11,7 @@ import { RoutesAfterInitialization } from "./routes";
 
 const drawerWidth = 240;
 
-export const AppFull: React.FC = (props) => {
+export const AppFull: React.FC = () => {
     const theme = useTheme();
     const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
     const [mobileOpen, setMobileOpen] = React.useState(false);

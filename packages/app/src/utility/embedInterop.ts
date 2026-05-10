@@ -1,7 +1,7 @@
 import { SeverityLevel } from "@microsoft/applicationinsights-web";
 import { ResizeObserver } from "resize-observer";
 import { wait } from "jscorlib/promises";
-import { EmbedMessage, HostMessage, IHostSettings } from "@wft-repo/shared";
+import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
 import { appInsights } from "./telemetry";
 
 export function isOwnerWindowPresent(): boolean {
@@ -30,8 +30,8 @@ let readyPosted = false;
 export async function waitMessage<T extends HostMessage>(type: T["type"], signal?: AbortSignal): Promise<T> {
     const { promise, resolve } = Promise.withResolvers<T>();
     function handler(e: MessageEvent) {
-        if (e.data && typeof e.data === "object" && e.data.token === currentToken && e.data.type === type) {
-            resolve(e.data);
+        if (isInteropMessage(e.data) && e.data.token === currentToken && e.data.type === type) {
+            resolve(e.data as T);
         }
     }
     window.addEventListener("message", handler);

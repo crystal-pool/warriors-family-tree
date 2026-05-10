@@ -7,8 +7,6 @@ export class Stopwatch {
         sw.start();
         return sw;
     }
-    public constructor() {
-    }
     public start() {
         if (this._isRunning) return;
         this._startTime = performance.now();

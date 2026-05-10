@@ -35,3 +35,8 @@ export interface IEmbedFamilyTreeNodeClickMessage extends IInteropMessageBase {
 
 export type HostMessage = IInitializeMessage;
 export type EmbedMessage = IEmbedReadyMessage | IEmbedDocumentHeightChangedMessage | IEmbedFamilyTreeNodeClickMessage;
+
+export function isInteropMessage(data: unknown): data is IInteropMessageBase {
+    if (!data || typeof data !== "object") return false;
+    return typeof (data as Record<string, unknown>).type === "string";
+}

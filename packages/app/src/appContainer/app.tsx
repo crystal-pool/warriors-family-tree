@@ -46,7 +46,8 @@ function startNewPageScope(location: { pathname: string; search: string }): stri
 function endPageScope(id: string, url: string, title?: string, refUri?: string, endReason?: string) {
     appInsights.stopTrackPage(id, url, {
         contextId: id,
-        endReason,
+        endReason: endReason!,
+        // @ts-expect-error Hack handled by initializeTracking in telemetry.ts
         _outer_overrides: {
             name: title,
             refUri

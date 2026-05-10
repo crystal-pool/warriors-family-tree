@@ -412,7 +412,7 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
         return vacant;
     }
     function declareSlotOccupied(id: string, slotIndex: number): void {
-        const slots = occupiedSlotsMap.get(id) || occupiedSlotsMap.set(id, []).get(id)!;
+        const slots = occupiedSlotsMap.get(id) ?? occupiedSlotsMap.set(id, []).get(id)!;
         console.assert(!slots[slotIndex]);
         slots[slotIndex] = true;
     }

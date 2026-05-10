@@ -6,7 +6,7 @@ import { setDocumentTitle } from "../utility/general";
 import { appInsights } from "../utility/telemetry";
 import { routePathBuilders } from "./routes";
 
-export const Welcome: React.FC = (props) => {
+export const Welcome: React.FC = () => {
     React.useEffect(() => {
         setDocumentTitle(resourceManager.getPrompt("WelcomeTitle"));
         appInsights.trackPageView();

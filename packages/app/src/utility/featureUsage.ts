@@ -2,7 +2,7 @@ import { SeverityLevel } from "@microsoft/applicationinsights-web";
 import { hashString } from "./general";
 import { appInsights } from "./telemetry";
 
-export function trackFeatureUsage(featureName: string, featureLocation?: string, usageContext?: Record<string, any>) {
+export function trackFeatureUsage(featureName: string, featureLocation?: string, usageContext?: Record<string, unknown>) {
     appInsights.trackEvent({
         name: "featureUsage",
         properties: {
@@ -26,7 +26,7 @@ export function setLogicalParent(element: Element, parent?: Element | null): voi
 }
 
 export function getLogicalParent(element: Element): Element | null {
-    return (element as ILogicallyParentedDomElementProps)._l_f_owner || element.parentElement || null;
+    return (element as ILogicallyParentedDomElementProps)._l_f_owner ?? element.parentElement ?? null;
 }
 
 export interface IFeatureDataProps {
@@ -37,7 +37,7 @@ export interface IFeatureDataProps {
 
 const featureAnchorIntegritySalt = Math.round(Math.random() * 1677216);
 
-export function buildFeatureAnchorProps(featureName: string, usageContext?: Record<string, any>): IFeatureDataProps {
+export function buildFeatureAnchorProps(featureName: string, usageContext?: Record<string, unknown>): IFeatureDataProps {
     if (!featureName) throw new RangeError("Expect non-empty featureName.");
     const rawValue = JSON.stringify([featureName, usageContext]);
     const integrity = (hashString(rawValue) ^ featureAnchorIntegritySalt).toString(36);
@@ -61,7 +61,7 @@ export function checkFeatureAnchorIntegrity(props: IFeatureDataProps): boolean {
 export function trackFeatureUsageFromElement(element: Element): boolean {
     const scopes: string[] = [];
     let featureName: string | undefined;
-    let usageContext: Record<string, any> | undefined;
+    let usageContext: Record<string, unknown> | undefined;
     for (let currentElement: Element | null = element; currentElement; currentElement = getLogicalParent(currentElement)) {
         const featureData: IFeatureDataProps = {
             "data-f1": currentElement.getAttribute("data-f1"),
@@ -77,7 +77,7 @@ export function trackFeatureUsageFromElement(element: Element): boolean {
             else if (!featureData["data-f1"]) return false;
         }
         if (featureData["data-f1"]) {
-            const [fn, uc] = JSON.parse(featureData["data-f1"]);
+            const [fn, uc] = JSON.parse(featureData["data-f1"]) as  [string, Record<string, unknown>];
             if (featureName == null) {
                 featureName = fn;
                 usageContext = uc;
@@ -96,8 +96,8 @@ export function trackFeatureUsageFromElement(element: Element): boolean {
             }
         }
         if (currentElement instanceof HTMLAnchorElement && currentElement.href) {
-            if (featureName == null) featureName = "navigation.link";
-            usageContext = usageContext || {};
+            featureName ??= "navigation.link";
+            usageContext = usageContext ?? {};
             if (!("htmlAnchor" in usageContext)) {
                 usageContext.htmlAnchor = {
                     href: currentElement.href,

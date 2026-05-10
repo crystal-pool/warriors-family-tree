@@ -8,7 +8,7 @@ export interface ILanguageContextValue {
 
 export const LanguageContext = React.createContext<ILanguageContextValue>({
     language: browserLanguage,
-    setLanguage(language) {
+    setLanguage(_language) {
         throw new Error("Not supported.");
     }
 });

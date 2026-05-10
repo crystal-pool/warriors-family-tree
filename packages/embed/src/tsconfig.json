@@ -7,10 +7,5 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-  ],
-  "references": [
-    {
-      "path": "../../shared"
-    }
   ]
 }

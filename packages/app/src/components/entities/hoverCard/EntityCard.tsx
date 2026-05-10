@@ -35,6 +35,6 @@ export const EntityHoverCard: React.FC<IEntityHoverCardProps> = function EntityH
     return (<HoverTooltip
         title={<EntityCard qName={props.qName} />}
         enterDelay={300} leaveDelay={300}
-        slotProps={{ popper: buildUiScopeProps("entityCard") as {} }}
+        slotProps={{ popper: buildUiScopeProps("entityCard") }}
     >{props.children}</HoverTooltip>);
 };

@@ -1,5 +1,5 @@
 import * as _ from "lodash-es";
-import { EmbedMessage, HostMessage, IHostSettings } from "@wft-repo/shared";
+import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
 
 export interface IDisposable {
     dispose(): void;
@@ -172,7 +172,7 @@ class EmbedMessageTarget implements IDisposable {
         window.removeEventListener("message", this._onMessage);
     }
     private readonly _onMessage = (e: MessageEvent): void => {
-        if (e.isTrusted && e.data && typeof e.data === "object" && e.data.token === this._messageToken && typeof e.data.type === "string") {
+        if (e.isTrusted && isInteropMessage(e.data) && e.data.token === this._messageToken) {
             const message = e.data as EmbedMessage;
             if (!environment.isProduction) {
                 console.log("EmbedMessageTarget._onMessage", e);

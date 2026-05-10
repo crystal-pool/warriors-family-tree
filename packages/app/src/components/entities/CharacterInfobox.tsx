@@ -55,7 +55,7 @@ function getInfoboxItems(qName: RdfQName, props: ICharacterInfoboxProps): Array<
         buildRow("CharacterChild", "CharacterChildren", getRelations("child")),
         buildRow("CharacterMentor", "CharacterMentors", getRelations("mentor")),
         buildRow("CharacterApprentice", "CharacterApprentices", getRelations("apprentice")),
-    ]).filter(([label, value]) => value);
+    ]).filter(([_, value]) => !!value);
 }
 
 export const CharacterRelationInfobox: React.FC<ICharacterInfoboxProps> = function CharacterRelationInfobox(props) {
