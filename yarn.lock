@@ -2026,10 +2026,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"javascript-lp-solver@npm:^0.4.24":
-  version: 0.4.24
-  resolution: "javascript-lp-solver@npm:0.4.24"
-  checksum: 10/c95637696ba519881b411c3b631f1988eb5c3ca9d096f96fb0709c2bb388793a9e520b54434bd12f5d96165ee728f0c88a88057b9f82fc44ef5ed0a228496d66
+"javascript-lp-solver@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "javascript-lp-solver@npm:1.0.3"
+  checksum: 10/f6d427cd1af8f2ec359ee9c65e34a292009651e4e16ffa5df440280a4cd7352dbe37e03add777c48822d2becaa275aa314f7fcdafa9d51050fadb12d5b4c87a6
   languageName: node
   linkType: hard
 
@@ -3202,7 +3202,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.3"
     "@types/wu": "npm:^2.1.42"
     "@wft-repo/shared": "workspace:*"
-    javascript-lp-solver: "npm:^0.4.24"
+    javascript-lp-solver: "npm:^1.0.3"
     jscorlib: "npm:^0.0.0-int.7"
     lodash: "npm:^4.18.1"
     react: "npm:^18.3.1"

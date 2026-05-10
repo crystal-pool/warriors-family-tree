@@ -1,7 +1,7 @@
-import Solver from "javascript-lp-solver";
+import Solver, { type Model as LPModel } from "javascript-lp-solver";
 
 export type Polynomial = Record<string, number | null | undefined>;
-export type Contraint = [Polynomial, "<=" | "=" | ">=", number];
+export type Constraint = [Polynomial, "<=" | "=" | ">=", number];
 
 export function buildPolynomial(obj: Polynomial, rhs?: Array<string | number>, lhs?: Array<string | number>): string {
     const builder: Array<string | number> = lhs ? [...lhs] : [];
@@ -21,7 +21,7 @@ export function buildPolynomial(obj: Polynomial, rhs?: Array<string | number>, l
 export interface ILPModel {
     objective: Polynomial;
     opType: "min" | "max";
-    constraints?: Contraint[];
+    constraints?: Constraint[];
     intVariables?: string[];
 }
 
@@ -41,8 +41,8 @@ export function buildLPModel(model: ILPModel): string[] {
     return expr;
 }
 
-export function buildJSLPModel(model: ILPModel): Solver.IModel {
-    return Solver.ReformatLP(buildLPModel(model));
+export function buildJSLPModel(model: ILPModel): LPModel {
+    return Solver.ReformatLP(buildLPModel(model)) as LPModel;
 }
 
 export function dumpLPModel(model: ILPModel): string {

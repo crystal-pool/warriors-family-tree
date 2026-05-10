@@ -1,7 +1,7 @@
-import Solver from "javascript-lp-solver";
+import Solver, { type SolveResult } from "javascript-lp-solver";
 import wu from "wu";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
-import { buildJSLPModel, Contraint, Polynomial } from "../../utility/lpsolverUtility";
+import { buildJSLPModel, Constraint, Polynomial } from "../../utility/lpsolverUtility";
 import { Stopwatch } from "../../utility/stopwatch";
 import { appInsights } from "../../utility/telemetry";
 import { IFamilyTreeData } from "./FamilyTree";
@@ -141,7 +141,7 @@ function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<
     const orderedNodes = Array.from(knownNodes);
     const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
     const objective: Polynomial = {};
-    const constraints: Contraint[] = [];
+    const constraints: Constraint[] = [];
     const ints: string[] = [];
     const yMax = orderedNodes.length;
     function addObjective(name: string, addition: number): void {
@@ -196,13 +196,13 @@ function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<
     }
     const model = buildJSLPModel({ opType: "min", objective, constraints, intVariables: ints });
     model.options = { timeout: 30000 };
-    const solution = Solver.Solve(model);
+    const solution = Solver.Solve(model) as SolveResult;
     if (!solution.feasible) {
         throw new Error("Infeasible model: arrangeRows.");
     }
     const rows: string[][] = [];
     for (const node of orderedNodes) {
-        const rowIndex = solution[varNameY(node)] || 0;
+        const rowIndex = (solution[varNameY(node)] as number) || 0;
         let row = rows[rowIndex];
         row ??= rows[rowIndex] = [];
         row.push(node);
@@ -275,7 +275,7 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     const orderedNodes: string[] = Array.from(wu(rows).flatten());
     const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
     const objective: Polynomial = {};
-    const constraints: Contraint[] = [];
+    const constraints: Constraint[] = [];
     const ints: string[] = [];
     let maxNodeWidth = 0;
     const dxNodes = new Set<string>();
@@ -373,14 +373,14 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
     }
     const model = buildJSLPModel({ opType: "min", objective, constraints, intVariables: ints });
     model.options = { timeout: 30000 };
-    const solution = Solver.Solve(model);
+    const solution = Solver.Solve(model) as SolveResult;
     if (!solution.feasible) {
         throw new Error("Infeasible model: layoutRow.");
     }
     // console.log(solution);
     for (const row of layoutRows) {
         for (const node of row) {
-            node.offsetX = solution[varNameX(node.id)] || 0;
+            node.offsetX = (solution[varNameX(node.id)] as number) || 0;
         }
     }
     return layoutRows;

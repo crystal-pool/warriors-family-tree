@@ -16,7 +16,7 @@
     "@mui/material": "^9.0.1",
     "@svgdotjs/svg.js": "^3.2.5",
     "@wft-repo/shared": "workspace:*",
-    "javascript-lp-solver": "^0.4.24",
+    "javascript-lp-solver": "^1.0.3",
     "jscorlib": "^0.0.0-int.7",
     "lodash": "^4.18.1",
     "react": "^18.3.1",
