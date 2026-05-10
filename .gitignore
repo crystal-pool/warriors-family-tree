@@ -22,8 +22,3 @@ _private
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
-
-bin
-obj
-/DataBuilder/**/Properties/launchSettings.json
-/DataBuilder/Raw/*.ttl

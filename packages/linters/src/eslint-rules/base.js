@@ -68,7 +68,7 @@ export const baseConfig = defineConfig(
     },
     rules: {
       "@stylistic/quotes": ["error", "double", {
-        "allowTemplateLiterals": true,
+        "allowTemplateLiterals": "always",
       }],
       "@stylistic/semi": ["error", "always"],
       "@stylistic/eol-last": "error",
