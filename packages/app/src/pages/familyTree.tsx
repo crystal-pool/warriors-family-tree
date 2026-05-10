@@ -15,6 +15,7 @@ import { useSetPageTitle } from "../utility/react";
 import CommonScss from "./common.module.scss";
 import { FamilyTreeRoutingParams, routePathBuilders } from "./routes";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IFamilyTreeProps {
 }
 
@@ -24,7 +25,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
     const queryParams = parseQueryParams(search);
     const navigate = useNavigate();
     const characterId = params.character;
-    const depth = queryParams.depth || 3;
+    const depth = queryParams.depth ?? 3;
     const [walkMode, setWalkMode] = React.useState<CharacterFamilyTreeWalkMode>("naive");
     const setPageTitle = useSetPageTitle();
     // Re-render the component when language changes.
@@ -34,7 +35,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
             setPageTitle(resourceManager.getPrompt("FamilyTreeTitle"));
         } else {
             const label = dataService.getLabelFor(characterId);
-            setPageTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label && label.label || characterId]));
+            setPageTitle(resourceManager.getPrompt("FamilyTreeTitle1", [label?.label || characterId]));
         }
     }, [params]);
     if (!characterId) {
@@ -43,7 +44,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
             <p>{resourceManager.getPrompt("PageNeedsEntityId")}</p>
         </React.Fragment>);
     }
-    if (characterId.indexOf(":") < 0) {
+    if (!characterId.includes(":")) {
         location.replace(routePathBuilders.familyTree({ ...params, character: "wd:" + characterId }, search));
     }
     return (<div {...buildUiScopeProps("familyTreePage")}>
@@ -60,8 +61,8 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
                 <Grid container spacing={1}>
                     <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <Typography id="max-depth-slider">Max depth: {depth}</Typography>
-                        <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(e, v) => {
-                            navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v as number })));
+                        <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(_, v) => {
+                            navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v })));
                         }} />
                     </Grid>
                     {environment.isProduction ||
@@ -69,7 +70,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
                             <Typography id="mode-selector">Mode</Typography>
                             <ToggleButtonGroup
                                 aria-labelledby="mode-selector" size="small"
-                                exclusive value={walkMode} onChange={(_: React.MouseEvent, v: string | null) => { v && setWalkMode(v as CharacterFamilyTreeWalkMode); }}>
+                                exclusive value={walkMode} onChange={(_: React.MouseEvent, v: string | null) => { if(v) setWalkMode(v as CharacterFamilyTreeWalkMode); }}>
                                 <ToggleButton value="naive">Naïve</ToggleButton>
                                 <ToggleButton value="bloodline">Bloodline</ToggleButton>
                             </ToggleButtonGroup>

@@ -14,8 +14,7 @@ export const AppEmbed: React.FC<IAppEmbedProps> = (props) => {
     React.useEffect(() => {
         const ownerPresent = isOwnerWindowPresent();
         if (ownerPresent && props.postMessageToken) {
-            // tslint:disable-next-line: no-floating-promises
-            postReadyMessage(props.postMessageToken);
+            void postReadyMessage(props.postMessageToken);
         } else {
             appInsights.trackTrace({ message: "Not posting embed ready message.", properties: { ownerPresent, postMessageToken: props.postMessageToken } });
         }

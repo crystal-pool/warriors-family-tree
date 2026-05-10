@@ -5,7 +5,7 @@ export interface ILanguageInfo {
 }
 
 const knownLanguagesInfo = {
-    cs: <ILanguageInfo>{ autonym: "čeština" },
+    cs: { autonym: "čeština" },
     da: { autonym: "dansk" },
     de: { autonym: "Deutsch" },
     "en-us": { autonym: "English (United States)" },
@@ -32,7 +32,7 @@ export type KnownLanguage = keyof typeof knownLanguagesInfo;
 
 export type KnownLanguageWithFallback = keyof typeof knownLanguagesInfo | "en" | "zh";
 
-export const knownLanguages: ReadonlyArray<KnownLanguage> = Object
+export const knownLanguages: readonly KnownLanguage[] = Object
     .keys(knownLanguagesInfo)
     .filter((k): k is KnownLanguage => Object.prototype.hasOwnProperty.call(knownLanguagesInfo, k))
     .sort();
@@ -65,10 +65,10 @@ export function choosePerferredLanguage<TBaseline extends string>(baselines: Ite
     if (typeof preferences === "string") preferences = [preferences];
     let priority = preferences.length;
     const languageCandidates = new Map<TBaseline, number>();
-    for (let lang of preferences) {
+    for (const lang of preferences) {
         for (const knownLang of baselines) {
             const similarity = evaluateLanguageSimilarity(knownLang, lang);
-            languageCandidates.set(knownLang, Math.max(languageCandidates.get(knownLang) || 0, similarity * priority));
+            languageCandidates.set(knownLang, Math.max(languageCandidates.get(knownLang) ?? 0, similarity * priority));
         }
         priority--;
     }

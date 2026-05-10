@@ -35,8 +35,7 @@ function scrollToPolyfill(this: HTMLElement, arg1: ScrollToOptions | number | un
     const y = typeof arg1 === "object" ? arg1.top : arg2;
     const behavior = typeof arg1 === "object" && arg1.behavior || "smooth";
     if (behavior === "smooth") {
-        // tslint:disable-next-line: no-floating-promises
-        smoothScrollTo(this, x ?? this.scrollLeft, y ?? this.scrollTop);
+        void smoothScrollTo(this, x ?? this.scrollLeft, y ?? this.scrollTop);
     } else {
         if (x != null) this.scrollLeft = x;
         if (y != null) this.scrollTop = y;

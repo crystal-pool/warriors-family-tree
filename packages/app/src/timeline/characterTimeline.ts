@@ -37,7 +37,7 @@ export interface ITimelinePositionHoldingEvent extends ITimelineEventBase {
 export interface ITimelineNamingEvent extends ITimelineEventBase {
     type: "naming";
     // [text, language][]
-    names: readonly [string, string][];
+    names: ReadonlyArray<[string, string]>;
 }
 
 export type TimelineEvent = ITimelineRelationEvent | ITimelineAffiliationEvent | ITimelinePositionHoldingEvent | ITimelineNamingEvent;
@@ -59,7 +59,7 @@ export function compareTimelineTime(x?: TimelineTime, y?: TimelineTime): -1 | 0 
 }
 
 export class CharacterTimelineBuilder {
-    constructor(private _dataService: DataService) {
+    public constructor(private _dataService: DataService) {
     }
     public timelineTimeFromMarker(markerEntityId: RdfQName, offsetMonths?: number): TimelineTime {
         if (isBlankNodeUri(markerEntityId)) return "unknown";
@@ -72,7 +72,7 @@ export class CharacterTimelineBuilder {
             marker: markerEntityId,
             offsetMonths: offsetMonths,
             timeline: marker.timeline,
-            absoluteMonths: marker.totalMonths + (offsetMonths || 0)
+            absoluteMonths: marker.totalMonths + (offsetMonths ?? 0)
         };
     }
     private _sortAndFill(events: ITimelineEventBase[]): void {

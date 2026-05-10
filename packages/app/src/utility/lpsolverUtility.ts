@@ -3,8 +3,8 @@ import Solver from "javascript-lp-solver";
 export type Polynomial = Record<string, number | null | undefined>;
 export type Contraint = [Polynomial, "<=" | "=" | ">=", number];
 
-export function buildPolynomial(obj: Polynomial, rhs?: (string | number)[], lhs?: (string | number)[]): string {
-    const builder: (string | number)[] = lhs ? [...lhs] : [];
+export function buildPolynomial(obj: Polynomial, rhs?: Array<string | number>, lhs?: Array<string | number>): string {
+    const builder: Array<string | number> = lhs ? [...lhs] : [];
     for (const k in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, k)) {
             const coeff = obj[k];

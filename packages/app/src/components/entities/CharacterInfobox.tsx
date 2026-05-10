@@ -42,7 +42,7 @@ function renderRelationEntries(entries: Iterable<ITimelineRelationEvent>, props:
     }
 }
 
-function getInfoboxItems(qName: RdfQName, props: ICharacterInfoboxProps): [string, React.ReactNode][] {
+function getInfoboxItems(qName: RdfQName, props: ICharacterInfoboxProps): Array<[string, React.ReactNode]> {
     function getRelations(relationType: CharacterRelationType) {
         return characterTimelineBuilder.getRelations(qName, relationType);
     }

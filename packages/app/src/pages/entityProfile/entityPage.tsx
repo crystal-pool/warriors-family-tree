@@ -18,6 +18,7 @@ import CommonScss from "../common.module.scss";
 import { CharacterEntityDetails } from "./character";
 import Scss from "./entityPage.module.scss";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IEntityProfileProps {
 }
 
@@ -40,7 +41,7 @@ function renderEntityPartials(qName: string): IEntityPartials {
     };
 }
 
-export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) => {
+export const EntityProfile: React.FC<IEntityProfileProps> = React.memo(() => {
     const params = useParams<EntityRoutingParams>();
     const [search] = useSearchParams();
     const queryParams = parseQueryParams(search);
@@ -53,7 +54,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
             setPageTitle(resourceManager.getPrompt("EntityProfileTitle"));
         } else {
             const label = dataService.getLabelFor(entityQName);
-            setPageTitle(label && label.label || entityQName);
+            setPageTitle(label?.label || entityQName);
         }
     }, [params]);
     if (!entityQName) {
@@ -62,7 +63,7 @@ export const EntityProfile: React.FC<IEntityProfileProps> = React.memo((props) =
             <p>{resourceManager.getPrompt("PageNeedsEntityId")}</p>
         </React.Fragment>);
     }
-    if (entityQName.indexOf(":") < 0) {
+    if (!entityQName.includes(":")) {
         location.replace(routePathBuilders.familyTree({ ...params, character: "wd:" + entityQName }, search));
     }
     const partials = renderEntityPartials(entityQName);

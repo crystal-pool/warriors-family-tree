@@ -11,7 +11,7 @@ export function flattenKeyPath(obj: NestableObject): FlattenedObject {
                 if (typeof value === "object" && value) {
                     flattenInner(value as NestableObject, flattenedKey);
                 } else {
-                    result[flattenedKey] = value as FlattenedObject[string];
+                    result[flattenedKey] = value;
                 }
             }
         }

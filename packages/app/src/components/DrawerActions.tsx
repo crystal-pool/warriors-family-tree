@@ -29,6 +29,7 @@ export interface IDrawerActionsProps {
 }
 
 // Need ref to make Tooltip work
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     const { asMenuItem, children, ...rest } = props;
     if (asMenuItem) {
@@ -41,26 +42,27 @@ const ItemComponent: React.FC<IItemComponentProps> = React.forwardRef((props, re
 });
 
 // Need ref to make Menu work
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     return (
         <List ref={ref}>
             <ItemComponent onClick={() => {
                 openUrl("https://github.com/crystal-pool/warriors-family-tree");
-                props.onItemClick && props.onItemClick();
+                props.onItemClick?.();
             }} {...buildFeatureAnchorProps("navigation.external.repo")}>
                 <ListItemIcon><LocalIcons.GitHub /></ListItemIcon>
                 <ListItemText primary="GitHub" secondary={resourceManager.getPrompt("StarTheRepo")} />
             </ItemComponent>
             <ItemComponent onClick={() => {
                 openUrl("https://crystalpool.cxuesong.com/");
-                props.onItemClick && props.onItemClick();
+                props.onItemClick?.();
             }} {...buildFeatureAnchorProps("navigation.external.crystalpool.main")}>
                 <ListItemIcon><Icons.Storage /></ListItemIcon>
                 <ListItemText primary="Crystal Pool" secondary={resourceManager.getPrompt("ContributeToTheDataSource")} />
             </ItemComponent>
             <ItemComponent onClick={() => {
                 openUrl("https://crystalpool.cxuesong.com/wiki/Crystal_Pool:Warriors_Family_Tree");
-                props.onItemClick && props.onItemClick();
+                props.onItemClick?.();
             }} {...buildFeatureAnchorProps("navigation.external.crystalpool.about")}>
                 <ListItemIcon><LocalIcons.Cat /></ListItemIcon>
                 <ListItemText primary={resourceManager.getPrompt("AboutThisApp")} secondary={resourceManager.getPrompt("AboutThisAppDescription")} />
@@ -68,6 +70,7 @@ export const AppActionsList: React.FC<IDrawerActionsProps> = React.forwardRef((p
         </List>);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardRef((props, ref: React.Ref<any>) => {
     return (<ThemeProvider theme={environmentInfoListTheme}>
         <List dense ref={ref}>
@@ -76,7 +79,7 @@ export const EnvironmentInfoList: React.FC<IDrawerActionsProps> = React.forwardR
                 <ItemComponent
                     onClick={() => {
                         openUrl("https://github.com/crystal-pool/warriors-family-tree/commit/" + environment.commitId);
-                        props.onItemClick && props.onItemClick();
+                        props.onItemClick?.();
                     }} {...buildFeatureAnchorProps("navigation.external.repo.currentRevision")}>
                     <ListItemText primary="Version" secondary={environment.version || environment.commitId.substr(0, 8)} />
                 </ItemComponent>

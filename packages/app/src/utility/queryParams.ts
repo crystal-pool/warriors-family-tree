@@ -34,7 +34,7 @@ export function parseQueryParams(queryExpr: string | URLSearchParams): IQueryPar
             throw new RangeError("Invalid integer expression in query params.");
         return parsed;
     }
-    let s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
+    const s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
     return {
         embed: parseBoolean(s.get("embed")),
         depth: parseIntNumber(s.get("depth")),
@@ -43,9 +43,9 @@ export function parseQueryParams(queryExpr: string | URLSearchParams): IQueryPar
 }
 
 export function setQueryParams<T extends IQueryParams>(queryExpr: string | URLSearchParams, replacements: { [k in keyof T]?: T[k] | null }): string {
-    let s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
+    const s = typeof queryExpr === "string" ? new URLSearchParams(queryExpr) : queryExpr;
     for (const k in replacements) {
-        if (replacements.hasOwnProperty(k)) {
+        if (Object.prototype.hasOwnProperty.call(replacements, k)) {
             const v = replacements[k];
             if (v === null)
                 s.delete(k);
@@ -57,7 +57,7 @@ export function setQueryParams<T extends IQueryParams>(queryExpr: string | URLSe
 }
 
 export function resetQueryParams<T extends IQueryParams>(queryExpr: string, params?: { [k in keyof T]?: T[k] | null }): string {
-    let s = new URLSearchParams(queryExpr);
+    const s = new URLSearchParams(queryExpr);
     const allParams: Record<string, string> = {};
     for (const k of intrinsicParamNames) {
         if (s.has(k)) allParams[k] = s.get(k)!;

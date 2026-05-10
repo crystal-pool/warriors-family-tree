@@ -28,9 +28,9 @@ const knownSites: Record<string, KnownSiteInfo> = {
 
 function matchSiteKey(pageHref: string): string | undefined {
     let match: string | undefined;
-    let prevPrefixLength = 0;
+    const prevPrefixLength = 0;
     for (const key in knownSites) {
-        if (!knownSites.hasOwnProperty(key)) continue;
+        if (!Object.prototype.hasOwnProperty.call(knownSites, key)) continue;
         const { href } = knownSites[key];
         if (href.length > prevPrefixLength && pageHref.startsWith(href)) {
             match = key;

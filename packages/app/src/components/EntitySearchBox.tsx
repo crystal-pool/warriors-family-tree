@@ -12,7 +12,7 @@ export interface IEntitySearchBoxProps {
 
 function searchEntities(searchExpr: string): IEntityLookupResultItem[] {
     const searchResult = dataService.lookupEntity(searchExpr, 50);
-    const entityIdMatch = searchExpr.match(/^\s*(wd:)?(Q\d+)/ui);
+    const entityIdMatch = /^\s*(wd:)?(Q\d+)/ui.exec(searchExpr);
     // Supports search pattern like Q1234 .
     if (entityIdMatch) {
         const entityId = entityIdMatch[2].toUpperCase();

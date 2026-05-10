@@ -6,19 +6,19 @@ export function renderTemplate(template: string, args?: TemplateArguments<React.
     if (!args) {
         return template;
     }
-    let re = /\{(.+?)\}/g;
+    const re = /\{(.+?)\}/g;
     const result: React.ReactNode[] = [];
-    do {
+    while (true) {
         const lastIndex = re.lastIndex;
         const match = re.exec(template);
         if (match) {
             result.push(template.substring(lastIndex, match.index));
-            result.push((args as any)[match[1]]);
+            result.push((args as Record<string, React.ReactNode>)[match[1]]);
         } else {
             result.push(template.substring(lastIndex));
             break;
         }
-    } while (true);
+    };
     return result;
 }
 

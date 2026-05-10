@@ -16,10 +16,10 @@ export class ResourceManager {
         this._language = language;
     }
     public getPromptRaw<T extends PromptKey>(key: T): Partial<PromptsTable>[T] {
-        return (prompts[this._language] || {})[key];
+        return prompts[this._language]?.[key];
     }
     public getPrompt(key: PromptKey, args?: TemplateArguments<string>): string {
-        let value = selectLocalizedResource(lang => prompts[lang as KnownLanguageWithFallback] && prompts[lang as KnownLanguageWithFallback]![key], this._language, key);
+        let value = selectLocalizedResource(lang => prompts[lang as KnownLanguageWithFallback]?.[key], this._language, key);
         if (args) value = formatTemplate(value, args);
         return value;
     }

@@ -72,7 +72,7 @@ export class RouteRoot extends React.PureComponent<IRouteRootProps> {
     }
     private onWindowUnload = () => {
         this.endPageScopeIfNeeded("unload");
-    }
+    };
     private _onLocationChanged(): void {
         this.endPageScopeIfNeeded("locationChanged");
         this._pageScopeId = startNewPageScope(this.props.location);
@@ -191,16 +191,16 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
         this.setState({
             languageContext: { language, setLanguage: this.setLanguage }
         });
-    }
+    };
     public setTitle = (title: string, withAppName: boolean) => {
         const context = this.state.titleContext;
         if (context.title !== title || context.withAppName !== withAppName) {
             this.setState({ titleContext: { title, withAppName, setTitle: this.setTitle } });
         }
-    }
+    };
     public clearError = () => {
         this.setState({ error: undefined });
-    }
+    };
     private _applyLanguage(language: KnownLanguage, prevLanguage?: KnownLanguage): void {
         document.documentElement.lang = language;
         appInsights.trackEvent({ name: "language.applied", properties: { language, prevLanguage } });
@@ -215,7 +215,7 @@ export class App extends React.PureComponent<IAppProps, IAppStates> {
     private _onGlobalError = (e: ErrorEvent | PromiseRejectionEvent) => {
         const merged = e as (ErrorEvent & PromiseRejectionEvent);
         this.setState({ error: merged.error || merged.reason || "<Error>" });
-    }
+    };
     private _onRootContainerClick(e: React.MouseEvent) {
         if (!(e.target instanceof Element)) return;
         trackFeatureUsageFromElement(e.target);

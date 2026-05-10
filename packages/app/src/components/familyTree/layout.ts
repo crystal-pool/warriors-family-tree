@@ -72,15 +72,15 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDim
         wu.filter(t => !!t[1], props.children).map(t => [t[0], t[1]!]))
     ) {
         if (id1 === id2) throw new Error(`Detected self-mating: ${id1}.`);
-        let siblings1 = matesLookup.get(id1) || matesLookup.set(id1, new Set()).get(id1)!;
-        let siblings2 = matesLookup.get(id2) || matesLookup.set(id2, new Set()).get(id2)!;
+        const siblings1 = matesLookup.get(id1) ?? matesLookup.set(id1, new Set()).get(id1)!;
+        const siblings2 = matesLookup.get(id2) ?? matesLookup.set(id2, new Set()).get(id2)!;
         siblings1.add(id2);
         siblings2.add(id1);
         knownNodes.add(id1).add(id2);
     }
     for (const [id1, id2, id3] of props.children) {
         const key = buildUnorderedIdPair(id1, id2);
-        let children = childrenLookup.get(key) || childrenLookup.set(key, new Set()).get(key)!;
+        const children = childrenLookup.get(key) ?? childrenLookup.set(key, new Set()).get(key)!;
         children.add(id3);
         knownNodes.add(id1).add(id3);
         if (id2) knownNodes.add(id2);
@@ -92,7 +92,7 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDim
         successful: false
     };
     function stopwatchDuration(prop: keyof IFamilyTreeLayoutTelemetry) {
-        telemetryProps[prop] = sw1.elapsed as any;
+        telemetryProps[prop] = sw1.elapsed as never;
         sw1.restart();
     }
     try {
@@ -204,7 +204,7 @@ function arrangeRows(knownNodes: Iterable<string>, matesLookup: Map<string, Set<
     for (const node of orderedNodes) {
         const rowIndex = solution[varNameY(node)] || 0;
         let row = rows[rowIndex];
-        if (row == null) row = rows[rowIndex] = [];
+        row ??= rows[rowIndex] = [];
         row.push(node);
     }
     // console.log(rows);
@@ -340,7 +340,7 @@ function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, chil
             if (node.column > 0) {
                 let distance = currentX + node.width / 2;
                 for (let k = 0; k < node.column; k++) {
-                    let node1 = row[k];
+                    const node1 = row[k];
                     distance -= node1.width / 2;
                     constraints.push([{ [varNameX(node.id)]: 1, [varNameX(node1.id)]: -1 }, ">=", distance]);
                     distance -= node1.width / 2;
@@ -394,13 +394,13 @@ interface IConnectionArrangment {
 function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>): IConnectionArrangment {
     const layoutNodes = new Map<string, ILayoutNode>();
     rows.forEach(nodes => nodes.forEach(n => layoutNodes.set(n.id, n)));
-    let nodeSpacing = 1;
+    const nodeSpacing = 1;
     // Layout connections.
     const occupiedSlotsMap = new Map<string, boolean[]>();
     function findVacantSlot(ids: Iterable<string>, occupySlot: boolean): number {
         // WuIterator does not support iterations more than once.
         if (occupySlot && !Array.isArray(ids)) ids = Array.from(ids);
-        const slots = wu(ids).map(id => occupiedSlotsMap.get(id)).filter(s => !!s).toArray() as boolean[][];
+        const slots = wu(ids).map(id => occupiedSlotsMap.get(id)).filter(s => !!s).toArray();
         const vacant = wu.count(1).find(i => slots.every(s => !s[i]))!;
         occupySlot && wu(ids).forEach(id => declareSlotOccupied(id, vacant));
         return vacant;
@@ -425,9 +425,9 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
             // Mates
             for (const mate of mates) {
                 if (visitedNodes.has(mate)) continue;
-                const occupiedSlots = occupiedSlotsMap.get(node.id) || occupiedSlotsMap.set(node.id, []).get(node.id)!;
+                const occupiedSlots = occupiedSlotsMap.get(node.id) ?? occupiedSlotsMap.set(node.id, []).get(node.id)!;
                 if (!occupiedSlots[0]) {
-                    if (next && next.id === mate) {
+                    if (next?.id === mate) {
                         connections.push({ id1: node.id, id2: mate, slot1: 0 });
                         occupiedSlots[0] = true;
                         continue;
@@ -487,6 +487,6 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
     }
     return {
         connections,
-        rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) || []).length - 1), 0)),
+        rowSlotCount: rows.map(row => row.reduce((p, n) => Math.max(p, (occupiedSlotsMap.get(n.id) ?? []).length - 1), 0)),
     };
 }

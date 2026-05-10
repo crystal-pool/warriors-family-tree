@@ -15,7 +15,7 @@ export function initializeTracking() {
     function processTelemetry(item: ITelemetryItem): boolean {
         if (item.baseType === "PageviewData" && item.baseData) {
             // Allows us to override page title afterwards.
-            const surrogateProps = item.baseData.properties && item.baseData.properties._outer_overrides;
+            const surrogateProps = item.baseData.properties?._outer_overrides;
             if (surrogateProps) {
                 Object.assign(item.baseData, surrogateProps);
                 delete item.baseData.properties._outer_overrides;
@@ -30,7 +30,7 @@ export function initializeTracking() {
                     buildTimestamp: environment.buildTimestamp,
                     language: telemetryEnvironment.language
                 },
-                ...(item.baseData && item.baseData.properties || {})
+                ...(item.baseData?.properties || {})
             }
         };
         if (!environment.isProduction) {

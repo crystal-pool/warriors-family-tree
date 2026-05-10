@@ -13,7 +13,7 @@ export interface IEmbedIntrinsicOptions {
 
 export interface IEmbedOptions {
     route?: string;
-    queryParams?: string | Record<string, any>;
+    queryParams?: string | Record<string, unknown>;
     embedOptions?: IEmbedIntrinsicOptions;
 }
 
@@ -39,8 +39,8 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         throw new TypeError("container should be an HTMLElement object.");
     if (options && !(typeof options === "object"))
         throw new TypeError("options should be an IEmbedOptions object.");
-    options = options || {};
-    const intrinsicOptions = options.embedOptions || {};
+    options = options ?? {};
+    const intrinsicOptions = options.embedOptions ?? {};
     let url = intrinsicOptions.urlStem || defaultAppUrlStem;
     const postMessageToken = "wft-pmt-" + Math.round(Math.random() * 2821109907456).toString(36);
     let disposeCallbacks: Array<() => void> | undefined = [];
@@ -51,10 +51,10 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         if (typeof options.queryParams === "object") {
             builder = new URLSearchParams();
             for (const k in options.queryParams) {
-                if (options.queryParams.hasOwnProperty(k)) {
+                if (Object.prototype.hasOwnProperty.call(options.queryParams, k)) {
                     const v = options.queryParams[k];
                     if (v != null) {
-                        builder.append(k, v);
+                        builder.append(k, String(v));
                     }
                 }
             }
@@ -74,7 +74,7 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         frame.className = "warriors-family-tree-embed " + (intrinsicOptions.className || "");
         if (intrinsicOptions.style) {
             for (const k in intrinsicOptions.style) {
-                if (intrinsicOptions.style.hasOwnProperty(k)) {
+                if (Object.prototype.hasOwnProperty.call(intrinsicOptions.style, k)) {
                     let v = intrinsicOptions.style[k];
                     if (typeof v === "number") v = String(v);
                     frame.style.setProperty(k, v);
@@ -88,7 +88,7 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         }
         frame.allow = "fullscreen";
         frame.sandbox.add("allow-popups", "allow-popups-to-escape-sandbox", "allow-scripts", "allow-same-origin");
-        const autoResize = intrinsicOptions.autoResize == null ? true : intrinsicOptions.autoResize;
+        const autoResize = intrinsicOptions.autoResize ?? true;
         const embedMessageTarget = new EmbedMessageTarget(frame, postMessageToken, {
             observeDocumentHeight: autoResize,
             scrollable: intrinsicOptions.scrollable
@@ -163,7 +163,7 @@ class EmbedMessageTarget implements IDisposable {
         if (!message.token) message.token = this._messageToken;
         if (!this._embedFrame.contentWindow)
             throw new Error("Cannot postMessage to the embed <iframe>.");
-        this._embedFrame.contentWindow!.postMessage(message, "*");
+        this._embedFrame.contentWindow.postMessage(message, "*");
     }
     public dispose(): void {
         window.removeEventListener("message", this._onMessage);
@@ -187,5 +187,5 @@ class EmbedMessageTarget implements IDisposable {
             }
             this._messageCallback(message);
         }
-    }
+    };
 }

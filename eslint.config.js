@@ -62,6 +62,11 @@ export default defineConfig(
           ignoreTernaryTests: false,
         },
       ],
+      "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
+      "@typescript-eslint/no-base-to-string": ["error", {
+        checkUnknown: false,
+        ignoredTypeNames: ['Error', 'RegExp', 'URL', 'URLSearchParams', '{}'],
+      }],
       "no-var": "error",
       "no-duplicate-imports": "error",
     },

@@ -22,13 +22,13 @@ export interface ICharacterEntityDetailsProps {
     qName: string;
 }
 
-function renderCharacterName(names: readonly [string, string][], languagePreferrence: string[]): React.ReactNode {
+function renderCharacterName(names: ReadonlyArray<[string, string]>, languagePreferrence: string[]): React.ReactNode {
     if (names.length > 0 && languagePreferrence.length > 0) {
-        const knownLanguages = new Set(wu(names).map(([t, l]) => l));
+        const knownLanguages = new Set(wu(names).map(([_, l]) => l));
         const language = choosePerferredLanguage(knownLanguages, languagePreferrence);
         if (language) {
             return <>
-                <span lang={language}>{names.filter(([t, l]) => l === language).map(([t, l]) => t).join(resourceManager.getPrompt("ListSeparator"))}
+                <span lang={language}>{names.filter(([_, l]) => l === language).map(([t, _]) => t).join(resourceManager.getPrompt("ListSeparator"))}
                     {language !== languagePreferrence[0] &&
                         <span className={entityPageScss.fallbackLabelLanguageBadge}>{resourceManager.getPrompt("Brackets", [languageInfo[language as KnownLanguage]?.autonym || language])}</span>
                     }

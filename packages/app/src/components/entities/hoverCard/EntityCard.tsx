@@ -18,7 +18,7 @@ export const EntityCard: React.FC<IEntityCardProps> = function EntityCard(props)
 };
 
 const HoverTooltip = styled(LogicallyParentedTooltip)(({ theme }) => ({
-    [`& .MuiTooltip-tooltip`]: {
+    ["& .MuiTooltip-tooltip"]: {
         padding: "0",
         backgroundColor: "unset",
         boxShadow: theme.shadows[1],

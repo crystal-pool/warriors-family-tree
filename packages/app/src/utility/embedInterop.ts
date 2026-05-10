@@ -29,7 +29,7 @@ let readyPosted = false;
 
 export function waitMessage<T extends HostMessage>(type: T["type"], cancellationToken?: ICancellationToken): PromiseLike<T> {
     const plrs = new PromiseLikeResolutionSource<T>();
-    const cts = cancellationToken && cancellationToken.subscribe(() => {
+    const cts = cancellationToken?.subscribe(() => {
         window.removeEventListener("message", handler);
         plrs.tryCancel();
     });
@@ -38,7 +38,7 @@ export function waitMessage<T extends HostMessage>(type: T["type"], cancellation
             try {
                 plrs.tryResolve(e.data);
             } finally {
-                cts && cts.dispose();
+                cts?.dispose();
                 window.removeEventListener("message", handler);
             }
         }
@@ -72,7 +72,7 @@ export async function postReadyMessage(token: string): Promise<void> {
         name: "postReadyMessage.hostInitialize",
         properties: { message }
     });
-    hostSettings = message.settings || {};
+    hostSettings = message.settings ?? {};
     if (hostSettings.observeDocumentHeight) {
         observeDocumentHeight();
     }

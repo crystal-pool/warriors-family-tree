@@ -10,9 +10,9 @@ import { ILayoutNode, IRect, ISize, layoutFamilyTree } from "./layout";
 export interface IFamilyTreeData {
     roots: string[];
     // s - s
-    mates: [string, string][];
+    mates: Array<[string, string]>;
     // p + p -> c
-    children: [string, string | null | undefined, string][];
+    children: Array<[string, string | null | undefined, string]>;
 }
 
 export type NodeRenderCallback = (id: string, boundingRect: Readonly<IRect>) => React.ReactNode;
@@ -32,11 +32,11 @@ const FAMILY_TREE_MATE_SLOT_OFFSET = 10;
 
 export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
     public static defaultProps: Partial<IFamilyTreeProps> = {
-        onEvalNodeDimension(id) {
+        onEvalNodeDimension(_id) {
             // Fixed dimension by default.
             return { width: 130, height: 50 };
         },
-        onRenderNode(id, brct): React.ReactNode {
+        onRenderNode(id, _brct): React.ReactNode {
             return id;
         }
     };
@@ -66,10 +66,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             this.forceUpdate();
             return;
         }
-        const FAMILY_TREE_BOX_SPACING_Y = this.props.nodeSpacingY == null ? 20 : this.props.nodeSpacingY;
+        const FAMILY_TREE_BOX_SPACING_Y = this.props.nodeSpacingY ?? 20;
         const drawingWidth = layout.rawWidth;
         // [top, height]
-        const rowDimension: [number, number][] = [];
+        const rowDimension: Array<[number, number]> = [];
         const rowSlotTop: number[] = [];
         let drawingHeight: number | undefined;
         {
@@ -104,8 +104,10 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             return rowSlotTop[node.row] + FAMILY_TREE_MATE_SLOT_OFFSET * (slotIndex - 1);
         }
         // Draw nodes.
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let rowi = 0; rowi < layout.rows.length; rowi++) {
             const row = layout.rows[rowi];
+            // eslint-disable-next-line @typescript-eslint/prefer-for-of
             for (let coli = 0; coli < row.length; coli++) {
                 const node = row[coli];
                 const bRect: IRect = getNodeRect(node);
@@ -250,11 +252,11 @@ export class FamilyTree extends React.PureComponent<IFamilyTreeProps> {
             }
         }
         this.forceUpdate();
-    }
+    };
     private _onDrawingRootChanged = (root: HTMLDivElement | null): void => {
         this._drawingRoot = root;
         this._updateDrawing();
-    }
+    };
     public scrollToNode(id: string): boolean {
         const internalId = this._nodeInternalIdMap.get(id);
         if (internalId == null) return false;
@@ -307,7 +309,7 @@ function plotElbowHorizontal(container: Container, x1: number, y1: number, y2: n
 
 export function dumpFamilyTreeData(data: IFamilyTreeData): string {
     function getLabelFor(qName: RdfQName): string {
-        return (dataService.getLabelFor(qName) || {}).label || qName;
+        return dataService.getLabelFor(qName)?.label || qName;
     }
     const result: IFamilyTreeData = {
         roots: data.roots.map(v => getLabelFor(v)),

@@ -13,7 +13,7 @@ export function usePrevious<T, TInit>(nextValue: T, initialValue: TInit): T | TI
 export interface IPageTitleContextValue {
     title?: string;
     withAppName: boolean;
-    setTitle(title: string, withAppName?: boolean): void;
+    setTitle: (title: string, withAppName?: boolean) => void;
 }
 
 export const PageTitleContext = React.createContext<IPageTitleContextValue>({
@@ -51,10 +51,12 @@ export function shallowEquals(objA: unknown, objB: unknown): boolean {
             } else if (Array.isArray(objB)) {
                 return false;
             }
-            const keysA = Object.keys(objA as {});
-            const keysB = Object.keys(objB as {});
-            if (keysA.length !== keysB.length) return false;
-            return keysA.every(k => (objA as any)[k] === (objB as any)[k]);
+            {
+                const keysA = Object.keys(objA);
+                const keysB = Object.keys(objB as object);
+                if (keysA.length !== keysB.length) return false;
+                return keysA.every(k => (objA as Record<string, unknown>)[k] === (objB as Record<string, unknown>)[k]);
+            }
         default:
             // We've excluded objA === objB case.
             return false;

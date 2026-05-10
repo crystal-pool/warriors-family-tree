@@ -20,6 +20,6 @@ export function getGitHead(cwd: string): Promise<string> {
 }
 
 export async function getGitVersionSpec(cwd: string): Promise<string> {
-    const tagSpec = await invokeGit(`describe --tags --match "v-*"`, cwd);
+    const tagSpec = await invokeGit("describe --tags --match \"v-*\"", cwd);
     return tagSpec;
 }
