@@ -1,15 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "noEmit": true,
-    "noUnusedLocals": true
+    "types": ["node"],
+    "lib": ["ESNext"],
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
+    "vite.config.ts"
   ],
-  "references": [
-    { "path": "../shared" }
-  ]
 }

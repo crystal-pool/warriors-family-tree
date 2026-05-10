@@ -1,12 +1,12 @@
-import { resolve } from "path";
-import checker from "vite-plugin-checker";
-import { defineConfig } from "vite";
+import type { IEnvironmentInfo } from "@wft-repo/shared";
 import { getGitHead, getGitVersionSpec } from "@wft-repo/shared/build/git";
 import { flattenKeyPath, serializeRecordValues } from "@wft-repo/shared/build/utility";
-import type { IEnvironmentInfo } from "@wft-repo/shared";
+import { resolve } from "path";
+import { defineConfig, UserConfig } from "vite";
+import checker from "vite-plugin-checker";
 
-export default defineConfig(async ({ mode }) => {
-  const isProduction = mode === "production";
+export default defineConfig(async (env): Promise<UserConfig> => {
+  const isProduction = env.mode === "production";
   const repoRoot = resolve(__dirname, "../..");
 
   let commitId = "unknown";
@@ -32,7 +32,11 @@ export default defineConfig(async ({ mode }) => {
     root: __dirname,
     define: definitions,
     plugins: [
-      checker({ typescript: true }),
+      checker({
+        typescript: {
+          tsconfigPath: "src/tsconfig.json",
+        }
+      }),
     ],
     css: {
       modules: {

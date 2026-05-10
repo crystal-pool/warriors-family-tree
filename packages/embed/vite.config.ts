@@ -1,14 +1,13 @@
-import { resolve } from "path";
-import checker from "vite-plugin-checker";
-import { defineConfig } from "vite";
 import { getGitHead } from "@wft-repo/shared/build/git";
 import { flattenKeyPath, serializeRecordValues } from "@wft-repo/shared/build/utility";
-import type { IEnvironmentInfo } from "@wft-repo/shared";
+import { resolve } from "path";
+import { defineConfig, UserConfig } from "vite";
+import checker from "vite-plugin-checker";
 
 const LIB_NAME = "WarriorsFamilyTreeEmbed";
 
-export default defineConfig(async ({ mode }) => {
-  const isProduction = mode === "production";
+export default defineConfig(async (env): Promise<UserConfig> => {
+  const isProduction = env.mode === "production";
   const repoRoot = resolve(__dirname, "../..");
 
   let commitId = "unknown";
@@ -24,14 +23,18 @@ export default defineConfig(async ({ mode }) => {
       buildTimestamp: Date.now(),
       isProduction,
       aiInstrumentationKey: undefined,
-    } as IEnvironmentInfo,
+    },
   }));
 
   return {
     root: __dirname,
     define: definitions,
     plugins: [
-      checker({ typescript: true }),
+      checker({
+        typescript: {
+          tsconfigPath: "src/tsconfig.json",
+        }
+      }),
     ],
     css: {
       modules: {
@@ -54,7 +57,7 @@ export default defineConfig(async ({ mode }) => {
         //   3. Update README.md embed instructions to use <script type="module">
         //      and `import * as WarriorsFamilyTreeEmbed from "./wft-embed.js"`
         formats: ["umd"],
-        fileName: () =>"wft-embed-umd.js",
+        fileName: () => "wft-embed-umd.js",
       },
       rollupOptions: {
         // No externals — everything bundled for standalone embed usage.

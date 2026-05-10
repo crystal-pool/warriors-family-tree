@@ -11,7 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@microsoft/applicationinsights-web": "^2.7.4",
+    "@microsoft/applicationinsights-web": "^3.4.1",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "@svgdotjs/svg.js": "^3.2.5",
