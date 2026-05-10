@@ -54,10 +54,19 @@ export default defineConfig(async ({ mode }) => {
         //   3. Update README.md embed instructions to use <script type="module">
         //      and `import * as WarriorsFamilyTreeEmbed from "./wft-embed.js"`
         formats: ["umd"],
-        fileName: (_format) => "wft-embed-umd.js",
+        fileName: () =>"wft-embed-umd.js",
       },
       rollupOptions: {
         // No externals — everything bundled for standalone embed usage.
+        output: {
+          // The es2015 preset enables Symbol.toStringTag for namespace
+          // objects, but the minifier aliases global Symbol to a variable
+          // defined *after* the marker, crashing the UMD bundle at load
+          // time.  Disable it since it's unnecessary for a standalone lib.
+          generatedCode: {
+            symbols: false,
+          },
+        },
       },
     },
   };
