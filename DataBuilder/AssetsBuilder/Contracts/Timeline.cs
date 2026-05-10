@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
@@ -10,7 +7,7 @@ public class TimelineRoot
 {
 
     // <EntityId, MarkerInfo>
-    public IDictionary<string, TimelineMarkerInfo> Markers { get; set; } = new Dictionary<string, TimelineMarkerInfo>();
+    public required IDictionary<string, TimelineMarkerInfo> Markers { get; set; }
 
 }
 
@@ -18,7 +15,7 @@ public class TimelineRoot
 public class TimelineMarkerInfo
 {
 
-    public string TimelineName { get; set; } = "";
+    public required string TimelineName { get; set; }
 
     public float Month { get; set; }
 
