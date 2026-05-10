@@ -6,14 +6,8 @@ param (
     $RdfPath = "Dump/wbdump.ttl"
 )
 
-function checkLastExitCode() {
-    if ($LASTEXITCODE) {
-        Write-Error "Command exit code indicates failure: $LASTEXITCODE"
-        Exit $LASTEXITCODE
-    }
-}
-
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $true
 
 $RdfPath = (Resolve-Path $RdfPath).Path
 $DataPath = (New-Item "./packages/app/public/data" -ItemType Directory -Force).FullName
@@ -23,18 +17,18 @@ $AssetsBuilderProjectDir = (Resolve-Path "./DataBuilder/AssetsBuilder/AssetsBuil
 
 Copy-Item $RdfPath "$RawDataPath/wbdump.ttl"
 # Assumes $PWD is repo root
-dotnet run -c Release --project $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
-if ($LASTEXITCODE) {
-    # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
-    Write-Warning "::warning ::TimelineBuilder fetching live module failed. Will use fallback timeline data."
+{
+    $PSNativeCommandUseErrorActionPreference = $false
+    dotnet run -c Release --project $TimelineBuilderProjectDir -- "$RawDataPath/Timeline.json"
+    if ($LASTEXITCODE) {
+        # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
+        Write-Warning "::warning ::TimelineBuilder fetching live module failed. Will use fallback timeline data."
+    }
 }
 dotnet run -c Release --project $AssetsBuilderProjectDir -- $RawDataPath $DataPath
-checkLastExitCode
 
 yarn workspace warriors-family-tree run build -- --mode production
-checkLastExitCode
 
 yarn workspace wft-embed run build -- --mode production
-checkLastExitCode
 New-Item -ItemType Directory ./packages/app/dist/embed -Force
 Copy-Item ./packages/embed/dist/* ./packages/app/dist/embed/ -Recurse
