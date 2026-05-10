@@ -1,5 +1,4 @@
 import { SeverityLevel } from "@microsoft/applicationinsights-web";
-import { ResizeObserver } from "resize-observer";
 import { wait } from "jscorlib/promises";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
 import { appInsights } from "./telemetry";

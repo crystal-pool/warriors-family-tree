@@ -30,6 +30,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@wft-repo/linters": "workspace:*",
+    "node-html-parser": "^7.1.0",
     "vite": "^8.0.11",
     "vite-plugin-checker": "^0.13.0"
   }
