@@ -1,4 +1,4 @@
-import _ from "lodash";
+import * as _ from "lodash-es";
 
 export interface ILanguageInfo {
     autonym: string;
@@ -76,7 +76,7 @@ export function choosePerferredLanguage<TBaseline extends string>(baselines: Ite
 }
 
 function detectBrowserLanguage(): KnownLanguage {
-    return choosePerferredLanguage(knownLanguages, _.uniq(navigator.languages || navigator.language || "en-us")) || "en-us";
+    return choosePerferredLanguage(knownLanguages, _.uniq(navigator.languages || [navigator.language || "en-us"])) || "en-us";
 }
 
 export const browserLanguage = detectBrowserLanguage();

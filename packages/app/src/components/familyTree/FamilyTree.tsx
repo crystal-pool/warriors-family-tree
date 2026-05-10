@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import _ from "lodash";
+import * as _ from "lodash-es";
 import * as React from "react";
 import { SVG, Container, Polyline } from "@svgdotjs/svg.js";
 import { dataService } from "../../services";

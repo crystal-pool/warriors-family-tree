@@ -1,7 +1,7 @@
 import * as React from "react";
 import { EventEmitter } from "jscorlib/events";
 import { ensureResponseOK } from "jscorlib/http";
-import wu from "wu";
+import * as L from "jscorlib/linq";
 import { browserLanguage, evaluateLanguageSimilarity } from "../localization/languages";
 import { isRegExUnicodeCategorySupported } from "../utility/compatibility";
 import { shallowEquals } from "../utility/react";
@@ -173,7 +173,9 @@ export class DataService {
         if (!this.links) return [];
         const rawLinks = this.links.links[entityId];
         if (!rawLinks) return [];
-        return wu(rawLinks).map(([href, site, name]) => ({ href, site, name })).toArray();
+        return L.asLinq(rawLinks)
+            .$(L.select(([href, site, name]) => ({ href, site, name })))
+            .$(L.toArray());
     }
     public lookupEntity(keyword: string, limit: number): IEntityLookupResultItem[] {
         if (limit < 0) throw new RangeError("Invalid limit value.");
@@ -198,9 +200,9 @@ export class DataService {
         const entityResultMap = new Map<string, IEntityLookupResultItem>();
         let currentLowestScore = 0;
         for (const [kw, kwEntries] of this.entityLookup.entries) {
-            const [match, matchPriority] = wu(regExCandidates)
-                .map(([re, pri]) => [re.exec(kw), pri] as [RegExpExecArray | null, number])
-                .find(([re]) => !!re) ?? [undefined, 0];
+            const [match, matchPriority] = L.asLinq(regExCandidates)
+                .$(L.select(([re, pri]) => [re.exec(kw), pri] as [RegExpExecArray | null, number]))
+                .$(L.firstOrDefault(([re]) => !!re)) ?? [undefined, 0];
             if (!match) continue;
             for (const [qName, language, priority] of kwEntries) {
                 const languageSimilarity = evaluateLanguageSimilarity(this._language, language);

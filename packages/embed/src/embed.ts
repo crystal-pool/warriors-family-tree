@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import * as _ from "lodash-es";
 import { EmbedMessage, HostMessage, IHostSettings } from "@wft-repo/shared";
 
 export interface IDisposable {

@@ -1,7 +1,7 @@
 import { Paper } from "@mui/material";
 import clsx from "clsx";
 import * as React from "react";
-import wu from "wu";
+import * as L from "jscorlib/linq";
 import { resourceManager } from "../../localization";
 import { dataService } from "../../services";
 import { CharacterRelationType, RdfQName, useDataServiceLanguage, useLabelFor } from "../../services/dataService";
@@ -87,7 +87,9 @@ function walk(characterId: RdfQName, walkMode?: CharacterFamilyTreeWalkMode, max
     return {
         roots,
         children,
-        mates: wu.map(m => parseUnorderedIdPair(m) as [string, string], mates).toArray()
+        mates: L.asLinq(mates)
+            .$(L.select(m => parseUnorderedIdPair(m) as [string, string]))
+            .$(L.toArray()),
     };
 }
 

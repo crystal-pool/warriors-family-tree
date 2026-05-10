@@ -1,5 +1,5 @@
 import Solver, { type SolveResult } from "javascript-lp-solver";
-import wu from "wu";
+import * as L from "jscorlib/linq";
 import { buildUnorderedIdPair, parseUnorderedIdPair } from "../../utility/general";
 import { buildJSLPModel, Constraint, Polynomial } from "../../utility/lpsolverUtility";
 import { Stopwatch } from "../../utility/stopwatch";
@@ -68,8 +68,11 @@ export function layoutFamilyTree(props: Readonly<IFamilyTreeData>, onEvalNodeDim
     const matesLookup = new Map<string, Set<string>>();
     const childrenLookup = new Map<string, Set<string>>();
     const knownNodes = new Set<string>();
-    for (const [id1, id2] of wu.chain(props.mates,
-        wu.filter(t => !!t[1], props.children).map(t => [t[0], t[1]!]))
+    for (const [id1, id2] of L.asLinq(props.mates).$(L.concat(
+        L.asLinq(props.children)
+            .$(L.where((t): t is [string, string, string] => !!t[1]))
+            .$(L.select(t => [t[0], t[1]]))
+    ))
     ) {
         if (id1 === id2) throw new Error(`Detected self-mating: ${id1}.`);
         const siblings1 = matesLookup.get(id1) ?? matesLookup.set(id1, new Set()).get(id1)!;
@@ -227,7 +230,7 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
                 if (arrangedRow.some(n => mates.has(n))) {
                     arrangedRow.splice(groupStart, 0, c);
                     inserted = true;
-                } else if (wu(incomingNodes).some(n => mates.has(n))) {
+                } else if (L.asLinq(incomingNodes).$(L.any(n => mates.has(n)))) {
                     delayedNodes.push(c);
                     inserted = true;
                 }
@@ -257,7 +260,7 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
         if (!mates) continue;
         let arrangedIndex = arrangedRow.indexOf(node);
         console.assert(arrangedIndex >= 0);
-        const matesOnRow = wu(mates).filter(m => incomingNodes.has(m)).toArray();
+        const matesOnRow = L.asLinq(mates).$(L.where(m => incomingNodes.has(m))).$(L.toArray());
         for (const mate of matesOnRow) incomingNodes.delete(mate);
         const leftMatesCount = Math.floor(matesOnRow.length / 2);
         const leftMates = matesOnRow.slice(0, leftMatesCount);
@@ -272,7 +275,7 @@ function arrangeRow(nodes: string[], prevRow: string[] | undefined, matesLookup:
 }
 
 function layoutRow(rows: string[][], matesLookup: Map<string, Set<string>>, childrenLookup: Map<string, Set<string>>, getNodeDimentsion: (id: string) => ISize): ILayoutNode[][] {
-    const orderedNodes: string[] = Array.from(wu(rows).flatten());
+    const orderedNodes: string[] = rows.flat();
     const nodeIndexLookup = new Map(orderedNodes.map((v, i) => [v, i]));
     const objective: Polynomial = {};
     const constraints: Constraint[] = [];
@@ -398,11 +401,14 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
     // Layout connections.
     const occupiedSlotsMap = new Map<string, boolean[]>();
     function findVacantSlot(ids: Iterable<string>, occupySlot: boolean): number {
-        // WuIterator does not support iterations more than once.
         if (occupySlot && !Array.isArray(ids)) ids = Array.from(ids);
-        const slots = wu(ids).map(id => occupiedSlotsMap.get(id)).filter(s => !!s).toArray();
-        const vacant = wu.count(1).find(i => slots.every(s => !s[i]))!;
-        occupySlot && wu(ids).forEach(id => declareSlotOccupied(id, vacant));
+        const slots = L.asLinq(ids)
+            .$(L.select(id => occupiedSlotsMap.get(id)))
+            .$(L.where(s => !!s))
+            .$(L.toArray());
+        let vacant = 1;
+        while (!slots.every(s => !s[vacant])) vacant++;
+        if (occupySlot) L.asLinq(ids).$(L.forEach(id => declareSlotOccupied(id, vacant)));
         return vacant;
     }
     function declareSlotOccupied(id: string, slotIndex: number): void {
@@ -441,16 +447,16 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
                 if (node.row === mateNode.row) {
                     console.assert(lNode.column <= rNode.column);
                     // Same row.
-                    const slot = findVacantSlot(wu(row).slice(lNode.column, rNode.column + 1).map(r => r.id), true);
+                    const slot = findVacantSlot(row.slice(lNode.column, rNode.column + 1).map(r => r.id), true);
                     connections.push({ id1: node.id, id2: mate, slot1: slot });
                 } else {
                     // Different row. Prefer to use slot of the upper node.
                     const uNode = node.row < mateNode.row ? node : mateNode;
                     const dNode = node.row < mateNode.row ? mateNode : node;
                     const uRow = rows[uNode.row];
-                    const slot1 = findVacantSlot(wu(uRow)
-                        .filter(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing)
-                        .map(r => r.id), true);
+                    const slot1 = findVacantSlot(L.asLinq(uRow)
+                        .$(L.where(n => n.offsetX >= lNode.offsetX - nodeSpacing && n.offsetX <= rNode.offsetX + nodeSpacing))
+                        .$(L.select(r => r.id)), true);
                     connections.push({ id1: uNode.id, id2: dNode.id, slot1 });
                 }
             }
@@ -467,22 +473,22 @@ function arrangeConnections(rows: ILayoutNode[][], matesLookup: Map<string, Set<
         const node2 = layoutNodes.get(connection.id2)!;
         const children = childrenLookup.get(buildUnorderedIdPair(connection.id1, connection.id2));
         if (!children) continue;
-        const minOffsetX = Math.min(node1.offsetX, node2.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
-        const maxOffsetX = Math.max(node1.offsetX, node2.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
-        const slot = findVacantSlot(wu(rows[node2.row])
-            .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
-            .map(n => n.id), true);
+        const minOffsetX = Math.min(node1.offsetX, node2.offsetX, ...L.asLinq(children).$(L.select(id => layoutNodes.get(id)!.offsetX)));
+        const maxOffsetX = Math.max(node1.offsetX, node2.offsetX, ...L.asLinq(children).$(L.select(id => layoutNodes.get(id)!.offsetX)));
+        const slot = findVacantSlot(L.asLinq(rows[node2.row])
+            .$(L.where(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing))
+            .$(L.select(n => n.id)), true);
         connection.childrenSlot = slot;
         connection.childrenId = Array.from(children);
     }
     for (const [id, node] of layoutNodes) {
         const children = childrenLookup.get(buildUnorderedIdPair(id));
         if (!children) continue;
-        const minOffsetX = Math.min(node.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
-        const maxOffsetX = Math.max(node.offsetX, ...wu(children).map(id => layoutNodes.get(id)!.offsetX));
-        const slot = findVacantSlot(wu(rows[node.row])
-            .filter(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing)
-            .map(n => n.id), true);
+        const minOffsetX = Math.min(node.offsetX, ...L.asLinq(children).$(L.select(id => layoutNodes.get(id)!.offsetX)));
+        const maxOffsetX = Math.max(node.offsetX, ...L.asLinq(children).$(L.select(id => layoutNodes.get(id)!.offsetX)));
+        const slot = findVacantSlot(L.asLinq(rows[node.row])
+            .$(L.where(n => n.offsetX >= minOffsetX - nodeSpacing && n.offsetX <= maxOffsetX + nodeSpacing))
+            .$(L.select(n => n.id)), true);
         connections.push({ id1: id, childrenSlot: slot, childrenId: Array.from(children) });
     }
     return {

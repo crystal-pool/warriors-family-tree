@@ -1068,7 +1068,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.24":
+"@types/lodash-es@npm:^4.17.12":
+  version: 4.17.12
+  resolution: "@types/lodash-es@npm:4.17.12"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10/56b9a433348b11c31051c6fa9028540a033a08fb80b400c589d740446c19444d73b217cf1471d4036448ef686a83e8cf2a35d1fadcb3f2105f26701f94aebb07
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:*":
   version: 4.17.24
   resolution: "@types/lodash@npm:4.17.24"
   checksum: 10/0f2082565f60f9787eefc046edc38458054512be5a8b3584ef0bad5fd9e85d0ab55ec5a1fbfae1ed6ba015cf1f9e837d5fb4da1f99fc60b8f74b2a46146fb00f
@@ -1122,13 +1131,6 @@ __metadata:
   dependencies:
     csstype: "npm:^3.2.2"
   checksum: 10/fbff239089ee64b6bd9b00543594db498278b06de527ef1b0f71bb0eb09cc4445a71b5dd3c0d3d0257255c4eed94406be40a74ad4a987ade8a8d5dd65c82bc5f
-  languageName: node
-  linkType: hard
-
-"@types/wu@npm:^2.1.42":
-  version: 2.1.44
-  resolution: "@types/wu@npm:2.1.44"
-  checksum: 10/ff94a1d5839a9d409bd1be22ad585b07f0791bb5390cffad9aa4df4b30cade28f7cdd353a86420953a986cd9a9125ba557206f6712c7815ce85504f4f5e88fb5
   languageName: node
   linkType: hard
 
@@ -2260,7 +2262,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.14, lodash@npm:^4.18.1":
+"lodash-es@npm:^4.17.21":
+  version: 4.18.1
+  resolution: "lodash-es@npm:4.18.1"
+  checksum: 10/8bfad225ef09ef42b04283cdaf7830efcc2ba29ae41b56501c74422155ee1ccaa1f0f6e8319def3451a1fe54dec501c8e4bee622bae2b2d98ac993731e0a5cce
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.17.14":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10/306fea53dfd39dad1f03d45ba654a2405aebd35797b673077f401edb7df2543623dc44b9effbb98f69b32152295fff725a4cec99c684098947430600c6af0c3f
@@ -3197,14 +3206,13 @@ __metadata:
     "@mui/icons-material": "npm:^9.0.1"
     "@mui/material": "npm:^9.0.1"
     "@svgdotjs/svg.js": "npm:^3.2.5"
-    "@types/lodash": "npm:^4.17.24"
+    "@types/lodash-es": "npm:^4.17.12"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
-    "@types/wu": "npm:^2.1.42"
     "@wft-repo/shared": "workspace:*"
     javascript-lp-solver: "npm:^1.0.3"
     jscorlib: "npm:^0.0.0-int.7"
-    lodash: "npm:^4.18.1"
+    lodash-es: "npm:^4.17.21"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.30.3"
@@ -3212,7 +3220,6 @@ __metadata:
     tslib: "npm:^2.8.1"
     vite: "npm:^8.0.11"
     vite-plugin-checker: "npm:^0.13.0"
-    wu: "npm:^2.1.0"
   languageName: unknown
   linkType: soft
 
@@ -3220,9 +3227,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wft-embed@workspace:packages/embed"
   dependencies:
-    "@types/lodash": "npm:^4.17.24"
+    "@types/lodash-es": "npm:^4.17.12"
     "@wft-repo/shared": "workspace:*"
-    lodash: "npm:^4.18.1"
+    lodash-es: "npm:^4.17.21"
     tslib: "npm:^2.8.1"
     vite: "npm:^8.0.11"
     vite-plugin-checker: "npm:^0.13.0"
@@ -3262,13 +3269,6 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 10/159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
-  languageName: node
-  linkType: hard
-
-"wu@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "wu@npm:2.1.0"
-  checksum: 10/5ac7d382f6a0a0430a751ef4fc218ec71f51fe96198900589f06dcb6a014b44c967f476bf91946e529989802b951bb14cc3504db03ea6718cc310d3f0b673035
   languageName: node
   linkType: hard
 

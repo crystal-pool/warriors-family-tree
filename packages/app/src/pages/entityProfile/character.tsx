@@ -1,8 +1,8 @@
 import { Grid, Link } from "@mui/material";
-import _ from "lodash";
+import * as _ from "lodash-es";
 import * as React from "react";
 import { useLocation } from "react-router-dom";
-import wu from "wu";
+import * as L from "jscorlib/linq";
 import { CharacterRelationInfobox } from "../../components/entities/CharacterInfobox";
 import { RdfClanSymbol } from "../../components/entities/ClanSymbol";
 import { EntityHoverCard } from "../../components/entities/hoverCard/EntityCard";
@@ -24,7 +24,7 @@ export interface ICharacterEntityDetailsProps {
 
 function renderCharacterName(names: ReadonlyArray<[string, string]>, languagePreferrence: string[]): React.ReactNode {
     if (names.length > 0 && languagePreferrence.length > 0) {
-        const knownLanguages = new Set(wu(names).map(([_, l]) => l));
+        const knownLanguages = L.asLinq(names).$(L.select(([_, l]) => l)).$(L.toSet());
         const language = choosePerferredLanguage(knownLanguages, languagePreferrence);
         if (language) {
             return <>
