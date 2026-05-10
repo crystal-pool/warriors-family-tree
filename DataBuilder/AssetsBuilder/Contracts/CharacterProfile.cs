@@ -8,7 +8,7 @@ namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder.Contracts;
 public class CharacterProfileRoot
 {
 
-    public IDictionary<string, CharacterProfileEntry> Characters = new Dictionary<string, CharacterProfileEntry>();
+    public required IDictionary<string, CharacterProfileEntry> Characters { get; set; }
 
 }
 

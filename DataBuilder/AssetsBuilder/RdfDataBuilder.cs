@@ -217,7 +217,7 @@ public class RdfDataBuilder
 
     public CharacterProfileRoot BuildCharacterProfile()
     {
-        var root = new CharacterProfileRoot();
+        var root = new CharacterProfileRoot { Characters = new Dictionary<string, CharacterProfileEntry>() };
 
         CharacterProfileEntry GetProfileEntry(Uri uri)
         {

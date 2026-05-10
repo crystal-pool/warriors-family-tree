@@ -1,80 +1,14 @@
-import { InputBase, MenuItem, Paper, Typography } from "@mui/material";
-import { MenuItemProps } from "@mui/material/MenuItem";
+import { Autocomplete, InputBase, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import Downshift from "downshift";
 import * as React from "react";
 import { resourceManager } from "../localization";
 import { dataService } from "../services";
 import { IEntityLookupResultItem, RdfQName } from "../services/dataService";
 
-export type EntitySearchBoxClassName = "root"
-    | "searchIcon" | "inputRoot" | "inputInput"
-    | "autoCompletePopup" | "autoCompleteItemRoot" | "autoCompleteItem" | "autoCompleteItemHeader" | "autoCompleteItemDetails";
-
 export interface IEntitySearchBoxProps {
-    classes?: Partial<Record<EntitySearchBoxClassName, string>>;
+    classes?: Partial<Record<string, string>>;
     onAccept: (qName: RdfQName) => void;
 }
-
-const defaultStyles: Record<EntitySearchBoxClassName, React.CSSProperties> = {
-    root: { position: "relative" },
-    searchIcon: {
-        width: 56, height: "100%", position: "absolute",
-        pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center",
-    },
-    inputRoot: { color: "inherit", width: "100%" },
-    inputInput: { padding: "8px 8px 8px 56px", margin: 0, width: "auto" },
-    autoCompletePopup: {
-        position: "absolute", zIndex: 1, marginTop: 8,
-        left: 0, right: 0, maxHeight: "80vh", opacity: 0.9, overflowY: "auto"
-    },
-    autoCompleteItemRoot: { whiteSpace: "normal" },
-    autoCompleteItem: {},
-    autoCompleteItemHeader: {},
-    autoCompleteItemDetails: { opacity: 0.7 },
-};
-
-interface ISuggestionItemProps {
-    data: IEntityLookupResultItem;
-    isActive: boolean;
-    isSelected: boolean;
-    itemProps: MenuItemProps<"div", { button?: never }>;
-    defaultStyles: Record<EntitySearchBoxClassName, React.CSSProperties>;
-    classes: Partial<Record<EntitySearchBoxClassName, string>>;
-}
-
-const EntitySuggestionItem: React.FC<ISuggestionItemProps> = React.memo((props) => {
-    const label = dataService.getLabelFor(props.data.qName);
-    let header = props.data.keyword || props.data.qName;
-    let details = "";
-    if (label) {
-        if (label.label) {
-            header = label.label;
-            if (label.label !== props.data.keyword) {
-                header += " (" + props.data.keyword + ")";
-            }
-            if (label.description) {
-                details = label.description;
-            }
-        }
-    }
-    return (
-        <MenuItem
-            {...props.itemProps}
-            selected={props.isActive}
-            component="div"
-            sx={{ whiteSpace: "normal" }}
-            style={{
-                fontWeight: props.isSelected ? 500 : 400,
-            }}
-        >
-            <div className={props.classes.autoCompleteItem}>
-                <Typography variant="body1" className={props.classes.autoCompleteItemHeader}>{header}</Typography>
-                {details && <Typography variant="body2" style={props.defaultStyles.autoCompleteItemDetails} className={props.classes.autoCompleteItemDetails}>{details}</Typography>}
-            </div>
-        </MenuItem>
-    );
-});
 
 function searchEntities(searchExpr: string): IEntityLookupResultItem[] {
     const searchResult = dataService.lookupEntity(searchExpr, 50);
@@ -88,69 +22,82 @@ function searchEntities(searchExpr: string): IEntityLookupResultItem[] {
     return searchResult;
 }
 
+function getOptionLabel(option: IEntityLookupResultItem | string): string {
+    if (typeof option === "string") return option;
+    const label = dataService.getLabelFor(option.qName);
+    return label?.label || option.keyword || option.qName;
+}
+
 export const EntitySearchBox: React.FC<IEntitySearchBoxProps> = React.memo((props) => {
-    const classes = props.classes ?? {};
-    const [searchExpr, setSearchExpr] = React.useState("");
-    const suggestions = React.useMemo(() => searchEntities(searchExpr), [searchExpr]);
+    const [inputValue, setInputValue] = React.useState("");
+    const options = React.useMemo(() => searchEntities(inputValue), [inputValue]);
     return (
-        <Downshift
-            itemToString={(item) => item && item.qName || ""}
-            onChange={(value) => {
-                if (value) {
-                    const label = dataService.getLabelFor(value);
-                    setSearchExpr(label && label.label || value);
-                    props.onAccept(value);
+        <Autocomplete
+            freeSolo
+            options={options}
+            filterOptions={(x) => x}
+            getOptionLabel={getOptionLabel}
+            inputValue={inputValue}
+            onInputChange={(_e, value, reason) => {
+                if (reason !== "reset") {
+                    setInputValue(value);
                 }
             }}
-        >{
-                (options) => {
-                    const { onBlur, onChange, onFocus, ...inputProps } = options.getInputProps({
-                        "aria-label": "search",
-                        placeholder: resourceManager.getPrompt("EntitySearchBoxPlaceholder"),
-                        value: searchExpr,
-                        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                            if (e.target.value === "") {
-                                options.clearSelection();
-                            }
-                            setSearchExpr(e.target.value);
-                        },
-                        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                            // Use Enter to accept the first item.
-                            if (e.key === "Enter" && suggestions.length > 0) {
-                                options.selectItemAtIndex(0);
-                            }
-                        },
-                        onFocus: options.openMenu,
-                    });
-                    return (<div className={classes.root} style={defaultStyles.root}>
-                        <div className={classes.searchIcon} style={defaultStyles.searchIcon}>
+            onChange={(_e, value) => {
+                if (value && typeof value !== "string") {
+                    const label = dataService.getLabelFor(value.qName);
+                    setInputValue(label?.label || value.qName);
+                    props.onAccept(value.qName);
+                }
+            }}
+            renderOption={(optionProps, option) => {
+                const label = dataService.getLabelFor(option.qName);
+                let header = option.keyword || option.qName;
+                let details = "";
+                if (label?.label) {
+                    header = label.label;
+                    if (label.label !== option.keyword) {
+                        header += " (" + option.keyword + ")";
+                    }
+                    if (label.description) {
+                        details = label.description;
+                    }
+                }
+                return (
+                    <li {...optionProps} key={option.qName}>
+                        <div>
+                            <Typography variant="body1">{header}</Typography>
+                            {details && <Typography variant="body2" sx={{ opacity: 0.7 }}>{details}</Typography>}
+                        </div>
+                    </li>
+                );
+            }}
+            slotProps={{
+                paper: { square: true, sx: { opacity: 0.9 } },
+            }}
+            isOptionEqualToValue={(option, value) => typeof value !== "string" && option.qName === value.qName}
+            renderInput={(params) => {
+                const { slotProps, id, disabled, fullWidth, ...rootProps } = params;
+                return (
+                    <div {...rootProps} ref={slotProps.input.ref} style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <div style={{
+                            width: 40, height: "100%", position: "absolute",
+                            pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
                             <SearchIcon />
                         </div>
                         <InputBase
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            sx={defaultStyles.inputRoot}
-                            {...{ onBlur, onChange, onFocus }}
-                            inputProps={inputProps}
+                            id={id}
+                            disabled={disabled}
+                            fullWidth={fullWidth}
+                            inputProps={slotProps.htmlInput}
+                            placeholder={resourceManager.getPrompt("EntitySearchBoxPlaceholder")}
+                            sx={{ color: "inherit", width: "100%", pl: 5 }}
                         />
-                        <div {...options.getMenuProps()}>
-                            {options.isOpen ? (
-                                <Paper style={defaultStyles.autoCompletePopup} square>
-                                    {suggestions.map((data, i) => (<EntitySuggestionItem
-                                        data={data}
-                                        key={i}
-                                        isActive={options.highlightedIndex === i}
-                                        isSelected={options.selectedItem === data.qName}
-                                        itemProps={options.getItemProps({ item: data.qName })}
-                                        defaultStyles={defaultStyles}
-                                        classes={classes}
-                                    />))}
-                                </Paper>
-                            ) : null}
-                        </div>
-                    </div>);
-                }
-            }</Downshift>);
+                    </div>
+                );
+            }}
+            sx={{ flexGrow: 1 }}
+        />
+    );
 });

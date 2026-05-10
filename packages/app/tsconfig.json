@@ -3,13 +3,15 @@
   "compilerOptions": {
     "composite": true,
     "noEmit": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"
   ],
   "references": [
-    { "path": "../shared" }
+    {
+      "path": "../shared"
+    }
   ]
 }

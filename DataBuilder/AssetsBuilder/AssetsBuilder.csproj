@@ -6,6 +6,7 @@
     <RootNamespace>WarriorsFamilyTree.DataBuilder.AssetsBuilder</RootNamespace>
     <AssemblyName>WarriorsFamilyTree.DataBuilder.AssetsBuilder</AssemblyName>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

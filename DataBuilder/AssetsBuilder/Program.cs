@@ -8,16 +8,16 @@ using WarriorsFamilyTree.DataBuilder.TimelineBuilder.ObjectModel;
 
 namespace WarriorsFamilyTree.DataBuilder.AssetsBuilder;
 
-static class Program
+internal static class Program
 {
 
-    private static readonly JsonSerializerOptions outputJsonOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions outputJsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         if (args.Length < 2)
         {
@@ -28,12 +28,13 @@ static class Program
         var targetRoot = Path.GetFullPath(args[1]);
         if (!Directory.Exists(targetRoot))
             Directory.CreateDirectory(targetRoot);
-        void ExportJson(string fileName, object root)
+
+        async Task ExportJsonAsync(string fileName, object root)
         {
             var fullName = Path.Join(targetRoot, fileName);
             {
-                using var fs = new FileStream(fullName, FileMode.Create);
-                JsonSerializer.Serialize(fs, root, root.GetType(), outputJsonOptions);
+                await using var fs = new FileStream(fullName, FileMode.Create);
+                await JsonSerializer.SerializeAsync(fs, root, outputJsonOptions);
             }
             Console.WriteLine("Exported {0} ({1:#,#} B).", fileName, new FileInfo(fullName).Length);
         }
@@ -44,15 +45,16 @@ static class Program
         var dataset = new InMemoryDataset(graph);
         var timeline = TimelineTable.LoadFrom(Path.Join(rawDataRoot, RawDataFiles.Timeline));
         var builder = new RdfDataBuilder(dataset, graph.NamespaceMap, timeline);
-        ExportJson("characters.json", builder.BuildCharacterProfile());
-        ExportJson("relations.json", builder.BuildRelationGraph());
-        ExportJson("timeline.json", builder.BuildTimelineMarkers());
-        ExportJson("links.json", builder.BuildEntityLinks());
+
+        await ExportJsonAsync("characters.json", builder.BuildCharacterProfile());
+        await ExportJsonAsync("relations.json", builder.BuildRelationGraph());
+        await ExportJsonAsync("timeline.json", builder.BuildTimelineMarkers());
+        await ExportJsonAsync("links.json", builder.BuildEntityLinks());
         foreach (var (language, root) in builder.BuildEntityLabels())
         {
-            ExportJson($"labels.{language}.json", root);
+            await ExportJsonAsync($"labels.{language}.json", root);
         }
-        ExportJson("entityLookup.json", builder.BuildEntityLookupTable());
+        await ExportJsonAsync("entityLookup.json", builder.BuildEntityLookupTable());
         return 0;
     }
 

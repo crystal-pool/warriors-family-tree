@@ -47,6 +47,18 @@ export default defineConfig(
         },
       ],
       "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/prefer-optional-chain": [
+        "error",
+        {
+          checkAny: true,
+          checkBigInt: true,
+          checkBoolean: true,
+          checkNumber: true,
+          checkString: false,
+          checkUnknown: true,
+          requireNullish: false,
+        },
+      ],
       "no-var": "error",
       "no-duplicate-imports": "error",
     },

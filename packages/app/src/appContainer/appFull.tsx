@@ -58,10 +58,7 @@ export const AppFull: React.FC = (props) => {
                         display: "flex", flexDirection: "row", alignItems: "center",
                         flexGrow: { xs: 1, sm: 0 }
                     }}>
-                        <EntitySearchBox classes={{
-                            root: undefined,
-                            inputInput: undefined
-                        }}
+                        <EntitySearchBox
                             onAccept={(qName) => {
                                 location.href = routePathBuilders.entityProfile({ qName });
                             }}
