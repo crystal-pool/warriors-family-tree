@@ -1,6 +1,7 @@
 import { SeverityLevel } from "@microsoft/applicationinsights-web";
-import { wait } from "jscorlib/promises";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
+import { wait } from "jscorlib/promises";
+import * as _ from "lodash-es";
 import { appInsights } from "./telemetry";
 
 export function isOwnerWindowPresent(): boolean {
@@ -82,11 +83,14 @@ export async function postReadyMessage(token: string): Promise<void> {
 function observeDocumentHeight(): void {
     if (documentHeightObserver) return;
     let currentHeight = 0;
+    const notify = _.throttle((h: number) => {
+        postInteropMessage({ type: "documentHeightChanged", height: h });
+    }, 200, { leading: true, trailing: true });
     documentHeightObserver = new ResizeObserver(() => {
         const h = document.documentElement.offsetHeight;
         if (h !== currentHeight) {
-            postInteropMessage({ type: "documentHeightChanged", height: h });
             currentHeight = h;
+            notify(h);
         }
     });
     documentHeightObserver.observe(document.documentElement);
