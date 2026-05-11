@@ -12,6 +12,11 @@ export interface IEmbedIntrinsicOptions {
     autoResize?: boolean;
     scrollable?: boolean;
     eagerRender?: boolean;
+    /**
+     * The `background-color` CSS value of the family tree app.
+     * Use `"transparent"` for transparent background (if supported).
+     */
+    backgroundColor?: string;
 }
 
 export interface IEmbedOptions {
@@ -74,7 +79,7 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
             delayedRenderDisposeCallback = undefined;
         }
         const frame = document.createElement("iframe");
-        frame.className = "warriors-family-tree-embed " + (intrinsicOptions.className || "");
+        frame.className = ["warriors-family-tree-embed", intrinsicOptions.className].join(" ").trim();
         if (intrinsicOptions.style) {
             for (const k in intrinsicOptions.style) {
                 if (Object.prototype.hasOwnProperty.call(intrinsicOptions.style, k)) {
@@ -94,7 +99,8 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         const autoResize = intrinsicOptions.autoResize ?? true;
         const embedMessageTarget = new EmbedMessageTarget(frame, postMessageToken, {
             observeDocumentHeight: autoResize,
-            scrollable: intrinsicOptions.scrollable
+            scrollable: intrinsicOptions.scrollable,
+            backgroundColor: intrinsicOptions.backgroundColor,
         }, (message) => {
             switch (message.type) {
                 case "documentHeightChanged":

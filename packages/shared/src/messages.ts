@@ -15,6 +15,7 @@ export interface IHostSettings {
     observeDocumentHeight?: boolean;
     scrollable?: boolean;
     onFamilyTreeNodeClick?: "none" | "default";
+    backgroundColor?: string;
 }
 
 export interface IEmbedReadyMessage extends IInteropMessageBase {

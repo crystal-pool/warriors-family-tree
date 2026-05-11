@@ -70,6 +70,9 @@ export async function postReadyMessage(token: string): Promise<void> {
     if (hostSettings.observeDocumentHeight) {
         observeDocumentHeight();
     }
+    if (hostSettings.backgroundColor) {
+        document.body.style.backgroundColor = hostSettings.backgroundColor;
+    }
     document.body.classList.add("embed");
     if (!hostSettings.scrollable) {
         document.body.classList.add("noscroll");
@@ -79,7 +82,7 @@ export async function postReadyMessage(token: string): Promise<void> {
 function observeDocumentHeight(): void {
     if (documentHeightObserver) return;
     let currentHeight = 0;
-    documentHeightObserver = new window.ResizeObserver(() => {
+    documentHeightObserver = new ResizeObserver(() => {
         const h = document.documentElement.offsetHeight;
         if (h !== currentHeight) {
             postInteropMessage({ type: "documentHeightChanged", height: h });

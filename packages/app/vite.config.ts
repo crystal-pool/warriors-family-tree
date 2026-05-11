@@ -9,19 +9,10 @@ export default defineConfig(async (env): Promise<UserConfig> => {
   const isProduction = env.mode === "production";
   const repoRoot = resolve(__dirname, "../..");
 
-  let commitId = "unknown";
-  let version = "dev";
-  try {
-    commitId = await getGitHead(repoRoot);
-    version = await getGitVersionSpec(repoRoot);
-  } catch {
-    // Git info unavailable in CI or detached HEAD; fall through with defaults.
-  }
-
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: {
-      commitId,
-      version,
+      commitId: await getGitHead(repoRoot),
+      version: await getGitVersionSpec(repoRoot),
       buildTimestamp: Date.now(),
       isProduction,
     } satisfies IEnvironmentInfo,

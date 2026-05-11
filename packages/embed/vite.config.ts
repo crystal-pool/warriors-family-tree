@@ -1,5 +1,5 @@
 import { IEnvironmentInfo } from "@wft-repo/shared";
-import { getGitHead } from "@wft-repo/shared/build/git";
+import { getGitHead, getGitVersionSpec } from "@wft-repo/shared/build/git";
 import { flattenKeyPath, serializeRecordValues } from "@wft-repo/shared/build/utility";
 import { resolve } from "path";
 import { defineConfig, UserConfig } from "vite";
@@ -11,20 +11,12 @@ export default defineConfig(async (env): Promise<UserConfig> => {
   const isProduction = env.mode === "production";
   const repoRoot = resolve(__dirname, "../..");
 
-  let commitId = "unknown";
-  try {
-    commitId = await getGitHead(repoRoot);
-  } catch {
-    // Git info unavailable; fall through.
-  }
-
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: {
-      commitId,
+      commitId: await getGitHead(repoRoot),
       buildTimestamp: Date.now(),
       isProduction,
-      // TODO
-      version: "",
+      version: await getGitVersionSpec(repoRoot),
     } satisfies IEnvironmentInfo,
   }));
 
