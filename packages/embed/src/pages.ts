@@ -1,11 +1,11 @@
-import { IDisposable, mountEmbed } from "./embed";
+import { ExplicitDisposable, mountEmbed } from "./embed";
 
 export interface IFamilyTreeOptions {
     qName: string;
     depth: number;
 }
 
-export function mountFamilyTree(container: HTMLElement, options: IFamilyTreeOptions): IDisposable {
+export function mountFamilyTree(container: HTMLElement, options: IFamilyTreeOptions): ExplicitDisposable {
     if (!options)
         throw new TypeError("options argument is required.");
     if (!(typeof options === "object"))

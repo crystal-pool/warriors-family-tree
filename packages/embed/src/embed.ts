@@ -1,6 +1,9 @@
+import { installPolyfill as installDisposablePolyfill } from "@jscorlib/polyfills/explicit-resource-management";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
 
-export interface IDisposable {
+installDisposablePolyfill({});
+
+export interface ExplicitDisposable extends Disposable {
     dispose(): void;
 }
 
@@ -34,17 +37,19 @@ export const defaultAppUrlStem = environment.isProduction ? "https://crystal-poo
  * @param container The HTML element that will host the embed. An empty `<div>` element is okay for this.
  * @param options Additional options.
  */
-export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDisposable {
+export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): ExplicitDisposable {
     if (!(container && container instanceof HTMLElement))
         throw new TypeError("container should be an HTMLElement object.");
     if (options && !(typeof options === "object"))
         throw new TypeError("options should be an IEmbedOptions object.");
+
     options = options ?? {};
     const intrinsicOptions = options.embedOptions ?? {};
     let url = intrinsicOptions.urlStem || defaultAppUrlStem;
     const postMessageToken = "wft-pmt-" + Math.round(Math.random() * 2821109907456).toString(36);
-    let disposeCallbacks: Array<() => void> | undefined = [];
-    let delayedRenderDisposeCallback: (() => void) | undefined;
+
+    using disposables = new DisposableStack();
+
     if (options.route) url += options.route;
     if (options.queryParams) {
         let builder: URLSearchParams | undefined;
@@ -65,11 +70,8 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         builder.set("pmToken", postMessageToken);
         url += "?" + String(builder);
     }
+
     function renderIFrame() {
-        if (delayedRenderDisposeCallback) {
-            delayedRenderDisposeCallback();
-            delayedRenderDisposeCallback = undefined;
-        }
         const frame = document.createElement("iframe");
         frame.className = ["warriors-family-tree-embed", intrinsicOptions.className].join(" ").trim();
         if (intrinsicOptions.style) {
@@ -104,49 +106,72 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         });
         frame.src = url;
         container.appendChild(frame);
-        disposeCallbacks!.push(() => embedMessageTarget.dispose());
-        disposeCallbacks!.push(() => frame.remove());
+        disposables.use(embedMessageTarget);
+        disposables.defer(() => frame.remove());
     }
+
     if (intrinsicOptions.eagerRender) {
         renderIFrame();
     } else {
+        disposables.use(new DeferredRenderPlaceholder(
+            container,
+            intrinsicOptions.style?.height ?? "300px",
+            renderIFrame,
+        ));
+    }
+    return disposables.move();
+}
+
+class DeferredRenderPlaceholder implements Disposable {
+    private readonly _disposables: DisposableStack;
+    private _onRender: (() => void) | undefined;
+
+    public constructor(
+        container: HTMLElement,
+        height: string | 0,
+        onRender: () => void,
+    ) {
+        using disposables = new DisposableStack();
+        this._onRender = onRender;
+
         const placeholder = document.createElement("div");
         let node: HTMLElement = document.createElement("p");
         node.innerText = "Did not see family tree?";
         placeholder.appendChild(node);
         node = document.createElement("button");
         node.innerText = "Click here to load it!";
-        node.addEventListener("focus", () => renderIFrame());
+        node.addEventListener("focus", this._triggerRender);
         placeholder.appendChild(node);
         // 300px is the default IFrame height.
-        placeholder.style.height = String(intrinsicOptions.style?.height ?? "300px");
+        placeholder.style.height = String(height);
         container.appendChild(placeholder);
+        disposables.defer(() => placeholder.remove());
+
         const observer = new IntersectionObserver((entries) => {
             if (entries.some(e => e.isIntersecting)) {
-                renderIFrame();
+                this._triggerRender();
             }
         }, { rootMargin: "-10px" });
+        disposables.defer(() => observer.disconnect());
         observer.observe(container);
-        delayedRenderDisposeCallback = () => {
-            placeholder.remove();
-            observer.disconnect();
-        };
+
+        this._disposables = disposables.move();
     }
-    return {
-        dispose() {
-            if (delayedRenderDisposeCallback) {
-                delayedRenderDisposeCallback();
-                delayedRenderDisposeCallback = undefined;
-            }
-            if (disposeCallbacks) {
-                disposeCallbacks.forEach(cb => cb());
-                disposeCallbacks = undefined;
-            }
-        }
+
+    private readonly _triggerRender = (): void => {
+        if (this._disposables.disposed) return;
+        const onRender = this._onRender;
+        this[Symbol.dispose]();
+        onRender?.();
     };
+
+    public [Symbol.dispose](): void {
+        this._onRender = undefined;
+        this._disposables.dispose();
+    }
 }
 
-class EmbedMessageTarget implements IDisposable {
+class EmbedMessageTarget implements Disposable {
     public constructor(
         private readonly _embedFrame: HTMLIFrameElement,
         private readonly _messageToken: string,
@@ -160,7 +185,7 @@ class EmbedMessageTarget implements IDisposable {
             throw new Error("Cannot postMessage to the embed <iframe>.");
         this._embedFrame.contentWindow.postMessage(message, "*");
     }
-    public dispose(): void {
+    public [Symbol.dispose](): void {
         window.removeEventListener("message", this._onMessage);
     }
     private readonly _onMessage = (e: MessageEvent): void => {
