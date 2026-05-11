@@ -1,4 +1,3 @@
-import * as _ from "lodash-es";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
 
 export interface IDisposable {
@@ -29,13 +28,6 @@ export interface IEmbedOptions {
  * The URL prefix of Warriors Family Tree.
  */
 export const defaultAppUrlStem = environment.isProduction ? "https://crystal-pool.github.io/warriors-family-tree/#" : "http://localhost:3080/#";
-
-function isInViewport(element: HTMLElement): boolean {
-    if (!element.offsetParent) return false;
-    const boundingRect = element.getBoundingClientRect();
-    return boundingRect.right >= 0 && boundingRect.bottom >= 0
-        && boundingRect.left <= window.innerWidth && boundingRect.top <= window.innerHeight;
-}
 
 /**
  * Embeds the Warriors Family Tree inside the specified HTML element.
@@ -118,14 +110,6 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
     if (intrinsicOptions.eagerRender) {
         renderIFrame();
     } else {
-        const checkRenderIFrame = _.debounce(function checkRenderIFrame() {
-            window.requestAnimationFrame(() => {
-                if (!delayedRenderDisposeCallback) return;
-                if (isInViewport(container)) {
-                    renderIFrame();
-                }
-            });
-        }, 200);
         const placeholder = document.createElement("div");
         let node: HTMLElement = document.createElement("p");
         node.innerText = "Did not see family tree?";
@@ -137,14 +121,16 @@ export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): IDi
         // 300px is the default IFrame height.
         placeholder.style.height = String(intrinsicOptions.style?.height ?? "300px");
         container.appendChild(placeholder);
-        window.addEventListener("scroll", checkRenderIFrame);
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some(e => e.isIntersecting)) {
+                renderIFrame();
+            }
+        }, { rootMargin: "-10px" });
+        observer.observe(container);
         delayedRenderDisposeCallback = () => {
             placeholder.remove();
-            window.removeEventListener("scroll", checkRenderIFrame);
+            observer.disconnect();
         };
-        // Mount IFrame only when the container is visible.
-        checkRenderIFrame();
-        window.setTimeout(() => checkRenderIFrame.flush(), 0);
     }
     return {
         dispose() {
