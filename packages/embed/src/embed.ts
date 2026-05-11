@@ -1,11 +1,8 @@
 import { installPolyfill as installDisposablePolyfill } from "@jscorlib/polyfills/explicit-resource-management";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
+import { ExplicitDisposable } from "./typing";
 
 installDisposablePolyfill({});
-
-export interface ExplicitDisposable extends Disposable {
-    dispose(): void;
-}
 
 export interface IEmbedIntrinsicOptions {
     urlStem?: string;
@@ -135,13 +132,12 @@ class DeferredRenderPlaceholder implements Disposable {
         this._onRender = onRender;
 
         const placeholder = document.createElement("div");
-        let node: HTMLElement = document.createElement("p");
-        node.innerText = "Did not see family tree?";
-        placeholder.appendChild(node);
-        node = document.createElement("button");
-        node.innerText = "Click here to load it!";
-        node.addEventListener("focus", this._triggerRender);
-        placeholder.appendChild(node);
+        placeholder.innerHTML = ""
+            + `<p>Did not see family tree?</p>`
+            + `<button>Click here to load it!</button>`;
+        placeholder
+            .querySelector("button")!
+            .addEventListener("focus", this._triggerRender);
         // 300px is the default IFrame height.
         placeholder.style.height = String(height);
         container.appendChild(placeholder);

@@ -60,6 +60,14 @@ export const baseConfig = defineConfig(
       }],
       "no-var": "error",
       "no-duplicate-imports": "error",
+      "no-implicit-coercion": [
+        "error",
+        {
+          number: true,
+          boolean: false,
+          string: false,
+        }
+      ],
     },
   },
   {
