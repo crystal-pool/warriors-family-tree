@@ -1,5 +1,6 @@
 import { installPolyfill as installDisposablePolyfill } from "@jscorlib/polyfills/explicit-resource-management";
 import { EmbedMessage, HostMessage, IHostSettings, isInteropMessage } from "@wft-repo/shared";
+import * as Errors from "jscorlib/errors";
 import { ExplicitDisposable } from "./typing";
 
 installDisposablePolyfill({});
@@ -35,10 +36,8 @@ export const defaultAppUrlStem = environment.isProduction ? "https://crystal-poo
  * @param options Additional options.
  */
 export function mountEmbed(container: HTMLElement, options?: IEmbedOptions): ExplicitDisposable {
-    if (!(container && container instanceof HTMLElement))
-        throw new TypeError("container should be an HTMLElement object.");
-    if (options && !(typeof options === "object"))
-        throw new TypeError("options should be an IEmbedOptions object.");
+    Errors.checkArgumentType(0, "container", container, HTMLElement);
+    Errors.checkArgumentType(1, "options", options, "object", "undefined");
 
     options = options ?? {};
     const intrinsicOptions = options.embedOptions ?? {};

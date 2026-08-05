@@ -12,6 +12,7 @@
   "dependencies": {
     "@jscorlib/polyfills": "^0.0.0-int.7",
     "@wft-repo/shared": "workspace:*",
+    "jscorlib": "^0.0.0-int.7",
     "lodash-es": "^4.17.21",
     "tslib": "^2.8.1"
   },
