@@ -9,7 +9,7 @@ const LIB_NAME = "WarriorsFamilyTreeEmbed";
 
 export default defineConfig(async (env): Promise<UserConfig> => {
   const isProduction = env.mode === "production";
-  const repoRoot = resolve(__dirname, "../..");
+  const repoRoot = resolve(import.meta.dirname, "../..");
 
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: {
@@ -21,7 +21,7 @@ export default defineConfig(async (env): Promise<UserConfig> => {
   }));
 
   return {
-    root: __dirname,
+    root: import.meta.dirname,
     define: definitions,
     plugins: [
       checker({
@@ -42,7 +42,7 @@ export default defineConfig(async (env): Promise<UserConfig> => {
       outDir: "dist",
       sourcemap: true,
       lib: {
-        entry: resolve(__dirname, "src/index.ts"),
+        entry: resolve(import.meta.dirname, "src/index.ts"),
         name: LIB_NAME,
         // UMD output for consumers loading via <script> tag.
         // To switch to ESM-only in the future:
