@@ -4,6 +4,7 @@ function invokeGit(params: string, cwd: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         child_process.exec("git " + params, { cwd }, (error, stdout) => {
             if (error) {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 reject(error);
             } else {
                 resolve(stdout.trim());

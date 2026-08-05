@@ -14,7 +14,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/node": "^25.6.2",
+    "@types/node": "^26.1.2",
     "@wft-repo/linters": "workspace:*",
     "typescript": "^6.0.3"
   }

@@ -62,7 +62,7 @@ export const FamilyTree: React.FC<IFamilyTreeProps> = React.memo(() => {
                     <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <Typography id="max-depth-slider">Max depth: {depth}</Typography>
                         <Slider aria-labelledby="discrete-slider" marks value={depth} step={1} min={1} max={environment.isProduction ? 10 : 30} onChange={(_, v) => {
-                            navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v })));
+                            void navigate(routePathBuilders.familyTree(params, setQueryParams(search, { depth: v })));
                         }} />
                     </Grid>
                     {environment.isProduction ||
