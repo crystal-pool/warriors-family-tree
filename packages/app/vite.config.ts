@@ -7,7 +7,7 @@ import checker from "vite-plugin-checker";
 
 export default defineConfig(async (env): Promise<UserConfig> => {
   const isProduction = env.mode === "production";
-  const repoRoot = resolve(__dirname, "../..");
+  const repoRoot = resolve(import.meta.dirname, "../..");
 
   const definitions = serializeRecordValues(flattenKeyPath({
     environment: {
@@ -21,7 +21,7 @@ export default defineConfig(async (env): Promise<UserConfig> => {
   const base = process.env.WFT_APP_BASE_PATH || "/";
 
   return {
-    root: __dirname,
+    root: import.meta.dirname,
     base,
     define: definitions,
     plugins: [
@@ -59,7 +59,7 @@ function resourceLoadTrackingPlugin(base: string): Plugin {
         const doc = parseHtml(html);
 
         // Read and minify the inline snippet source.
-        const snippetPath = resolve(__dirname, "src/index.snippet.js");
+        const snippetPath = resolve(import.meta.dirname, "src/index.snippet.js");
         const bundle = await rolldown({
           input: { snippet: snippetPath },
         });
