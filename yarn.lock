@@ -420,10 +420,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jscorlib/polyfills@npm:^0.0.0-int.7":
-  version: 0.0.0-int.7
-  resolution: "@jscorlib/polyfills@npm:0.0.0-int.7"
-  checksum: 10/2225e15e1a74cd30fd07528459795946004414acfb6043692acbf0f4f5cb5561bd3ff1ac8934f3f7feb8b13dd48195457d65c160ae999298c54f6a4edb7f5ed0
+"@jscorlib/polyfills@npm:^0.0.0-int.8":
+  version: 0.0.0-int.8
+  resolution: "@jscorlib/polyfills@npm:0.0.0-int.8"
+  checksum: 10/1f9cd4e5da11700457d9f5188ec3fb4d8a9579100fafbda95832682796ec63565d4296bd0cdccd05ed09b96d194786ce5dcc30283de45cb9fec3ba9b3982a35c
   languageName: node
   linkType: hard
 
@@ -2134,10 +2134,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jscorlib@npm:^0.0.0-int.7":
-  version: 0.0.0-int.7
-  resolution: "jscorlib@npm:0.0.0-int.7"
-  checksum: 10/cb89a83198d30c8d7e4440cdedc31faf8cdd482cbb66fd9150a8f3bdeba61a59e2ecbfb35064b9fca120a3a7dc55bfb5c7fe690de0c029ac42c968fdf5f571d2
+"jscorlib@npm:^0.0.0-int.7, jscorlib@npm:^0.0.0-int.8":
+  version: 0.0.0-int.8
+  resolution: "jscorlib@npm:0.0.0-int.8"
+  checksum: 10/d1c4dd6e540eded4ea18c04ed3d2d9ff869d00f264d0c156f7095db131bc72ba130040f79cabf350c1e095f0a8b19347603d9f478ec76685c5a319376441312b
   languageName: node
   linkType: hard
 
@@ -3325,12 +3325,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wft-embed@workspace:packages/embed"
   dependencies:
-    "@jscorlib/polyfills": "npm:^0.0.0-int.7"
+    "@jscorlib/polyfills": "npm:^0.0.0-int.8"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^26.1.2"
     "@wft-repo/linters": "workspace:*"
     "@wft-repo/shared": "workspace:*"
-    jscorlib: "npm:^0.0.0-int.7"
+    jscorlib: "npm:^0.0.0-int.8"
     lodash-es: "npm:^4.18.1"
     tslib: "npm:^2.8.1"
     typescript: "npm:^6.0.3"
